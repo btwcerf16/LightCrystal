@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 95adb4702d2d3424585a08df57ee3685, type: 3}
+  m_Name: ActorStats
+  m_EditorClassIdentifier: Assembly-CSharp::ActorStatsConfig
+  <ViewDistance>k__BackingField: 12
+  <ViewAngle>k__BackingField: 120
+  <MaxHealth>k__BackingField: 100
+  <MaxSanity>k__BackingField: 100
+  <HealthRegeneration>k__BackingField: 0
+  <MoveSpeed>k__BackingField: 5
+  <AttackSpeed>k__BackingField: 1
+  <CooldownReduction>k__BackingField: 0
+  <PhysicalDamageMultiplier>k__BackingField: 1
+  <MagicDamageMultiplier>k__BackingField: 1
+  <PhysicalLifeSteal>k__BackingField: 0
+  <MagicLifeSteal>k__BackingField: 0
+  <PhysicalResistance>k__BackingField: 0
+  <MagicResistance>k__BackingField: 0
+  <ForceResistance>k__BackingField: 0
+  <MadnessResistance>k__BackingField: 0
+  <EffectResistance>k__BackingField: 0
