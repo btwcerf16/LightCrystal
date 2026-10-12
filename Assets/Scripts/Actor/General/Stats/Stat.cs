@@ -26,9 +26,22 @@ public sealed class Stat
 
     public void SetBaseValue(float baseValue)
     {
-        BaseValue = baseValue;
+        if (BaseValue == baseValue)
+            return;
 
-        RecalculateValue();
+        BaseValue = baseValue;
+        RecalculateValue(true);
+    }
+
+    private void RecalculateValue(bool forceNotification = false)
+    {
+        float calculatedValue = CalculateValue();
+
+        if (!forceNotification && calculatedValue == Value)
+            return;
+
+        Value = calculatedValue;
+        ValueChanged?.Invoke(Value);
     }
 
     public void AddModifier(StatModifier modifier)
@@ -73,17 +86,6 @@ public sealed class Stat
         RecalculateValue();
     }
 
-    private void RecalculateValue()
-    {
-        float calculatedValue = CalculateValue();
-
-        if (calculatedValue == Value)
-            return;
-
-        Value = calculatedValue;
-        ValueChanged?.Invoke(Value);
-    }
-
     private float CalculateValue()
     {
         float flatBonus = 0f;
@@ -113,5 +115,17 @@ public sealed class Stat
             * multiplier;
 
         return Mathf.Clamp(calculatedValue, _minimumValue, _maximumValue);
+    }
+    public void SetReplicatedValues(float baseValue, float value)
+    {
+        float clampedValue = Mathf.Clamp(value, _minimumValue, _maximumValue);
+
+        bool changed = BaseValue != baseValue || Value != clampedValue;
+
+        BaseValue = baseValue;
+        Value = clampedValue;
+
+        if (changed)
+            ValueChanged?.Invoke(Value);
     }
 }

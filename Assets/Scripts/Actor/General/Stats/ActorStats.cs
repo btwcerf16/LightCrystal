@@ -28,6 +28,7 @@ public sealed class ActorStats : MonoBehaviour
     public Stat MadnessResistance { get; private set; }
     public Stat EffectResistance { get; private set; }
 
+
     private void Awake()
     {
         if (_config == null)

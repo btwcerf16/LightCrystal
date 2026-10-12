@@ -1,7 +1,7 @@
 ﻿using Cinemachine;
 using UnityEngine;
 
-public sealed class LocalCameraController : MonoBehaviour
+public class LocalCameraController : MonoBehaviour
 {
     [SerializeField] private Camera _worldCamera;
     [SerializeField] private CinemachineVirtualCamera _virtualCamera;

@@ -31,4 +31,5 @@ public sealed class ActorStatsConfig : ScriptableObject
     [field: SerializeField, Range(0f, 1f)] public float ForceResistance { get; private set; }
     [field: SerializeField, Range(0f, 1f)] public float MadnessResistance { get; private set; }
     [field: SerializeField, Range(0f, 1f)] public float EffectResistance { get; private set; }
+
 }
