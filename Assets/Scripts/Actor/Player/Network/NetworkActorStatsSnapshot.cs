@@ -12,6 +12,7 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
     public NetworkStatValue MoveSpeed;
     public NetworkStatValue AttackSpeed;
     public NetworkStatValue CooldownReduction;
+    public NetworkStatValue PhysicalDamage;
     public NetworkStatValue PhysicalDamageMultiplier;
     public NetworkStatValue MagicDamageMultiplier;
     public NetworkStatValue PhysicalLifeSteal;
@@ -32,6 +33,7 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
         MoveSpeed = new NetworkStatValue(stats.MoveSpeed);
         AttackSpeed = new NetworkStatValue(stats.AttackSpeed);
         CooldownReduction = new NetworkStatValue(stats.CooldownReduction);
+        PhysicalDamage = new NetworkStatValue(stats.PhysicalDamage);
         PhysicalDamageMultiplier = new NetworkStatValue(stats.PhysicalDamageMultiplier);
         MagicDamageMultiplier = new NetworkStatValue(stats.MagicDamageMultiplier);
         PhysicalLifeSteal = new NetworkStatValue(stats.PhysicalLifeSteal);
@@ -53,6 +55,7 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
         serializer.SerializeValue(ref MoveSpeed);
         serializer.SerializeValue(ref AttackSpeed);
         serializer.SerializeValue(ref CooldownReduction);
+        serializer.SerializeValue(ref PhysicalDamage);
         serializer.SerializeValue(ref PhysicalDamageMultiplier);
         serializer.SerializeValue(ref MagicDamageMultiplier);
         serializer.SerializeValue(ref PhysicalLifeSteal);
@@ -74,6 +77,7 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
             && MoveSpeed.Equals(other.MoveSpeed)
             && AttackSpeed.Equals(other.AttackSpeed)
             && CooldownReduction.Equals(other.CooldownReduction)
+            && PhysicalDamage.Equals(other.PhysicalDamage)
             && PhysicalDamageMultiplier.Equals(other.PhysicalDamageMultiplier)
             && MagicDamageMultiplier.Equals(other.MagicDamageMultiplier)
             && PhysicalLifeSteal.Equals(other.PhysicalLifeSteal)

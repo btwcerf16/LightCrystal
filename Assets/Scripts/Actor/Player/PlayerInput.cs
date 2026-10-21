@@ -109,6 +109,51 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""PrimaryUse"",
+                    ""type"": ""Button"",
+                    ""id"": ""a2350acf-629e-4d92-b1b2-efa9d318ee62"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SecondaryUse"",
+                    ""type"": ""Button"",
+                    ""id"": ""8644f80e-fe31-4e0c-8a49-02c8c574f9b5"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ToggleStats"",
+                    ""type"": ""Button"",
+                    ""id"": ""f36c7a91-443e-48ab-a70a-e67bc5e1cf9d"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Interact"",
+                    ""type"": ""Button"",
+                    ""id"": ""bb7a0793-0a09-4de5-8a0f-cebc7ed61abc"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""DropWeapon"",
+                    ""type"": ""Button"",
+                    ""id"": ""828c8e51-50e3-45a1-850d-50f50d91f67e"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -177,6 +222,61 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
                     ""action"": ""Aim"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""234cd6e8-677d-42c9-9449-93536fa4d0dc"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PrimaryUse"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""42c1a9e9-cc47-4593-a062-b3a4ab865fb5"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SecondaryUse"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""16102e62-fbf1-48df-b12c-a6a320a09a08"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ToggleStats"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a6c73bf7-13fa-41b2-a55a-66da05ea611a"",
+                    ""path"": ""<Keyboard>/e"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Interact"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ea6aae03-2d82-4787-ab01-4bfcd9cbb01e"",
+                    ""path"": ""<Keyboard>/q"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""DropWeapon"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -187,6 +287,11 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         m_PlayerGameInput = asset.FindActionMap("PlayerGameInput", throwIfNotFound: true);
         m_PlayerGameInput_Move = m_PlayerGameInput.FindAction("Move", throwIfNotFound: true);
         m_PlayerGameInput_Aim = m_PlayerGameInput.FindAction("Aim", throwIfNotFound: true);
+        m_PlayerGameInput_PrimaryUse = m_PlayerGameInput.FindAction("PrimaryUse", throwIfNotFound: true);
+        m_PlayerGameInput_SecondaryUse = m_PlayerGameInput.FindAction("SecondaryUse", throwIfNotFound: true);
+        m_PlayerGameInput_ToggleStats = m_PlayerGameInput.FindAction("ToggleStats", throwIfNotFound: true);
+        m_PlayerGameInput_Interact = m_PlayerGameInput.FindAction("Interact", throwIfNotFound: true);
+        m_PlayerGameInput_DropWeapon = m_PlayerGameInput.FindAction("DropWeapon", throwIfNotFound: true);
     }
 
     ~@PlayerControls()
@@ -269,6 +374,11 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
     private List<IPlayerGameInputActions> m_PlayerGameInputActionsCallbackInterfaces = new List<IPlayerGameInputActions>();
     private readonly InputAction m_PlayerGameInput_Move;
     private readonly InputAction m_PlayerGameInput_Aim;
+    private readonly InputAction m_PlayerGameInput_PrimaryUse;
+    private readonly InputAction m_PlayerGameInput_SecondaryUse;
+    private readonly InputAction m_PlayerGameInput_ToggleStats;
+    private readonly InputAction m_PlayerGameInput_Interact;
+    private readonly InputAction m_PlayerGameInput_DropWeapon;
     /// <summary>
     /// Provides access to input actions defined in input action map "PlayerGameInput".
     /// </summary>
@@ -288,6 +398,26 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "PlayerGameInput/Aim".
         /// </summary>
         public InputAction @Aim => m_Wrapper.m_PlayerGameInput_Aim;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerGameInput/PrimaryUse".
+        /// </summary>
+        public InputAction @PrimaryUse => m_Wrapper.m_PlayerGameInput_PrimaryUse;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerGameInput/SecondaryUse".
+        /// </summary>
+        public InputAction @SecondaryUse => m_Wrapper.m_PlayerGameInput_SecondaryUse;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerGameInput/ToggleStats".
+        /// </summary>
+        public InputAction @ToggleStats => m_Wrapper.m_PlayerGameInput_ToggleStats;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerGameInput/Interact".
+        /// </summary>
+        public InputAction @Interact => m_Wrapper.m_PlayerGameInput_Interact;
+        /// <summary>
+        /// Provides access to the underlying input action "PlayerGameInput/DropWeapon".
+        /// </summary>
+        public InputAction @DropWeapon => m_Wrapper.m_PlayerGameInput_DropWeapon;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -320,6 +450,21 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Aim.started += instance.OnAim;
             @Aim.performed += instance.OnAim;
             @Aim.canceled += instance.OnAim;
+            @PrimaryUse.started += instance.OnPrimaryUse;
+            @PrimaryUse.performed += instance.OnPrimaryUse;
+            @PrimaryUse.canceled += instance.OnPrimaryUse;
+            @SecondaryUse.started += instance.OnSecondaryUse;
+            @SecondaryUse.performed += instance.OnSecondaryUse;
+            @SecondaryUse.canceled += instance.OnSecondaryUse;
+            @ToggleStats.started += instance.OnToggleStats;
+            @ToggleStats.performed += instance.OnToggleStats;
+            @ToggleStats.canceled += instance.OnToggleStats;
+            @Interact.started += instance.OnInteract;
+            @Interact.performed += instance.OnInteract;
+            @Interact.canceled += instance.OnInteract;
+            @DropWeapon.started += instance.OnDropWeapon;
+            @DropWeapon.performed += instance.OnDropWeapon;
+            @DropWeapon.canceled += instance.OnDropWeapon;
         }
 
         /// <summary>
@@ -337,6 +482,21 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
             @Aim.started -= instance.OnAim;
             @Aim.performed -= instance.OnAim;
             @Aim.canceled -= instance.OnAim;
+            @PrimaryUse.started -= instance.OnPrimaryUse;
+            @PrimaryUse.performed -= instance.OnPrimaryUse;
+            @PrimaryUse.canceled -= instance.OnPrimaryUse;
+            @SecondaryUse.started -= instance.OnSecondaryUse;
+            @SecondaryUse.performed -= instance.OnSecondaryUse;
+            @SecondaryUse.canceled -= instance.OnSecondaryUse;
+            @ToggleStats.started -= instance.OnToggleStats;
+            @ToggleStats.performed -= instance.OnToggleStats;
+            @ToggleStats.canceled -= instance.OnToggleStats;
+            @Interact.started -= instance.OnInteract;
+            @Interact.performed -= instance.OnInteract;
+            @Interact.canceled -= instance.OnInteract;
+            @DropWeapon.started -= instance.OnDropWeapon;
+            @DropWeapon.performed -= instance.OnDropWeapon;
+            @DropWeapon.canceled -= instance.OnDropWeapon;
         }
 
         /// <summary>
@@ -391,5 +551,40 @@ public partial class @PlayerControls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnAim(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "PrimaryUse" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnPrimaryUse(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "SecondaryUse" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnSecondaryUse(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ToggleStats" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnToggleStats(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "Interact" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnInteract(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "DropWeapon" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnDropWeapon(InputAction.CallbackContext context);
     }
 }

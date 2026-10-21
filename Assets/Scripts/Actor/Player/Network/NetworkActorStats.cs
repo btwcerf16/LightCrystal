@@ -46,6 +46,7 @@ public class NetworkActorStats : NetworkBehaviour
             _stats.MoveSpeed,
             _stats.AttackSpeed,
             _stats.CooldownReduction,
+            _stats.PhysicalDamage,
             _stats.PhysicalDamageMultiplier,
             _stats.MagicDamageMultiplier,
             _stats.PhysicalLifeSteal,
@@ -102,6 +103,7 @@ public class NetworkActorStats : NetworkBehaviour
         _stats.MoveSpeed.SetReplicatedValues(snapshot.MoveSpeed.BaseValue, snapshot.MoveSpeed.Value);
         _stats.AttackSpeed.SetReplicatedValues(snapshot.AttackSpeed.BaseValue, snapshot.AttackSpeed.Value);
         _stats.CooldownReduction.SetReplicatedValues(snapshot.CooldownReduction.BaseValue, snapshot.CooldownReduction.Value);
+        _stats.PhysicalDamage.SetReplicatedValues(snapshot.PhysicalDamage.BaseValue, snapshot.PhysicalDamage.Value);
         _stats.PhysicalDamageMultiplier.SetReplicatedValues(snapshot.PhysicalDamageMultiplier.BaseValue, snapshot.PhysicalDamageMultiplier.Value);
         _stats.MagicDamageMultiplier.SetReplicatedValues(snapshot.MagicDamageMultiplier.BaseValue, snapshot.MagicDamageMultiplier.Value);
         _stats.PhysicalLifeSteal.SetReplicatedValues(snapshot.PhysicalLifeSteal.BaseValue, snapshot.PhysicalLifeSteal.Value);

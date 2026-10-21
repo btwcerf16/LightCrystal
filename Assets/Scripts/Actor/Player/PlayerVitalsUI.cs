@@ -2,7 +2,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(ActorHealth), typeof(ActorSanity))]
+[RequireComponent(typeof(NetworkActorVitals))]
 public sealed class PlayerVitalsUI : NetworkBehaviour
 {
     [SerializeField, Min(200f)] private float _width = 560f;
@@ -13,8 +13,7 @@ public sealed class PlayerVitalsUI : NetworkBehaviour
     public float RightEdge => _width * 0.5f;
     public float BottomMargin => _bottomMargin;
 
-    private ActorHealth _health;
-    private ActorSanity _sanity;
+    private NetworkActorVitals _vitals;
     private GameObject _canvasObject;
     private RectTransform _healthFill;
     private RectTransform _sanityFill;
@@ -24,8 +23,7 @@ public sealed class PlayerVitalsUI : NetworkBehaviour
 
     private void Awake()
     {
-        _health = GetComponent<ActorHealth>();
-        _sanity = GetComponent<ActorSanity>();
+        _vitals = GetComponent<NetworkActorVitals>();
     }
 
     private void OnEnable() => Show();
@@ -63,18 +61,14 @@ public sealed class PlayerVitalsUI : NetworkBehaviour
 
         CreateBar(panel, "Health", "Здоровье", -8f, 26f, _healthColor, out _healthFill, out _healthText);
         CreateBar(panel, "Sanity", "Рассудок", -42f, 18f, _sanityColor, out _sanityFill, out _sanityText);
-        _health.HealthChanged += UpdateHealth;
-        _sanity.SanityChanged += UpdateSanity;
-        UpdateHealth(_health.CurrentHealth, _health.MaxHealth);
-        UpdateSanity(_sanity.CurrentSanity, _sanity.MaxSanity);
+        _vitals.Changed += UpdateVitals;
+        UpdateVitals(_vitals.State);
     }
 
     private void Hide()
     {
-        if (_health != null)
-            _health.HealthChanged -= UpdateHealth;
-        if (_sanity != null)
-            _sanity.SanityChanged -= UpdateSanity;
+        if (_vitals != null)
+            _vitals.Changed -= UpdateVitals;
         if (_canvasObject == null)
             return;
 
@@ -83,14 +77,10 @@ public sealed class PlayerVitalsUI : NetworkBehaviour
         _canvasObject = null;
     }
 
-    private void UpdateHealth(float current, float maximum)
+    private void UpdateVitals(Vector4 state)
     {
-        UpdateBar(_healthFill, _healthText, current, maximum);
-    }
-
-    private void UpdateSanity(float current, float maximum)
-    {
-        UpdateBar(_sanityFill, _sanityText, current, maximum);
+        UpdateBar(_healthFill, _healthText, state.x, state.y);
+        UpdateBar(_sanityFill, _sanityText, state.z, state.w);
     }
 
     private void UpdateBar(RectTransform fill, Text value, float current, float maximum)

@@ -38,6 +38,20 @@ public sealed class NetworkPlayerHand : NetworkBehaviour
         _isSubscribed = false;
     }
 
+    private void LateUpdate()
+    {
+        if (IsSpawned && IsOwner && _camera != null)
+            _actorHand.SetOffset(GetAimOffset());
+    }
+
+    public Vector2 GetAimOffset()
+    {
+        if (_camera == null)
+            return _actorHand.CurrentOffset;
+        Vector2 cursor = _camera.ScreenToWorldPoint(_inputReader.AimScreenPosition);
+        return _actorHand.ClampOffset(cursor - (Vector2)transform.position);
+    }
+
     private void SetHandOffset(Vector2 screenPosition)
     {
         Vector2 cursorWorldPosition = _camera.ScreenToWorldPoint(screenPosition);

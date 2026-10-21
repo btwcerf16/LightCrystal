@@ -16,6 +16,7 @@ public sealed class ActorStats : MonoBehaviour
     public Stat AttackSpeed { get; private set; }
     public Stat CooldownReduction { get; private set; }
 
+    public Stat PhysicalDamage { get; private set; }
     public Stat PhysicalDamageMultiplier { get; private set; }
     public Stat MagicDamageMultiplier { get; private set; }
 
@@ -49,6 +50,7 @@ public sealed class ActorStats : MonoBehaviour
         AttackSpeed = new Stat(_config.AttackSpeed, 0f);
         CooldownReduction = new Stat(_config.CooldownReduction, 0f, 0.9f);
 
+        PhysicalDamage = new Stat(_config.PhysicalDamage, 0f);
         PhysicalDamageMultiplier = new Stat(_config.PhysicalDamageMultiplier, 0f);
         MagicDamageMultiplier = new Stat(_config.MagicDamageMultiplier, 0f);
 

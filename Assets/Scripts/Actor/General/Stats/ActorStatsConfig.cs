@@ -17,6 +17,9 @@ public sealed class ActorStatsConfig : ScriptableObject
     [field: SerializeField, Min(0f)] public float AttackSpeed { get; private set; } = 1f;
     [field: SerializeField, Range(0f, 0.9f)] public float CooldownReduction { get; private set; }
 
+    [Header("Damage")]
+    [field: SerializeField, Min(0f)] public float PhysicalDamage { get; private set; }
+
     [Header("Damage multipliers")]
     [field: SerializeField, Min(0f)] public float PhysicalDamageMultiplier { get; private set; } = 1f;
     [field: SerializeField, Min(0f)] public float MagicDamageMultiplier { get; private set; } = 1f;

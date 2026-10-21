@@ -33,7 +33,7 @@ public sealed class InventoryUI : NetworkBehaviour
 
     public void CreateInventoryUI(int size)
     {
-        if (!IsSpawned || !IsClient || !IsOwner || _canvasObject != null || size <= 0)
+        if (!IsSpawned || !IsClient || !IsOwner || _canvasObject != null)
             return;
 
         _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
@@ -54,7 +54,7 @@ public sealed class InventoryUI : NetworkBehaviour
         int columns = Mathf.Max(1, _columns);
         int rows = Mathf.CeilToInt((float)size / columns);
         float width = columns * _slotSize + (columns - 1) * _slotSpacing;
-        float height = rows * _slotSize + (rows - 1) * _slotSpacing;
+        float height = rows > 0 ? rows * _slotSize + (rows - 1) * _slotSpacing : 0f;
 
         RectTransform panel = CreateRect("InventoryPanel", _canvasObject.transform, new Vector2(0.5f, 0f), new Vector2(0f, 0f), new Vector2(horizontalOffset, bottomMargin), new Vector2(width + 16f, height + 16f));
         AddImage(panel, _panelColor);
@@ -74,8 +74,12 @@ public sealed class InventoryUI : NetworkBehaviour
             AddImage(slot, _slotColor);
             AddBorder(slot);
             CreateLabel(slot, (i + 1).ToString(), new Vector2(7f, -11f), 11, new Color(0.57f, 0.53f, 0.45f));
+            int index = i;
+            Inventory inventory = GetComponent<Inventory>();
+            slot.gameObject.AddComponent<ItemSlotUI>().Bind(() => inventory.GetItem(index));
         }
     }
+
 
     private void RemoveInventoryUI()
     {
