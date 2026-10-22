@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Specialized;
 using UnityEngine;
 
 public class Inventory : MonoBehaviour
@@ -34,6 +35,38 @@ public class Inventory : MonoBehaviour
             ContentsChanged?.Invoke();
         }
     }
+    public void SetItem(int index, ulong uid)
+    {
+        if (index < 0 || index >= _items.Length)
+            return;
+
+        Item item = null;
+        if (uid != 0)
+        {
+            Item[] items = GetComponentsInChildren<Item>(true);
+            for (int i = 0; i < items.Length; i++)
+            {
+                if (items[i].Uid == uid)
+                {
+                    item = items[i];
+                    break;
+                }
+            }
+
+            if (item == null)
+            {
+                Debug.LogError($"Item with UID {uid} was not found on this player.", this);
+                return;
+            }
+        }
+
+        if (_items[index] == item)
+            return;
+
+        _items[index] = item;
+        ContentsChanged?.Invoke();
+    }
+
     public void DropItem(int index)
     {
         if (!HasItem(index))
