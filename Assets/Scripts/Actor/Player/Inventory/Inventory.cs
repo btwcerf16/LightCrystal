@@ -9,6 +9,26 @@ public class Inventory : MonoBehaviour
     public Item GetItem(int index) => index >= 0 && index < _items.Length ? _items[index] : null;
 
     public event Action ContentsChanged;
+    public event Action<int, int> SlotChangeRequested;
+    public event Action<int> ItemDropRequested;
+    public event Action<int> ItemUseRequested;
+
+    public void RequestUseItem(int index)
+    {
+        ItemUseRequested?.Invoke(index);
+    }
+
+    public int FindEmptySlot() => Array.IndexOf(_items, null);
+
+    public void RequestChangeItemSlot(int previousIndex, int newIndex)
+    {
+        SlotChangeRequested?.Invoke(previousIndex, newIndex);
+    }
+
+    public void RequestDropItem(int index)
+    {
+        ItemDropRequested?.Invoke(index);
+    }
 
     public bool CanUseItems { get; private set; } //понадобится когда добавим нажатия для предметов
 
@@ -19,6 +39,7 @@ public class Inventory : MonoBehaviour
             if (_items[i] == null)
             {
                 _items[i] = item;
+                item.Equip();
                 ContentsChanged?.Invoke();
                 return;
             }
@@ -63,7 +84,13 @@ public class Inventory : MonoBehaviour
         if (_items[index] == item)
             return;
 
+        if (_items[index] != null && _items[index].transform.IsChildOf(transform))
+        {
+            _items[index].Drop();
+            _items[index].gameObject.SetActive(false);
+        }
         _items[index] = item;
+        item?.Equip();
         ContentsChanged?.Invoke();
     }
 
@@ -71,13 +98,16 @@ public class Inventory : MonoBehaviour
     {
         if (!HasItem(index))
             return;
+        _items[index].Drop();
+        _items[index] = null;
         ContentsChanged?.Invoke();
     }
     public void UseItem(int index)
     {
         if (!HasItem(index))
             return;
-        _items[index].Use();
+        if (_items[index].TryUse())
+            ContentsChanged?.Invoke();
     }
 
     private bool HasItem(int index)

@@ -399,7 +399,6 @@ Transform:
   m_Children:
   - {fileID: 7494348020843618459}
   - {fileID: 8123400010000000002}
-  - {fileID: 8123400010000000008}
   m_Father: {fileID: 1466161130669804116}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &6332212930668729228
@@ -496,6 +495,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ActorHand
   _handTransform: {fileID: 8812741758872309371}
   _visualHandSpriteRender: {fileID: 4970621201862154502}
+  _worldItemPrefab: {fileID: 477985365, guid: a2ef457c21d14f0fbc6e609cb7b0af17, type: 3}
   _maxRadius: 1
 --- !u!114 &417154353394911983
 MonoBehaviour:
@@ -541,6 +541,15 @@ GameObject:
   - component: {fileID: 7203364025331181896}
   - component: {fileID: 7203364025331181902}
   - component: {fileID: 5644698805129247974}
+  - component: {fileID: 8123400010000000015}
+  - component: {fileID: 8123400010000000016}
+  - component: {fileID: 8123400010000000017}
+  - component: {fileID: 8123400010000000018}
+  - component: {fileID: 8123400010000000019}
+  - component: {fileID: 8123400010000000020}
+  - component: {fileID: 8123400010000000021}
+  - component: {fileID: 8123400010000000022}
+  - component: {fileID: 8123400010000000023}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -967,6 +976,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ActorArsenal
   _weapons:
   - {fileID: 8123400010000000011}
+  - {fileID: 0}
 --- !u!1 &8123400010000000001
 GameObject:
   m_ObjectHideFlags: 0
@@ -977,7 +987,6 @@ GameObject:
   m_Component:
   - component: {fileID: 8123400010000000002}
   - component: {fileID: 8123400010000000009}
-  - component: {fileID: 8123400010000000010}
   - component: {fileID: 8123400010000000011}
   m_Layer: 0
   m_Name: WeaponOrientation
@@ -1000,6 +1009,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8123400010000000005}
+  - {fileID: 8123400010000000008}
   m_Father: {fileID: 8812741758872309371}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: -90}
 --- !u!1 &8123400010000000003
@@ -1256,11 +1266,11 @@ Transform:
   m_GameObject: {fileID: 8123400010000000007}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.6, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 0.6, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 8812741758872309371}
+  m_Father: {fileID: 8123400010000000002}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &8123400010000000009
 Animator:
@@ -1284,22 +1294,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!114 &8123400010000000010
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8123400010000000001}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkAnimator
-  AuthorityMode: 0
-  m_Animator: {fileID: 8123400010000000009}
-  TransitionStateInfoList: []
-  NetworkAnimatorExpanded: 0
 --- !u!114 &8123400010000000011
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1313,10 +1307,121 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RustySword
   _icon: {fileID: 21300000, guid: b55e93f8adf8c814aa62f93a9fae300d, type: 3}
+  _itemId: 1
   _damage: 3
   _attackPoint: {fileID: 8123400010000000008}
   _animator: {fileID: 8123400010000000009}
   _swordRenderer: {fileID: 8123400010000000006}
   _attackRadius: 0.4
   _trail: {fileID: 8123400010000000014}
-  _networkAnimator: {fileID: 8123400010000000010}
+--- !u!114 &8123400010000000015
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f14c0796d16e9f74da11fad4160c2cd9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerNetworkInteractions
+--- !u!114 &8123400010000000016
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 37dd60ef149a4c13b87a6d50ae598a66, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerArsenal
+--- !u!114 &8123400010000000017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0dc613c9f4de5b34d8d682990ba2c065, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerInventory
+--- !u!114 &8123400010000000018
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a6908f93ed4849b4846436fd71a4d8fc, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerSlotBindings
+  _settings: {fileID: 11400000, guid: d26395559b654054a70549c275d59e46, type: 2}
+--- !u!114 &8123400010000000019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 90f4d3523dd5443384c6e214f1a9072b, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerMenuUI
+--- !u!114 &8123400010000000020
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c044ff24e80944119bdc6a90732af9cd, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::EffectHandler
+--- !u!114 &8123400010000000021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38ae149da59442daa9aa16b7113e9f2d, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkEffectHandler
+  _effectData:
+  - {fileID: 11400000, guid: c5e72efe395a40a1a039dd1ff565f910, type: 2}
+--- !u!114 &8123400010000000022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9e2c58955994c1b849fe01115cf7e24, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerEffectsUI
+--- !u!114 &8123400010000000023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4a17bd3c562d4a7c81e78f522c597f49, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerItemTooltipUI

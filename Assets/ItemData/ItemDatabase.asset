@@ -11,5 +11,8 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 6b152a8d0d014f2c81051cf7c7ab6b5f, type: 3}
   m_Name: ItemDatabase
-  m_EditorClassIdentifier:
-  _items: []
+  m_EditorClassIdentifier: Assembly-CSharp::ItemDatabase
+  _items:
+  - {fileID: 8123400010000000011, guid: 4ac902ea29d44885a1a9b3fed62a6011, type: 3}
+  - {fileID: 720100004, guid: 9f77c795a39d41b6bff01c75033ea4af, type: 3}
+  - {fileID: 720100004, guid: f393883b8d48467b99e175c134c06b62, type: 3}

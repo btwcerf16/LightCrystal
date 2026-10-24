@@ -1,20 +1,23 @@
 using Unity.Netcode;
-using Unity.Netcode.Components;
+using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class RustySword : Weapon
 {
+    private const float SecondaryDamageMultiplier = 0.5f;
     [SerializeField] private SpriteRenderer _swordRenderer;
     [SerializeField] private float _attackRadius = 0.4f;
     [SerializeField] private TrailRenderer _trail;
-    [SerializeField] private NetworkAnimator _networkAnimator;
 
     private ActorHand _hand;
     private ActorStats _stats;
     private NetworkObject _ownerNetworkObject;
     private bool _isBonusApplied;
+    private bool _isAttacking;
+    private readonly HashSet<IDamageable> _hitTargets = new HashSet<IDamageable>();
 
     public override string DisplayName => "Ржавый меч";
+    public float SecondaryDamagePercent => SecondaryDamageMultiplier * 100f;
 
     private void Awake()
     {
@@ -28,7 +31,9 @@ public sealed class RustySword : Weapon
     public override void Equip()
     {
         base.Equip();
-        _hand ??= GetComponentInParent<ActorHand>();
+        _hand = GetComponentInParent<ActorHand>();
+        _stats = GetComponentInParent<ActorStats>();
+        _ownerNetworkObject = GetComponentInParent<NetworkObject>();
         if (!_isBonusApplied && _stats != null)
         {
             _stats.PhysicalDamage.AddModifier(new StatModifier(_damage, StatModifierType.Flat, this));
@@ -41,6 +46,7 @@ public sealed class RustySword : Weapon
 
     public override void Drop()
     {
+        CancelUse();
         base.Drop();
         if (_isBonusApplied)
         {
@@ -53,16 +59,38 @@ public sealed class RustySword : Weapon
         StopTrail();
     }
 
-    public override void BeginPrimaryUse() => _networkAnimator.SetTrigger("ThrustHit");
+    public override void BeginPrimaryUse()
+    {
+        if (!IsEquipped || _isAttacking)
+            return;
+
+        _isAttacking = true;
+        _hitTargets.Clear();
+        _animator.SetTrigger("ThrustHit");
+    }
     public override void EndPrimaryUse() { }
-    public override void BeginSecondaryUse() => _networkAnimator.SetTrigger("SweepHit");
+    public override void BeginSecondaryUse()
+    {
+        if (!IsEquipped || _isAttacking)
+            return;
+
+        _isAttacking = true;
+        _hitTargets.Clear();
+        _animator.SetTrigger("SweepHit");
+    }
     public override void EndSecondaryUse() { }
 
     public override void CancelUse()
     {
-        _networkAnimator.ResetTrigger("ThrustHit");
-        _networkAnimator.ResetTrigger("SweepHit");
+        _animator.ResetTrigger("ThrustHit");
+        _animator.ResetTrigger("SweepHit");
         _animator.Play("Idle", 0, 0f);
+        FinishAttack();
+    }
+
+    public void FinishAttack()
+    {
+        _isAttacking = false;
         StopTrail();
     }
 
@@ -75,7 +103,7 @@ public sealed class RustySword : Weapon
 
         Vector2 position = _attackPoint.position;
         position += (Vector2)_attackPoint.right * (attackPointIndex - 2);
-        Attack(position, CurrentDamage * 0.5f);
+        Attack(position, CurrentDamage * SecondaryDamageMultiplier);
     }
 
     private float CurrentDamage => _stats != null ? _stats.PhysicalDamage.Value : _damage;
@@ -97,7 +125,7 @@ public sealed class RustySword : Weapon
 
     private void Attack(Vector2 position, float damage)
     {
-        if (_ownerNetworkObject != null && _ownerNetworkObject.IsSpawned && !_ownerNetworkObject.NetworkManager.IsServer)
+        if (!IsEquipped || !_isAttacking || _ownerNetworkObject == null || !_ownerNetworkObject.IsSpawned || !_ownerNetworkObject.NetworkManager.IsServer)
             return;
 
         Collider2D[] targets = Physics2D.OverlapCircleAll(position, _attackRadius);
@@ -106,7 +134,13 @@ public sealed class RustySword : Weapon
             if (target.transform.root == transform.root)
                 continue;
 
-            target.GetComponentInParent<IDamageable>()?.TakeDamage(damage);
+            IDamageable damageable = target.GetComponentInParent<IDamageable>();
+            if (damageable != null && _hitTargets.Add(damageable))
+            {
+                ActorStats targetStats = target.GetComponentInParent<ActorStats>();
+                float resistance = targetStats != null ? targetStats.PhysicalResistance.Value : 0f;
+                damageable.TakeDamage(damage * (1f - resistance));
+            }
         }
     }
 

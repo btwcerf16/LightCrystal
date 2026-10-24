@@ -1,6 +1,7 @@
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(ActorArsenal))]
 public sealed class ArsenalUI : NetworkBehaviour
@@ -10,6 +11,8 @@ public sealed class ArsenalUI : NetworkBehaviour
     [SerializeField, Min(0f)] private float _gapFromVitals = 12f;
     private GameObject _canvasObject;
     private Font _font;
+    private PlayerSlotBindings _slotBindings;
+    private readonly List<Text> _bindingLabels = new List<Text>();
 
     public override void OnNetworkSpawn() => Show();
     public override void OnGainedOwnership() => Show();
@@ -27,7 +30,9 @@ public sealed class ArsenalUI : NetworkBehaviour
             return;
 
         _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _slotBindings = GetComponent<PlayerSlotBindings>();
         _canvasObject = new GameObject("ArsenalCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
+        _canvasObject.AddComponent<GraphicRaycaster>();
         _canvasObject.transform.SetParent(transform, false);
         Canvas canvas = _canvasObject.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -63,15 +68,26 @@ public sealed class ArsenalUI : NetworkBehaviour
         {
             RectTransform slot = Rect("WeaponSlot_" + i, grid, Vector2.zero, Vector2.zero, Vector2.zero, layout.cellSize);
             Paint(slot, new Color(0.085f, 0.071f, 0.048f));
-            Label(slot, (i + 1).ToString(), new Vector2(6f, -11f), 24f, 11);
+            _bindingLabels.Add(Label(slot, _slotBindings.GetBindingLabel(true, i), new Vector2(6f, -11f), _slotSize - 12f, 10));
             int index = i;
             ActorArsenal arsenal = GetComponent<ActorArsenal>();
-            slot.gameObject.AddComponent<ItemSlotUI>().Bind(() => arsenal.GetWeapon(index));
+            slot.gameObject.AddComponent<ItemSlotUI>().Bind(() => arsenal.GetWeapon(index), arsenal, index,
+                arsenal.RequestChangeWeaponSlot, arsenal.RequestDropWeapon, arsenal.RequestSelectWeapon);
         }
+        _slotBindings.BindingsChanged += RefreshBindings;
+    }
+
+    private void RefreshBindings()
+    {
+        for (int i = 0; i < _bindingLabels.Count; i++)
+            _bindingLabels[i].text = _slotBindings.GetBindingLabel(true, i);
     }
 
     private void Hide()
     {
+        if (_slotBindings != null)
+            _slotBindings.BindingsChanged -= RefreshBindings;
+        _bindingLabels.Clear();
         if (_canvasObject == null)
             return;
         _canvasObject.SetActive(false);
@@ -94,18 +110,22 @@ public sealed class ArsenalUI : NetworkBehaviour
     {
         Image image = rect.gameObject.AddComponent<Image>();
         image.color = color;
-        image.raycastTarget = false;
+        image.raycastTarget = true;
     }
 
-    private void Label(Transform parent, string value, Vector2 position, float width, int size)
+    private Text Label(Transform parent, string value, Vector2 position, float width, int size)
     {
         RectTransform rect = Rect("Label", parent, new Vector2(0f, 1f), new Vector2(0f, 0.5f), position, new Vector2(width, 18f));
         Text text = rect.gameObject.AddComponent<Text>();
         text.font = _font;
         text.text = value;
         text.fontSize = size;
+        text.resizeTextForBestFit = true;
+        text.resizeTextMinSize = 7;
+        text.resizeTextMaxSize = size;
         text.color = new Color(0.67f, 0.61f, 0.49f);
         text.alignment = TextAnchor.MiddleLeft;
         text.raycastTarget = false;
+        return text;
     }
 }

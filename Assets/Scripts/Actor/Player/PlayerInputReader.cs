@@ -1,7 +1,10 @@
 using System;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
+using System.Collections.Generic;
 
+[DefaultExecutionOrder(-10)]
 public sealed class PlayerInputReader : MonoBehaviour
 {
     private PlayerControls _controls;
@@ -18,6 +21,7 @@ public sealed class PlayerInputReader : MonoBehaviour
     public event Action InteractPressed;
     public event Action DropWeaponPressed;
     public bool IsStatsOpen { get; private set; }
+    public bool IsMenuOpen { get; private set; }
 
     public Vector2 MoveDirection { get; private set; }
     public Vector2 AimScreenPosition { get; private set; }
@@ -50,10 +54,12 @@ public sealed class PlayerInputReader : MonoBehaviour
 
     public void OnSecondaryUse(InputAction.CallbackContext context)
     {
-        if (_isDisabling || IsStatsOpen)
+        if (_isDisabling || IsStatsOpen || IsMenuOpen)
             return;
         if (context.performed)
         {
+            if (IsPointerOverUI())
+                return;
             SecondaryPressed?.Invoke();
         }
         else if (context.canceled)
@@ -64,10 +70,12 @@ public sealed class PlayerInputReader : MonoBehaviour
 
     public void OnPrimaryUse(InputAction.CallbackContext context)
     {
-        if (_isDisabling || IsStatsOpen)
+        if (_isDisabling || IsStatsOpen || IsMenuOpen)
             return;
         if (context.performed)
         {
+            if (IsPointerOverUI())
+                return;
             PrimaryPressed?.Invoke();
         }
         else if (context.canceled) 
@@ -87,6 +95,8 @@ public sealed class PlayerInputReader : MonoBehaviour
 
     private void OnToggleStats(InputAction.CallbackContext context)
     {
+        if (IsMenuOpen)
+            return;
         IsStatsOpen = !IsStatsOpen;
         if (IsStatsOpen)
             ActionsCanceled?.Invoke();
@@ -95,13 +105,24 @@ public sealed class PlayerInputReader : MonoBehaviour
 
     private void OnInteract(InputAction.CallbackContext context)
     {
-        if (!_isDisabling && !IsStatsOpen)
+        if (!_isDisabling && !IsStatsOpen && !IsMenuOpen)
             InteractPressed?.Invoke();
+    }
+
+    private bool IsPointerOverUI()
+    {
+        if (EventSystem.current == null || Mouse.current == null)
+            return false;
+        PointerEventData pointer = new PointerEventData(EventSystem.current);
+        pointer.position = Mouse.current.position.ReadValue();
+        List<RaycastResult> results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(pointer, results);
+        return results.Count > 0;
     }
 
     private void OnDropWeapon(InputAction.CallbackContext context)
     {
-        if (!_isDisabling && !IsStatsOpen)
+        if (!_isDisabling && !IsStatsOpen && !IsMenuOpen)
             DropWeaponPressed?.Invoke();
     }
 
@@ -134,12 +155,38 @@ public sealed class PlayerInputReader : MonoBehaviour
 
     private void OnMove(InputAction.CallbackContext context)
     {
-        SetMoveDirection(context.ReadValue<Vector2>());
+        SetMoveDirection(IsMenuOpen ? Vector2.zero : context.ReadValue<Vector2>());
     }
 
     private void OnAim(InputAction.CallbackContext context)
     {
+        if (IsMenuOpen)
+            return;
         SetAimPosition(context.ReadValue<Vector2>());
+    }
+
+    public void SetMenuOpen(bool isOpen)
+    {
+        IsMenuOpen = isOpen;
+        if (isOpen)
+        {
+            CloseStats();
+            SetMoveDirection(Vector2.zero);
+            ActionsCanceled?.Invoke();
+        }
+        else if (isActiveAndEnabled)
+        {
+            SetMoveDirection(_controls.PlayerGameInput.Move.ReadValue<Vector2>());
+            SetAimPosition(_controls.PlayerGameInput.Aim.ReadValue<Vector2>());
+        }
+    }
+
+    public bool IsGameplayBinding(string path)
+    {
+        foreach (InputBinding binding in _controls.asset.bindings)
+            if (!binding.isComposite && string.Equals(binding.effectivePath, path, StringComparison.OrdinalIgnoreCase))
+                return true;
+        return false;
     }
 
     private void SetMoveDirection(Vector2 direction)
