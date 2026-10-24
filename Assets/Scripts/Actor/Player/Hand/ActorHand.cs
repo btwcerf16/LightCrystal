@@ -48,8 +48,8 @@ public sealed class ActorHand : MonoBehaviour
             return worldItem;
         } 
 
-        worldItem.transform.position = _handTransform.position;
-        worldItem.ThrowAway();
+        worldItem.SetItem(itemPrefab);
+        worldItem.ShowAt(_handTransform.position);
         return worldItem;
     }
 

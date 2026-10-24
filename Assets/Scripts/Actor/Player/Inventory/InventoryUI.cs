@@ -2,6 +2,9 @@
 
 using UnityEngine.UI;
 using Unity.Netcode;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(Inventory))]
 public sealed class InventoryUI : NetworkBehaviour
@@ -15,6 +18,8 @@ public sealed class InventoryUI : NetworkBehaviour
     [SerializeField] private Color _slotColor = new Color(0.055f, 0.05f, 0.042f, 1f);
     private GameObject _canvasObject;
     private Font _font;
+    private PlayerSlotBindings _slotBindings;
+    private readonly List<Text> _bindingLabels = new List<Text>();
 
     public override void OnNetworkSpawn()
     {
@@ -37,7 +42,11 @@ public sealed class InventoryUI : NetworkBehaviour
             return;
 
         _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _slotBindings = GetComponent<PlayerSlotBindings>();
+        if (EventSystem.current == null)
+            new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
         _canvasObject = new GameObject("InventoryCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
+        _canvasObject.AddComponent<GraphicRaycaster>();
         _canvasObject.transform.SetParent(transform, false);
         Canvas canvas = _canvasObject.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.ScreenSpaceOverlay;
@@ -73,16 +82,27 @@ public sealed class InventoryUI : NetworkBehaviour
             RectTransform slot = CreateRect("Slot_" + i, grid, Vector2.zero, Vector2.zero, Vector2.zero, layout.cellSize);
             AddImage(slot, _slotColor);
             AddBorder(slot);
-            CreateLabel(slot, (i + 1).ToString(), new Vector2(7f, -11f), 11, new Color(0.57f, 0.53f, 0.45f));
+            _bindingLabels.Add(CreateLabel(slot, _slotBindings.GetBindingLabel(false, i), new Vector2(7f, -11f), 10, new Color(0.57f, 0.53f, 0.45f)));
             int index = i;
             Inventory inventory = GetComponent<Inventory>();
-            slot.gameObject.AddComponent<ItemSlotUI>().Bind(() => inventory.GetItem(index));
+            slot.gameObject.AddComponent<ItemSlotUI>().Bind(() => inventory.GetItem(index), inventory, index,
+                inventory.RequestChangeItemSlot, inventory.RequestDropItem, inventory.RequestUseItem);
         }
+        _slotBindings.BindingsChanged += RefreshBindings;
+    }
+
+    private void RefreshBindings()
+    {
+        for (int i = 0; i < _bindingLabels.Count; i++)
+            _bindingLabels[i].text = _slotBindings.GetBindingLabel(false, i);
     }
 
 
     private void RemoveInventoryUI()
     {
+        if (_slotBindings != null)
+            _slotBindings.BindingsChanged -= RefreshBindings;
+        _bindingLabels.Clear();
         if (_canvasObject == null)
             return;
         _canvasObject.SetActive(false);
@@ -106,7 +126,7 @@ public sealed class InventoryUI : NetworkBehaviour
     {
         Image image = rect.gameObject.AddComponent<Image>();
         image.color = color;
-        image.raycastTarget = false;
+        image.raycastTarget = true;
     }
 
     private void AddBorder(RectTransform rect)
@@ -116,16 +136,20 @@ public sealed class InventoryUI : NetworkBehaviour
         border.effectDistance = new Vector2(1f, -1f);
     }
 
-    private void CreateLabel(Transform parent, string value, Vector2 position, int fontSize, Color color)
+    private Text CreateLabel(Transform parent, string value, Vector2 position, int fontSize, Color color)
     {
-        RectTransform rect = CreateRect("Label", parent, new Vector2(0f, 1f), new Vector2(0f, 0.5f), position, new Vector2(24f, 18f));
+        RectTransform rect = CreateRect("Label", parent, new Vector2(0f, 1f), new Vector2(0f, 0.5f), position, new Vector2(_slotSize - 12f, 18f));
         Text label = rect.gameObject.AddComponent<Text>();
         label.font = _font;
         label.text = value;
         label.fontSize = fontSize;
+        label.resizeTextForBestFit = true;
+        label.resizeTextMinSize = 7;
+        label.resizeTextMaxSize = fontSize;
         label.color = color;
         label.alignment = TextAnchor.MiddleLeft;
         label.raycastTarget = false;
+        return label;
     }
 }
 

@@ -5,6 +5,7 @@ public abstract class Weapon : Item
     [SerializeField] protected float _damage;
     [SerializeField] protected Transform _attackPoint;
     [SerializeField] protected Animator _animator;
+    public float Damage => _damage;
     public abstract void BeginPrimaryUse();
     public abstract void EndPrimaryUse();
     public abstract void BeginSecondaryUse();

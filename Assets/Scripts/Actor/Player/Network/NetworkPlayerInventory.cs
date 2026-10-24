@@ -1,12 +1,12 @@
 ﻿using System;
 using Unity.Netcode;
 using UnityEngine;
-using static UnityEditor.Progress;
 
 public class NetworkPlayerInventory: NetworkBehaviour
 {
     private NetworkList<NetworkInventorySlot> _slots ;
     private Inventory _inventory;
+    private ItemFactory _itemFactory;
 
 
     private void Awake()
@@ -17,7 +17,14 @@ public class NetworkPlayerInventory: NetworkBehaviour
     }
     public override void OnNetworkSpawn()
     {
+        _itemFactory = NetworkManager.GetComponent<ItemFactory>();
         _slots.OnListChanged += OnSlotsChanged;
+
+        if (IsOwner || IsServer)
+        {
+            _inventory.SlotChangeRequested += OnSlotChangeRequested;
+            _inventory.ItemUseRequested += OnItemUseRequested;
+        }
 
         if (_inventory == null) return;
 
@@ -27,8 +34,10 @@ public class NetworkPlayerInventory: NetworkBehaviour
             return;
         }
 
+        _slots.Clear();
         for (int i = 0; i < _inventory.Size; i++)
         {
+            _itemFactory.AssignUid(_inventory.GetItem(i));
             _slots.Add(new NetworkInventorySlot { SlotIndex = i, IsConquered = false});
         }
         
@@ -39,6 +48,8 @@ public class NetworkPlayerInventory: NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         _slots.OnListChanged -= OnSlotsChanged;
+        _inventory.SlotChangeRequested -= OnSlotChangeRequested;
+        _inventory.ItemUseRequested -= OnItemUseRequested;
 
         if (!IsServer || _inventory == null) return;
         
@@ -65,7 +76,12 @@ public class NetworkPlayerInventory: NetworkBehaviour
                 continue;
             }
 
-            _inventory.SetItem(slot.SlotIndex, slot.Uid);
+            Item item = _itemFactory.GetOrCreateItem(slot.ItemId, slot.Uid, transform);
+            if (item != null)
+            {
+                item.SetCooldown(slot.CooldownDuration, slot.CooldownEndsAt);
+                _inventory.SetItem(slot.SlotIndex, slot.Uid);
+            }
         }
     }
 
@@ -79,17 +95,44 @@ public class NetworkPlayerInventory: NetworkBehaviour
             bool isOccupied = item != null;
             int itemId = isOccupied ? item.ItemId : 0;
             ulong uid = isOccupied ? item.Uid : 0;
+            float cooldownDuration = isOccupied ? item.CooldownDuration : 0f;
+            double cooldownEndsAt = isOccupied ? item.CooldownEndsAt : 0d;
 
-            if (slot.IsConquered != isOccupied || slot.ItemId != itemId || slot.Uid != uid)
+            if (slot.IsConquered != isOccupied || slot.ItemId != itemId || slot.Uid != uid
+                || slot.CooldownDuration != cooldownDuration || slot.CooldownEndsAt != cooldownEndsAt)
             {
                 slot.IsConquered = isOccupied;
                 slot.ItemId = itemId;
                 slot.Uid = uid;
+                slot.CooldownDuration = cooldownDuration;
+                slot.CooldownEndsAt = cooldownEndsAt;
                 _slots[i] = slot;
             }
 
         }
     }
+    private void OnSlotChangeRequested(int previousIndex, int newIndex)
+    {
+        if (IsServer)
+            _inventory.ChangeItemSlot(previousIndex, newIndex);
+        else
+            ChangeInventorySlotsRpc(previousIndex, newIndex);
+    }
+
+    private void OnItemUseRequested(int index)
+    {
+        if (IsServer)
+            _inventory.UseItem(index);
+        else
+            UseItemRpc(index);
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
+    private void UseItemRpc(int index)
+    {
+        _inventory.UseItem(index);
+    }
+
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
     public void ChangeInventorySlotsRpc(int previousIndex, int newIndex)
     {

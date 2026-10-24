@@ -8,16 +8,18 @@ public class NetworkActorStats : NetworkBehaviour
         new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     private ActorStats _stats;
+    private PlayerInputReader _input;
     private Stat[] _allStats;
 
     private void Awake()
     {
         _stats = GetComponent<ActorStats>();
+        _input = GetComponent<PlayerInputReader>();
     }
 
     private void Update()
     {
-        if (!IsOwner)
+        if (!IsOwner || Keyboard.current == null || (_input != null && _input.IsMenuOpen))
         {
             return;
         }

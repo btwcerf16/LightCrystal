@@ -7,10 +7,13 @@ public struct NetworkInventorySlot : INetworkSerializable, IEquatable<NetworkInv
     public int SlotIndex;
     public int ItemId;
     public ulong Uid;
+    public float CooldownDuration;
+    public double CooldownEndsAt;
 
     public bool Equals(NetworkInventorySlot other)
     {
-        return other.IsConquered == this.IsConquered && other.SlotIndex == this.SlotIndex && other.ItemId == this.ItemId && other.Uid == this.Uid;
+        return other.IsConquered == this.IsConquered && other.SlotIndex == this.SlotIndex && other.ItemId == this.ItemId && other.Uid == this.Uid
+            && other.CooldownDuration == this.CooldownDuration && other.CooldownEndsAt == this.CooldownEndsAt;
     }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -19,6 +22,8 @@ public struct NetworkInventorySlot : INetworkSerializable, IEquatable<NetworkInv
         serializer.SerializeValue(ref SlotIndex);
         serializer.SerializeValue(ref ItemId);
         serializer.SerializeValue(ref Uid);
+        serializer.SerializeValue(ref CooldownDuration);
+        serializer.SerializeValue(ref CooldownEndsAt);
     }
 }
 
