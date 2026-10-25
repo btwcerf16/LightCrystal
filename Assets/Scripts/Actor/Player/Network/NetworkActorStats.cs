@@ -63,6 +63,7 @@ public class NetworkActorStats : NetworkBehaviour
         {
             foreach (Stat stat in _allStats)
                 stat.ValueChanged += PublishSnapshot;
+            _stats.TargetPriorityChanged += PublishTargetPriority;
 
             PublishSnapshot(0f);
             return;
@@ -78,6 +79,7 @@ public class NetworkActorStats : NetworkBehaviour
         {
             foreach (Stat stat in _allStats)
                 stat.ValueChanged -= PublishSnapshot;
+            _stats.TargetPriorityChanged -= PublishTargetPriority;
 
             return;
         }
@@ -89,6 +91,11 @@ public class NetworkActorStats : NetworkBehaviour
     private void PublishSnapshot(float _)
     {
         _snapshot.Value = new NetworkActorStatsSnapshot(_stats);
+    }
+
+    private void PublishTargetPriority(int priority)
+    {
+        PublishSnapshot(0f);
     }
     private void ReceiveSnapshot(NetworkActorStatsSnapshot _, NetworkActorStatsSnapshot newSnapshot)
     {
@@ -115,5 +122,6 @@ public class NetworkActorStats : NetworkBehaviour
         _stats.ForceResistance.SetReplicatedValues(snapshot.ForceResistance.BaseValue, snapshot.ForceResistance.Value);
         _stats.MadnessResistance.SetReplicatedValues(snapshot.MadnessResistance.BaseValue, snapshot.MadnessResistance.Value);
         _stats.EffectResistance.SetReplicatedValues(snapshot.EffectResistance.BaseValue, snapshot.EffectResistance.Value);
+        _stats.SetTargetPriority(snapshot.TargetPriority);
     }
 }

@@ -7,6 +7,9 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
 {
     private Func<Item> _getItem;
     private Item _shownItem;
+    private EItemRarity _shownRarity;
+    private Outline _border;
+    private ItemRarityBorder _ornament;
     private Image _icon;
     private Text _name;
     private Component _container;
@@ -28,6 +31,10 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
         _swap = swap;
         _drop = drop;
         _select = select;
+        _border = GetComponent<Outline>();
+        if (_border == null)
+            _border = gameObject.AddComponent<Outline>();
+        _border.effectDistance = new Vector2(2f, -2f);
         RectTransform icon = Child("Icon", new Vector2(0f, 0.26f), new Vector2(1f, 0.92f));
         _icon = icon.gameObject.AddComponent<Image>();
         _icon.preserveAspect = true;
@@ -62,6 +69,7 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
         _cooldownText.alignment = TextAnchor.MiddleCenter;
         _cooldownText.color = new Color(0.95f, 0.91f, 0.82f);
         _cooldownText.raycastTarget = false;
+        _ornament = ItemRarityBorder.Create(transform);
         Refresh(_getItem());
         RefreshCooldown(_getItem());
     }
@@ -121,7 +129,7 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
     private void LateUpdate()
     {
         Item item = _getItem?.Invoke();
-        if (item != _shownItem)
+        if (item != _shownItem || (item != null && item.Rarity != _shownRarity))
             Refresh(item);
         RefreshCooldown(item);
     }
@@ -146,6 +154,11 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
     private void Refresh(Item item)
     {
         _shownItem = item;
+        _shownRarity = item != null ? item.Rarity : EItemRarity.Common;
+        _ornament.SetRarity(_shownRarity);
+        _border.effectColor = item != null
+            ? ItemRarityColors.Get(item.Rarity)
+            : new Color(0.16f, 0.145f, 0.12f);
         _icon.sprite = item != null ? item.Icon : null;
         _icon.enabled = _icon.sprite != null;
         _name.text = item != null ? item.DisplayName : "";

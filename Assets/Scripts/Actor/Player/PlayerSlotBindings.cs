@@ -177,6 +177,7 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
     private bool IsReserved(string path)
     {
         return string.Equals(path, "<Keyboard>/escape", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(path, "<Keyboard>/backquote", StringComparison.OrdinalIgnoreCase)
             || string.Equals(path, "<Keyboard>/t", StringComparison.OrdinalIgnoreCase)
             || _input.IsGameplayBinding(path);
     }

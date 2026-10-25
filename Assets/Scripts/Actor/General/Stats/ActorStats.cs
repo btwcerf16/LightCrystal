@@ -1,9 +1,13 @@
 using UnityEngine;
+using System;
 
 [DefaultExecutionOrder(-100)]
 public sealed class ActorStats : MonoBehaviour
 {
     [SerializeField] private ActorStatsConfig _config;
+
+    public int TargetPriority { get; private set; }
+    public event Action<int> TargetPriorityChanged;
 
     public Stat ViewDistance { get; private set; }
     public Stat ViewAngle { get; private set; }
@@ -39,6 +43,7 @@ public sealed class ActorStats : MonoBehaviour
             return;
         }
 
+        TargetPriority = _config.TargetPriority;
         ViewDistance = new Stat(_config.ViewDistance, 0f);
         ViewAngle = new Stat(_config.ViewAngle, 0f, 360f);
 
@@ -62,5 +67,13 @@ public sealed class ActorStats : MonoBehaviour
         ForceResistance = new Stat(_config.ForceResistance, 0f, 1f);
         MadnessResistance = new Stat(_config.MadnessResistance, 0f, 1f);
         EffectResistance = new Stat(_config.EffectResistance, 0f, 1f);
+    }
+
+    public void SetTargetPriority(int priority)
+    {
+        if (TargetPriority == priority)
+            return;
+        TargetPriority = priority;
+        TargetPriorityChanged?.Invoke(priority);
     }
 }

@@ -102,7 +102,7 @@ public sealed class PlayerMenuUI : NetworkBehaviour
 
     private void OnToggleMenu(InputAction.CallbackContext context)
     {
-        if (_canvas == null || _bindings.IsRebinding)
+        if (_canvas == null || _bindings.IsRebinding || _input.IsConsoleOpen)
             return;
         if (!_canvas.activeSelf)
         {

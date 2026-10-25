@@ -5,6 +5,8 @@ public abstract class Item : MonoBehaviour
 {
     [SerializeField] private Sprite _icon;
     [SerializeField, Min(0)] private int _itemId = 0;
+    [SerializeField] private EItemRarity _rarity = EItemRarity.Common;
+    [SerializeField, Min(0)] private int _price;
     [SerializeField, Min(0f)] private float _cooldown;
     [SerializeField, TextArea] private string _description;
     [SerializeField, TextArea] private string _statsDescription;
@@ -16,6 +18,8 @@ public abstract class Item : MonoBehaviour
     public virtual string DisplayName => name;
     public virtual Sprite Icon => _icon;
     public int ItemId => _itemId;
+    public EItemRarity Rarity => _rarity;
+    public int Price => _price;
     public ulong Uid { get; private set; }
     public float BaseCooldown => _cooldown;
     public string Description => TooltipText.Format(this, _description);

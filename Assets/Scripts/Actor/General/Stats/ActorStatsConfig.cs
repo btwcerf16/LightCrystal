@@ -3,6 +3,9 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "ActorStats", menuName = "Light Crystal/Actors/Stats Config")]
 public sealed class ActorStatsConfig : ScriptableObject
 {
+    [Header("Targeting")]
+    [field: SerializeField] public int TargetPriority { get; private set; }
+
     [Header("Vision")]
     [field: SerializeField, Min(0f)] public float ViewDistance { get; private set; } = 8f;
     [field: SerializeField, Range(0f, 360f)] public float ViewAngle { get; private set; } = 90f;

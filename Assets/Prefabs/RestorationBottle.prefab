@@ -106,7 +106,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RestorationBottle
   _icon: {fileID: 21300000, guid: 4120d9bdf38843baa7e11480d98a6234, type: 3}
   _itemId: 3
-  _description: Многоразовая бутылка. При использовании накладывает эффект восстановления здоровья.
-  _statsDescription: "Восстановление: {RestorationEffect.HealCount:0.#} HP/с\nДлительность: {RestorationEffect.EffectDuration:0.#} с\nВсего: {RestorationEffect.TotalHeal:0.#} HP\nБазовый КД: {BaseCooldown:0.#} с"
+  _rarity: 1
+  _price: 0
   _cooldown: 10
+  _description: "\u041C\u043D\u043E\u0433\u043E\u0440\u0430\u0437\u043E\u0432\u0430\u044F
+    \u0431\u0443\u0442\u044B\u043B\u043A\u0430. \u041F\u0440\u0438 \u0438\u0441\u043F\u043E\u043B\u044C\u0437\u043E\u0432\u0430\u043D\u0438\u0438
+    \u043D\u0430\u043A\u043B\u0430\u0434\u044B\u0432\u0430\u0435\u0442 \u044D\u0444\u0444\u0435\u043A\u0442
+    \u0432\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u0438\u044F
+    \u0437\u0434\u043E\u0440\u043E\u0432\u044C\u044F."
+  _statsDescription: "\u0412\u043E\u0441\u0441\u0442\u0430\u043D\u043E\u0432\u043B\u0435\u043D\u0438\u0435:
+    {RestorationEffect.HealCount:0.#} HP/\u0441\n\u0414\u043B\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C:
+    {RestorationEffect.EffectDuration:0.#} \u0441\n\u0412\u0441\u0435\u0433\u043E:
+    {RestorationEffect.TotalHeal:0.#} HP\n\u0411\u0430\u0437\u043E\u0432\u044B\u0439
+    \u041A\u0414: {BaseCooldown:0.#} \u0441"
   _restorationEffect: {fileID: 11400000, guid: c5e72efe395a40a1a039dd1ff565f910, type: 2}

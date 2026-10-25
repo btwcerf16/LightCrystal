@@ -26,6 +26,7 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
     private RectTransform _viewport;
     private RectTransform _row;
     private RectTransform _tooltip;
+    private Outline _tooltipBorder;
     private Text _title;
     private Text _description;
     private Font _font;
@@ -77,9 +78,8 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
         _tooltip = Rect("EffectTooltip", _canvasRect, new Vector2(320f, 140f));
         _tooltip.anchoredPosition = new Vector2(-16f, -86f);
         Background(_tooltip, new Color(0.025f, 0.024f, 0.022f, 0.98f), false);
-        Outline outline = _tooltip.gameObject.AddComponent<Outline>();
-        outline.effectColor = new Color(0.27f, 0.24f, 0.18f);
-        outline.effectDistance = new Vector2(1f, -1f);
+        _tooltipBorder = _tooltip.gameObject.AddComponent<Outline>();
+        _tooltipBorder.effectDistance = new Vector2(2f, -2f);
         _title = Label("Title", _tooltip, 18, new Vector2(292f, 26f));
         _title.rectTransform.anchoredPosition = new Vector2(-14f, -12f);
         _title.resizeTextForBestFit = true;
@@ -195,8 +195,8 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
         RectTransform rect = Rect("Effect_" + instanceId, _row, new Vector2(48f, 56f));
         Background(rect, new Color(0.04f, 0.038f, 0.032f, 0.96f), true);
         Outline border = rect.gameObject.AddComponent<Outline>();
-        border.effectColor = data.IsBuff ? new Color(0.26f, 0.38f, 0.27f) : new Color(0.48f, 0.23f, 0.19f);
-        border.effectDistance = new Vector2(1f, -1f);
+        border.effectColor = GetBorderColor(data);
+        border.effectDistance = new Vector2(2f, -2f);
         RectTransform iconRect = Rect("Icon", rect, new Vector2(40f, 38f));
         iconRect.anchoredPosition = new Vector2(-4f, -3f);
         if (data.SpriteIcon != null)
@@ -222,12 +222,18 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
     private void ShowTooltip(EffectView view)
     {
         _hovered = view;
+        _tooltipBorder.effectColor = GetBorderColor(view.Data);
         _title.text = view.Data.EffectName;
         string description = view.Data.FormatText(view.Data.EffectDescription);
         string stats = view.Data.FormatText(view.Data.EffectStats);
         _description.text = string.IsNullOrEmpty(stats) ? description : description + "\n\n" + stats;
         _tooltip.gameObject.SetActive(true);
         FitTooltip();
+    }
+
+    private Color GetBorderColor(EffectData data)
+    {
+        return data.IsBuff ? new Color(0.2f, 0.65f, 0.28f) : new Color(0.8f, 0.18f, 0.16f);
     }
 
     private void FitTooltip()
