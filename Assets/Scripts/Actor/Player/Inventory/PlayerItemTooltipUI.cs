@@ -19,6 +19,9 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
     private PlayerInputReader _input;
     private Camera _camera;
     private Item _shownItem;
+    private EItemRarity _shownRarity;
+    private Outline _border;
+    private ItemRarityBorder _ornament;
 
     public override void OnNetworkSpawn() => Bind();
     public override void OnGainedOwnership() => Bind();
@@ -52,9 +55,8 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
         Image background = _panel.gameObject.AddComponent<Image>();
         background.color = new Color(0.025f, 0.024f, 0.022f, 0.98f);
         background.raycastTarget = false;
-        Outline outline = _panel.gameObject.AddComponent<Outline>();
-        outline.effectColor = new Color(0.27f, 0.24f, 0.18f);
-        outline.effectDistance = new Vector2(1f, -1f);
+        _border = _panel.gameObject.AddComponent<Outline>();
+        _border.effectDistance = new Vector2(2f, -2f);
         _title = Label("Title", 18);
         _title.rectTransform.anchoredPosition = new Vector2(14f, -12f);
         _title.rectTransform.sizeDelta = new Vector2(312f, 28f);
@@ -66,6 +68,7 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
         _body.resizeTextForBestFit = true;
         _body.resizeTextMinSize = 10;
         _body.resizeTextMaxSize = 14;
+        _ornament = ItemRarityBorder.Create(_panel);
         _panel.gameObject.SetActive(false);
     }
 
@@ -88,9 +91,12 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
             return;
         }
 
-        if (item != _shownItem)
+        if (item != _shownItem || item.Rarity != _shownRarity)
         {
             _shownItem = item;
+            _shownRarity = item.Rarity;
+            _border.effectColor = ItemRarityColors.Get(item.Rarity);
+            _ornament.SetRarity(item.Rarity);
             _title.text = item.DisplayName;
             string description = item.Description;
             string stats = item.StatsDescription;

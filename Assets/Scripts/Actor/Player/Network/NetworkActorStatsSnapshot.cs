@@ -22,6 +22,7 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
     public NetworkStatValue ForceResistance;
     public NetworkStatValue MadnessResistance;
     public NetworkStatValue EffectResistance;
+    public int TargetPriority;
 
     public NetworkActorStatsSnapshot(ActorStats stats)
     {
@@ -43,6 +44,7 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
         ForceResistance = new NetworkStatValue(stats.ForceResistance);
         MadnessResistance = new NetworkStatValue(stats.MadnessResistance);
         EffectResistance = new NetworkStatValue(stats.EffectResistance);
+        TargetPriority = stats.TargetPriority;
     }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -65,6 +67,7 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
         serializer.SerializeValue(ref ForceResistance);
         serializer.SerializeValue(ref MadnessResistance);
         serializer.SerializeValue(ref EffectResistance);
+        serializer.SerializeValue(ref TargetPriority);
     }
 
     public bool Equals(NetworkActorStatsSnapshot other)
@@ -86,7 +89,8 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
             && MagicResistance.Equals(other.MagicResistance)
             && ForceResistance.Equals(other.ForceResistance)
             && MadnessResistance.Equals(other.MadnessResistance)
-            && EffectResistance.Equals(other.EffectResistance);
+            && EffectResistance.Equals(other.EffectResistance)
+            && TargetPriority == other.TargetPriority;
     }
 }
 

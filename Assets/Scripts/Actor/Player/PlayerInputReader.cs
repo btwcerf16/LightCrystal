@@ -9,6 +9,7 @@ public sealed class PlayerInputReader : MonoBehaviour
 {
     private PlayerControls _controls;
     private bool _isDisabling;
+    private bool _isMenuOpen;
 
     public event Action<Vector2> MoveChanged;
     public event Action<Vector2> AimChanged;
@@ -21,7 +22,8 @@ public sealed class PlayerInputReader : MonoBehaviour
     public event Action InteractPressed;
     public event Action DropWeaponPressed;
     public bool IsStatsOpen { get; private set; }
-    public bool IsMenuOpen { get; private set; }
+    public bool IsMenuOpen => _isMenuOpen || IsConsoleOpen;
+    public bool IsConsoleOpen { get; private set; }
 
     public Vector2 MoveDirection { get; private set; }
     public Vector2 AimScreenPosition { get; private set; }
@@ -167,8 +169,19 @@ public sealed class PlayerInputReader : MonoBehaviour
 
     public void SetMenuOpen(bool isOpen)
     {
-        IsMenuOpen = isOpen;
-        if (isOpen)
+        _isMenuOpen = isOpen;
+        RefreshInputState();
+    }
+
+    public void SetConsoleOpen(bool isOpen)
+    {
+        IsConsoleOpen = isOpen;
+        RefreshInputState();
+    }
+
+    private void RefreshInputState()
+    {
+        if (IsMenuOpen)
         {
             CloseStats();
             SetMoveDirection(Vector2.zero);

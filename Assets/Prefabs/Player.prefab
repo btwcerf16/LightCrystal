@@ -550,6 +550,8 @@ GameObject:
   - component: {fileID: 8123400010000000021}
   - component: {fileID: 8123400010000000022}
   - component: {fileID: 8123400010000000023}
+  - component: {fileID: 8123400010000000024}
+  - component: {fileID: 8123400010000000025}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1425,3 +1427,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a17bd3c562d4a7c81e78f522c597f49, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerItemTooltipUI
+--- !u!114 &8123400010000000024
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 11c735a75a544afda8abda5232213adb, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GameConsole
+--- !u!114 &8123400010000000025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fca1b79525e94442ba179a4f4110a027, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::StatsConsoleCommands
