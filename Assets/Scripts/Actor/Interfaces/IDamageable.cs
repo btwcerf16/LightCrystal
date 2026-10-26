@@ -9,7 +9,7 @@ public interface IDamageable
     float MaxHealth { get; }
     bool IsDead { get; }
 
-    float TakeDamage(float amount);
+    float TakeDamage(float amount, EDamageType damageType, ActorStats attacker = null);
     float Heal(float amount);
     void Kill();
 }

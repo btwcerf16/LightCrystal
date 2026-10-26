@@ -137,9 +137,7 @@ public sealed class RustySword : Weapon
             IDamageable damageable = target.GetComponentInParent<IDamageable>();
             if (damageable != null && _hitTargets.Add(damageable))
             {
-                ActorStats targetStats = target.GetComponentInParent<ActorStats>();
-                float resistance = targetStats != null ? targetStats.PhysicalResistance.Value : 0f;
-                damageable.TakeDamage(damage * (1f - resistance));
+                damageable.TakeDamage(damage, EDamageType.Physical, _stats);
             }
         }
     }
