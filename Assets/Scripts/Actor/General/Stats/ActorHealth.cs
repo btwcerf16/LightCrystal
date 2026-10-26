@@ -30,9 +30,13 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
         _stats.MaxHealth.ValueChanged -= OnMaxHealthChanged;
     }
 
-    public float TakeDamage(float amount)
+    public float TakeDamage(float amount, EDamageType damageType, ActorStats attacker = null)
     {
         if (amount <= 0f || IsDead)
+            return 0f;
+
+        amount = DamageCalculator.CalculateDamage(amount, damageType, attacker, _stats);
+        if (amount <= 0f)
             return 0f;
 
         float previousHealth = CurrentHealth;

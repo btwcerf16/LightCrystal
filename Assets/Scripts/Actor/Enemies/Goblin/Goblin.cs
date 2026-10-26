@@ -173,9 +173,7 @@ public sealed class Goblin : Enemy
             IDamageable damageable = target.GetComponentInParent<IDamageable>();
             if (damageable == null || !_hitTargets.Add(damageable))
                 continue;
-            ActorStats stats = target.GetComponentInParent<ActorStats>();
-            float resistance = stats != null ? stats.PhysicalResistance.Value : 0f;
-            damageable.TakeDamage(Stats.PhysicalDamage.Value * (1f - resistance));
+            damageable.TakeDamage(Stats.PhysicalDamage.Value, EDamageType.Physical, Stats);
         }
     }
 
