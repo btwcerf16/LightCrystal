@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 676a89b75a414646913af6353abe600c, type: 3}
+  m_Name: KnightArmor
+  m_EditorClassIdentifier: Assembly-CSharp::KnightArmorConfig
+  SpellName: Закалка
+  SpellDescription: Доспехи рыцаря смягчают физические удары.
+  StatsDescription: "Физическое сопротивление: +{ResistancePercent:0.#}%"
+  IsPassive: 1
+  CooldownTime: 0
+  SanityCost: 0
+  SpriteIcon: {fileID: 21300000, guid: 56c986e7df81408c9d8eb352cf7732f3, type: 3}
+  Resistance: 0.05

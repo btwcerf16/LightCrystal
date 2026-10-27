@@ -8,7 +8,6 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
     private Func<Item> _getItem;
     private Item _shownItem;
     private EItemRarity _shownRarity;
-    private Outline _border;
     private ItemRarityBorder _ornament;
     private Image _icon;
     private Text _name;
@@ -31,10 +30,9 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
         _swap = swap;
         _drop = drop;
         _select = select;
-        _border = GetComponent<Outline>();
-        if (_border == null)
-            _border = gameObject.AddComponent<Outline>();
-        _border.effectDistance = new Vector2(2f, -2f);
+        Outline outline = GetComponent<Outline>();
+        if (outline != null)
+            outline.enabled = false;
         RectTransform icon = Child("Icon", new Vector2(0f, 0.26f), new Vector2(1f, 0.92f));
         _icon = icon.gameObject.AddComponent<Image>();
         _icon.preserveAspect = true;
@@ -70,6 +68,7 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
         _cooldownText.color = new Color(0.95f, 0.91f, 0.82f);
         _cooldownText.raycastTarget = false;
         _ornament = ItemRarityBorder.Create(transform);
+        _ornament.DrawFrame = true;
         Refresh(_getItem());
         RefreshCooldown(_getItem());
     }
@@ -156,7 +155,7 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
         _shownItem = item;
         _shownRarity = item != null ? item.Rarity : EItemRarity.Common;
         _ornament.SetRarity(_shownRarity);
-        _border.effectColor = item != null
+        _ornament.color = item != null
             ? ItemRarityColors.Get(item.Rarity)
             : new Color(0.16f, 0.145f, 0.12f);
         _icon.sprite = item != null ? item.Icon : null;

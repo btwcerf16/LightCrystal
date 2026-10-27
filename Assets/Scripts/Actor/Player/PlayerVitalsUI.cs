@@ -6,12 +6,10 @@ using UnityEngine.UI;
 public sealed class PlayerVitalsUI : NetworkBehaviour
 {
     [SerializeField, Min(200f)] private float _width = 560f;
-    [SerializeField, Min(0f)] private float _bottomMargin = 24f;
     [SerializeField] private Color _healthColor = new Color(0.19f, 0.34f, 0.23f, 1f);
     [SerializeField] private Color _sanityColor = new Color(0.72f, 0.32f, 0.075f, 1f);
 
-    public float RightEdge => _width * 0.5f;
-    public float BottomMargin => _bottomMargin;
+    public float Width => _width;
 
     private NetworkActorVitals _vitals;
     private GameObject _canvasObject;
@@ -39,21 +37,8 @@ public sealed class PlayerVitalsUI : NetworkBehaviour
             return;
 
         _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        _canvasObject = new GameObject("VitalsCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
-        _canvasObject.transform.SetParent(transform, false);
-        Canvas canvas = _canvasObject.GetComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 20;
-        CanvasScaler scaler = _canvasObject.GetComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
-        scaler.matchWidthOrHeight = 0.5f;
-
-        RectTransform panel = CreateRect("VitalsPanel", _canvasObject.transform);
-        panel.anchorMin = panel.anchorMax = new Vector2(0.5f, 0f);
-        panel.pivot = new Vector2(0.5f, 0f);
-        panel.anchoredPosition = new Vector2(0f, _bottomMargin);
-        panel.sizeDelta = new Vector2(_width, 68f);
+        RectTransform panel = GetComponent<PlayerHUD>().VitalsPanel;
+        _canvasObject = panel.gameObject;
         AddImage(panel, new Color(0.025f, 0.024f, 0.022f, 1f));
         Outline border = panel.gameObject.AddComponent<Outline>();
         border.effectColor = new Color(0.16f, 0.145f, 0.12f, 1f);

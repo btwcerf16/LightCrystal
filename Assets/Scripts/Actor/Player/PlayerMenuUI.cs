@@ -18,8 +18,9 @@ public sealed class PlayerMenuUI : NetworkBehaviour
     private Text _message;
     private Button _inventoryTab;
     private Button _arsenalTab;
+    private Button _spellsTab;
     private Font _font;
-    private bool _isArsenalTab;
+    private ESlotBindingType _bindingType;
     private readonly List<Text> _bindingLabels = new List<Text>();
     private readonly List<Button> _bindingButtons = new List<Button>();
     private readonly Color _textColor = new Color(0.84f, 0.8f, 0.72f);
@@ -63,14 +64,15 @@ public sealed class PlayerMenuUI : NetworkBehaviour
         Label(main, "МЕНЮ", new Vector2(30f, -24f), new Vector2(320f, 40f), 28);
         Label(main, "Игра продолжается", new Vector2(30f, -68f), new Vector2(320f, 24f), 14);
         MakeButton(main, "Продолжить", new Vector2(30f, -124f), new Vector2(320f, 48f), CloseMenu);
-        MakeButton(main, "Настройки", new Vector2(30f, -184f), new Vector2(320f, 48f), () => ShowSettings(false));
+        MakeButton(main, "Настройки", new Vector2(30f, -184f), new Vector2(320f, 48f), () => ShowSettings(ESlotBindingType.Inventory));
         MakeButton(main, "Выйти из игры", new Vector2(30f, -244f), new Vector2(320f, 48f), QuitGame);
 
         RectTransform settings = Panel("Settings", new Vector2(900f, 650f));
         _settingsPanel = settings.gameObject;
         Label(settings, "ПРИВЯЗКИ КЛАВИШ", new Vector2(30f, -24f), new Vector2(840f, 40f), 26);
-        _inventoryTab = MakeButton(settings, "Инвентарь", new Vector2(30f, -86f), new Vector2(200f, 40f), () => ShowSettings(false));
-        _arsenalTab = MakeButton(settings, "Арсенал", new Vector2(242f, -86f), new Vector2(200f, 40f), () => ShowSettings(true));
+        _inventoryTab = MakeButton(settings, "Инвентарь", new Vector2(30f, -86f), new Vector2(200f, 40f), () => ShowSettings(ESlotBindingType.Inventory));
+        _arsenalTab = MakeButton(settings, "Арсенал", new Vector2(242f, -86f), new Vector2(200f, 40f), () => ShowSettings(ESlotBindingType.Arsenal));
+        _spellsTab = MakeButton(settings, "Способности", new Vector2(454f, -86f), new Vector2(200f, 40f), () => ShowSettings(ESlotBindingType.Spell));
 
         RectTransform scrollArea = Rect("Slots", settings, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(30f, -142f), new Vector2(840f, 390f));
         Paint(scrollArea, new Color(0.035f, 0.032f, 0.028f));
@@ -130,12 +132,15 @@ public sealed class PlayerMenuUI : NetworkBehaviour
         _mainPanel.SetActive(true);
     }
 
-    private void ShowSettings(bool isArsenal)
+    private void ShowSettings(ESlotBindingType type)
     {
         _bindings.CancelRebind();
-        _isArsenalTab = isArsenal;
-        _inventoryTab.targetGraphic.color = isArsenal ? new Color(0.12f, 0.105f, 0.08f) : new Color(0.25f, 0.2f, 0.12f);
-        _arsenalTab.targetGraphic.color = isArsenal ? new Color(0.25f, 0.2f, 0.12f) : new Color(0.12f, 0.105f, 0.08f);
+        _bindingType = type;
+        Color selected = new Color(0.25f, 0.2f, 0.12f);
+        Color normal = new Color(0.12f, 0.105f, 0.08f);
+        _inventoryTab.targetGraphic.color = type == ESlotBindingType.Inventory ? selected : normal;
+        _arsenalTab.targetGraphic.color = type == ESlotBindingType.Arsenal ? selected : normal;
+        _spellsTab.targetGraphic.color = type == ESlotBindingType.Spell ? selected : normal;
         _mainPanel.SetActive(false);
         _settingsPanel.SetActive(true);
         _message.text = "Нажми на привязку, затем на новую клавишу. Esc — отмена.";
@@ -146,14 +151,27 @@ public sealed class PlayerMenuUI : NetworkBehaviour
         }
         _bindingLabels.Clear();
         _bindingButtons.Clear();
-        int count = isArsenal ? GetComponent<ActorArsenal>().WeaponSize : GetComponent<Inventory>().Size;
+        int count;
+        switch (type)
+        {
+            case ESlotBindingType.Arsenal: count = GetComponent<ActorArsenal>().WeaponSize; break;
+            case ESlotBindingType.Spell: count = GetComponent<SpellHolder>().Count; break;
+            default: count = GetComponent<Inventory>().Size; break;
+        }
         for (int i = 0; i < count; i++)
         {
             int index = i;
             RectTransform row = Rect("Slot_" + i, _rows, Vector2.zero, Vector2.zero, Vector2.zero, Vector2.zero);
             row.gameObject.AddComponent<LayoutElement>().preferredHeight = 54f;
             Paint(row, new Color(0.075f, 0.067f, 0.054f));
-            Label(row, (isArsenal ? "Выбрать оружие " : "Использовать предмет ") + (i + 1), new Vector2(16f, -12f), new Vector2(480f, 30f), 18);
+            string title = type == ESlotBindingType.Arsenal ? "Выбрать оружие " : "Использовать предмет ";
+            title += i + 1;
+            if (type == ESlotBindingType.Spell)
+            {
+                SpellConfig config = GetComponent<SpellHolder>().GetConfig(i);
+                title = config != null ? config.SpellName : "Пустой слот";
+            }
+            Label(row, title, new Vector2(16f, -12f), new Vector2(480f, 30f), 18);
             Button button = MakeButton(row, "", Vector2.zero, new Vector2(190f, 38f), () => RebindSlot(index));
             RectTransform buttonRect = (RectTransform)button.transform;
             buttonRect.anchorMin = buttonRect.anchorMax = new Vector2(1f, 0.5f);
@@ -174,7 +192,7 @@ public sealed class PlayerMenuUI : NetworkBehaviour
         foreach (Button button in _bindingButtons)
             button.interactable = false;
         EventSystem.current.SetSelectedGameObject(null);
-        _bindings.BeginRebind(_isArsenalTab, index, message =>
+        _bindings.BeginRebind(_bindingType, index, message =>
         {
             if (_canvas == null)
                 return;
@@ -189,13 +207,18 @@ public sealed class PlayerMenuUI : NetworkBehaviour
     private void RefreshBindings()
     {
         for (int i = 0; i < _bindingLabels.Count; i++)
-            _bindingLabels[i].text = _bindings.GetBindingLabel(_isArsenalTab, i);
+        {
+            SpellConfig config = _bindingType == ESlotBindingType.Spell ? GetComponent<SpellHolder>().GetConfig(i) : null;
+            bool passive = config != null && config.IsPassive;
+            _bindingLabels[i].text = passive ? "Пассивная" : _bindings.GetBindingLabel(_bindingType, i);
+            _bindingButtons[i].interactable = !passive && !_bindings.IsRebinding;
+        }
     }
 
     private void ResetBindings()
     {
         _bindings.ResetBindings();
-        _message.text = "Привязки инвентаря и арсенала сброшены к стандартным.";
+        _message.text = "Все привязки сброшены к стандартным.";
     }
 
     private void QuitGame()

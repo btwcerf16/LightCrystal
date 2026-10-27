@@ -10,16 +10,16 @@ using System.Collections.Generic;
 public sealed class InventoryUI : NetworkBehaviour
 {
     [SerializeField, Min(32f)] private float _slotSize = 64f;
-    [SerializeField, Min(0f)] private float _slotSpacing = 3f;
-    [SerializeField, Min(0f)] private float _bottomMargin = 24f;
     [SerializeField, Min(1)] private int _columns = 3;
-    [SerializeField] private float _horizontalOffset = 280f;
     [SerializeField] private Color _panelColor = new Color(0.025f, 0.024f, 0.022f, 1f);
     [SerializeField] private Color _slotColor = new Color(0.055f, 0.05f, 0.042f, 1f);
     private GameObject _canvasObject;
     private Font _font;
     private PlayerSlotBindings _slotBindings;
     private readonly List<Text> _bindingLabels = new List<Text>();
+
+    public float Width => Mathf.Max(1, _columns) * _slotSize + 16f;
+    public float Height => Mathf.CeilToInt((float)GetComponent<Inventory>().Size / Mathf.Max(1, _columns)) * _slotSize + 40f;
 
     public override void OnNetworkSpawn()
     {
@@ -45,34 +45,21 @@ public sealed class InventoryUI : NetworkBehaviour
         _slotBindings = GetComponent<PlayerSlotBindings>();
         if (EventSystem.current == null)
             new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
-        _canvasObject = new GameObject("InventoryCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
-        _canvasObject.AddComponent<GraphicRaycaster>();
-        _canvasObject.transform.SetParent(transform, false);
-        Canvas canvas = _canvasObject.GetComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 20;
-        CanvasScaler scaler = _canvasObject.GetComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
-        scaler.matchWidthOrHeight = 0.5f;
-
-        PlayerVitalsUI vitals = GetComponent<PlayerVitalsUI>();
-        float horizontalOffset = vitals != null ? vitals.RightEdge : _horizontalOffset;
-        float bottomMargin = vitals != null ? vitals.BottomMargin : _bottomMargin;
-
         int columns = Mathf.Max(1, _columns);
         int rows = Mathf.CeilToInt((float)size / columns);
-        float width = columns * _slotSize + (columns - 1) * _slotSpacing;
-        float height = rows > 0 ? rows * _slotSize + (rows - 1) * _slotSpacing : 0f;
+        float width = columns * _slotSize;
+        float height = rows * _slotSize;
 
-        RectTransform panel = CreateRect("InventoryPanel", _canvasObject.transform, new Vector2(0.5f, 0f), new Vector2(0f, 0f), new Vector2(horizontalOffset, bottomMargin), new Vector2(width + 16f, height + 16f));
+        RectTransform panel = GetComponent<PlayerHUD>().InventoryPanel;
+        _canvasObject = panel.gameObject;
         AddImage(panel, _panelColor);
         AddBorder(panel);
+        CreateLabel(panel, "ИНВЕНТАРЬ", new Vector2(8f, -14f), 11, new Color(0.67f, 0.61f, 0.49f)).rectTransform.sizeDelta = new Vector2(width, 18f);
 
         RectTransform grid = CreateRect("Slots", panel, new Vector2(0.5f, 0f), new Vector2(0.5f, 0f), new Vector2(0f, 8f), new Vector2(width, height));
         GridLayoutGroup layout = grid.gameObject.AddComponent<GridLayoutGroup>();
         layout.cellSize = new Vector2(_slotSize, _slotSize);
-        layout.spacing = new Vector2(_slotSpacing, _slotSpacing);
+        layout.spacing = Vector2.zero;
         layout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         layout.constraintCount = columns;
         layout.startAxis = GridLayoutGroup.Axis.Horizontal;
