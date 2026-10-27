@@ -4,6 +4,7 @@ using UnityEngine.UI;
 public sealed class ItemRarityBorder : MaskableGraphic
 {
     private EItemRarity _rarity;
+    public bool DrawFrame { get; set; }
 
     public static ItemRarityBorder Create(Transform parent)
     {
@@ -21,17 +22,28 @@ public sealed class ItemRarityBorder : MaskableGraphic
     {
         _rarity = rarity;
         color = ItemRarityColors.Get(rarity);
-        enabled = rarity >= EItemRarity.Epic;
+        enabled = DrawFrame || rarity >= EItemRarity.Epic;
         SetVerticesDirty();
     }
 
     protected override void OnPopulateMesh(VertexHelper mesh)
     {
         mesh.Clear();
+        Rect rect = rectTransform.rect;
+        if (DrawFrame)
+        {
+            Vector2 bottomLeft = new Vector2(rect.xMin + 1f, rect.yMin + 1f);
+            Vector2 topLeft = new Vector2(rect.xMin + 1f, rect.yMax - 1f);
+            Vector2 topRight = new Vector2(rect.xMax - 1f, rect.yMax - 1f);
+            Vector2 bottomRight = new Vector2(rect.xMax - 1f, rect.yMin + 1f);
+            Stroke(mesh, bottomLeft, topLeft, 2f, color);
+            Stroke(mesh, topLeft, topRight, 2f, color);
+            Stroke(mesh, topRight, bottomRight, 2f, color);
+            Stroke(mesh, bottomRight, bottomLeft, 2f, color);
+        }
         if (_rarity < EItemRarity.Epic)
             return;
 
-        Rect rect = rectTransform.rect;
         float size = Mathf.Min(14f, rect.width * 0.24f, rect.height * 0.24f);
         if (size <= 0f)
             return;

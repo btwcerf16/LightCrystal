@@ -11,6 +11,8 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
     private InputActionMap _actions;
     private InputAction[] _inventoryActions;
     private InputAction[] _arsenalActions;
+    private InputAction[] _spellActions;
+    private SpellHolder _spells;
     private InputActionRebindingExtensions.RebindingOperation _rebind;
     private PlayerInputReader _input;
 
@@ -25,13 +27,15 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
         _actions = new InputActionMap("Slots");
         _inventoryActions = new InputAction[inventory.Size];
         _arsenalActions = new InputAction[arsenal.WeaponSize];
-        _settings.Load(inventory.Size, arsenal.WeaponSize);
+        _spells = GetComponent<SpellHolder>();
+        _spellActions = new InputAction[_spells.Count];
+        _settings.Load(inventory.Size, arsenal.WeaponSize, _spells.Count);
 
         for (int i = 0; i < _inventoryActions.Length; i++)
         {
             int index = i;
             string path = _settings.GetBinding(false, i);
-            _inventoryActions[i] = CreateAction(false, i, path);
+            _inventoryActions[i] = CreateAction(ESlotBindingType.Inventory, i, path);
             _inventoryActions[i].performed += context =>
             {
                 if (!_input.IsMenuOpen && !_input.IsStatsOpen)
@@ -43,12 +47,22 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
         {
             int index = i;
             string path = _settings.GetBinding(true, i);
-            _arsenalActions[i] = CreateAction(true, i, path);
+            _arsenalActions[i] = CreateAction(ESlotBindingType.Arsenal, i, path);
             _arsenalActions[i].performed += context =>
             {
                 if (!_input.IsMenuOpen && !_input.IsStatsOpen)
                     arsenal.RequestSelectWeapon(index);
             };
+        }
+
+        for (int i = 0; i < _spellActions.Length; i++)
+        {
+            SpellConfig config = _spells.GetConfig(i);
+            if (config == null || config.IsPassive)
+                continue;
+            int index = i;
+            _spellActions[i] = CreateAction(ESlotBindingType.Spell, i, _settings.GetBinding(ESlotBindingType.Spell, i));
+            _spellActions[i].performed += context => UseSpell(index);
         }
 
         HashSet<string> usedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -71,9 +85,9 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
             BindingsChanged?.Invoke();
     }
 
-    private InputAction CreateAction(bool isWeapon, int index, string path)
+    private InputAction CreateAction(ESlotBindingType type, int index, string path)
     {
-        InputAction action = _actions.AddAction((isWeapon ? "Arsenal" : "Inventory") + index, InputActionType.Button);
+        InputAction action = _actions.AddAction(type.ToString() + index, InputActionType.Button);
         action.AddBinding(path);
         return action;
     }
@@ -101,17 +115,34 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
 
     public string GetBindingLabel(bool isWeapon, int index)
     {
-        InputAction action = isWeapon ? _arsenalActions[index] : _inventoryActions[index];
+        return GetBindingLabel(isWeapon ? ESlotBindingType.Arsenal : ESlotBindingType.Inventory, index);
+    }
+
+    public string GetBindingLabel(ESlotBindingType type, int index)
+    {
+        InputAction action = GetAction(type, index);
+        if (action == null)
+            return "—";
         string label = action.GetBindingDisplayString(0);
         return string.IsNullOrEmpty(label) ? "—" : label;
     }
 
     public void BeginRebind(bool isWeapon, int index, Action<string> completed)
     {
+        BeginRebind(isWeapon ? ESlotBindingType.Arsenal : ESlotBindingType.Inventory, index, completed);
+    }
+
+    public void BeginRebind(ESlotBindingType type, int index, Action<string> completed)
+    {
         if (!IsOwner || !_input.IsMenuOpen || IsRebinding)
             return;
 
-        InputAction action = isWeapon ? _arsenalActions[index] : _inventoryActions[index];
+        InputAction action = GetAction(type, index);
+        if (action == null)
+        {
+            completed("Пассивной способности клавиша не нужна.");
+            return;
+        }
         string previousPath = action.bindings[0].effectivePath;
         action.Disable();
         _rebind = action.PerformInteractiveRebinding(0)
@@ -134,7 +165,7 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
                 }
                 else
                 {
-                    _settings.SetBinding(isWeapon, index, path);
+                    _settings.SetBinding(type, index, path);
                     message = "Привязка сохранена.";
                 }
                 FinishRebind(action);
@@ -162,8 +193,30 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
             _inventoryActions[i].ApplyBindingOverride(0, _settings.GetBinding(false, i));
         for (int i = 0; i < _arsenalActions.Length; i++)
             _arsenalActions[i].ApplyBindingOverride(0, _settings.GetBinding(true, i));
+        for (int i = 0; i < _spellActions.Length; i++)
+            if (_spellActions[i] != null)
+                _spellActions[i].ApplyBindingOverride(0, _settings.GetBinding(ESlotBindingType.Spell, i));
         _actions.Enable();
         BindingsChanged?.Invoke();
+    }
+
+    public void UseSpell(int index)
+    {
+        if (!IsSpawned || !IsOwner || !IsClient || !_input.isActiveAndEnabled || _input.IsMenuOpen || _input.IsStatsOpen)
+            return;
+        _spells.CastSpell(index, new SpellCastData { Position = transform.position });
+    }
+
+    private InputAction GetAction(ESlotBindingType type, int index)
+    {
+        InputAction[] actions;
+        switch (type)
+        {
+            case ESlotBindingType.Spell: actions = _spellActions; break;
+            case ESlotBindingType.Arsenal: actions = _arsenalActions; break;
+            default: actions = _inventoryActions; break;
+        }
+        return index >= 0 && index < actions.Length ? actions[index] : null;
     }
 
     private void FinishRebind(InputAction action)

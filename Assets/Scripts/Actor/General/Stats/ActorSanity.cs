@@ -50,6 +50,20 @@ public sealed class ActorSanity : MonoBehaviour, ISanity
         return drainedSanity;
     }
 
+    public bool TrySpendSanity(float amount)
+    {
+        if (amount < 0f || CurrentSanity < amount)
+            return false;
+        if (amount == 0f)
+            return true;
+
+        CurrentSanity -= amount;
+        SanityChanged?.Invoke(CurrentSanity, MaxSanity);
+        if (CurrentSanity <= 0f)
+            SanityDepleted?.Invoke();
+        return true;
+    }
+
     public float RestoreSanity(float amount)
     {
         if (amount <= 0f)

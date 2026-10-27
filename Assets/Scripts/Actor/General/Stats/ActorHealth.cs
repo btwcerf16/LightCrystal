@@ -8,6 +8,8 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
     private ActorStats _stats;
 
     public event Action<float, float> HealthChanged;
+    public event Action<float> DamageTaken;
+    public event Action<float> DamageDealt;
     public event Action Died;
 
     public float CurrentHealth { get; private set; }
@@ -44,6 +46,13 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
         float dealtDamage = previousHealth - CurrentHealth;
 
         HealthChanged?.Invoke(CurrentHealth, MaxHealth);
+        DamageTaken?.Invoke(dealtDamage);
+        if (attacker != null && attacker.gameObject != gameObject)
+        {
+            ActorHealth attackerHealth = attacker.GetComponent<ActorHealth>();
+            if (attackerHealth != null)
+                attackerHealth.DamageDealt?.Invoke(dealtDamage);
+        }
 
         if (CurrentHealth <= 0f)
             Kill();

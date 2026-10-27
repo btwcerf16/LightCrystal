@@ -7,12 +7,15 @@ using System.Collections.Generic;
 public sealed class ArsenalUI : NetworkBehaviour
 {
     [SerializeField, Min(32f)] private float _slotSize = 64f;
-    [SerializeField, Min(1)] private int _maxColumns = 2;
-    [SerializeField, Min(0f)] private float _gapFromVitals = 12f;
+    [SerializeField, Min(1)] private int _maxColumns = 1;
     private GameObject _canvasObject;
     private Font _font;
     private PlayerSlotBindings _slotBindings;
     private readonly List<Text> _bindingLabels = new List<Text>();
+
+    private int Columns => Mathf.Min(GetComponent<ActorArsenal>().WeaponSize, Mathf.Max(1, _maxColumns));
+    public float Width => Columns * _slotSize + 16f;
+    public float Height => Columns > 0 ? Mathf.CeilToInt((float)GetComponent<ActorArsenal>().WeaponSize / Columns) * _slotSize + 40f : 0f;
 
     public override void OnNetworkSpawn() => Show();
     public override void OnGainedOwnership() => Show();
@@ -31,26 +34,13 @@ public sealed class ArsenalUI : NetworkBehaviour
 
         _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         _slotBindings = GetComponent<PlayerSlotBindings>();
-        _canvasObject = new GameObject("ArsenalCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
-        _canvasObject.AddComponent<GraphicRaycaster>();
-        _canvasObject.transform.SetParent(transform, false);
-        Canvas canvas = _canvasObject.GetComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 20;
-        CanvasScaler scaler = _canvasObject.GetComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
-        scaler.matchWidthOrHeight = 0.5f;
-
-        int columns = Mathf.Min(count, Mathf.Max(1, _maxColumns));
+        int columns = Columns;
         int rows = Mathf.CeilToInt((float)count / columns);
-        float width = Mathf.Max(96f, columns * _slotSize + (columns - 1) * 4f);
-        float height = rows * _slotSize + (rows - 1) * 4f;
-        PlayerVitalsUI vitals = GetComponent<PlayerVitalsUI>();
-        float edge = vitals != null ? vitals.RightEdge : 280f;
-        float bottom = vitals != null ? vitals.BottomMargin : 24f;
+        float width = columns * _slotSize;
+        float height = rows * _slotSize;
 
-        RectTransform panel = Rect("ArsenalPanel", _canvasObject.transform, new Vector2(0.5f, 0f), new Vector2(1f, 0f), new Vector2(-edge - _gapFromVitals, bottom), new Vector2(width + 16f, height + 40f));
+        RectTransform panel = GetComponent<PlayerHUD>().ArsenalPanel;
+        _canvasObject = panel.gameObject;
         Paint(panel, new Color(0.025f, 0.024f, 0.022f));
         Outline border = panel.gameObject.AddComponent<Outline>();
         border.effectColor = new Color(0.27f, 0.23f, 0.16f);
@@ -60,7 +50,7 @@ public sealed class ArsenalUI : NetworkBehaviour
         RectTransform grid = Rect("WeaponSlots", panel, Vector2.zero, Vector2.zero, new Vector2(8f, 8f), new Vector2(width, height));
         GridLayoutGroup layout = grid.gameObject.AddComponent<GridLayoutGroup>();
         layout.cellSize = Vector2.one * _slotSize;
-        layout.spacing = Vector2.one * 4f;
+        layout.spacing = Vector2.zero;
         layout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         layout.constraintCount = columns;
         layout.childAlignment = TextAnchor.UpperCenter;

@@ -22,3 +22,7 @@ MonoBehaviour:
   _arsenalBindings:
   - <Keyboard>/f1
   - <Keyboard>/f2
+  _spellBindings:
+  - <Keyboard>/r
+  - <Keyboard>/f
+  -
