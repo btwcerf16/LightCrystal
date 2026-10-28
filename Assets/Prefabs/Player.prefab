@@ -58,7 +58,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: d150bd8832de467faf2486d059be0488, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -556,6 +556,8 @@ GameObject:
   - component: {fileID: 8123400010000000027}
   - component: {fileID: 8123400010000000028}
   - component: {fileID: 8123400010000000029}
+  - component: {fileID: 8123400010000000030}
+  - component: {fileID: 8123400010000000031}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1502,3 +1504,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76b4d73fcb5d4c24820c92ceb405e289, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHUD
+--- !u!114 &8123400010000000030
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3c7e562d9d34f679d31b85ef80f0c59, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ActorVisuals
+  _renderers:
+  - {fileID: 2520797166062340064}
+  _hitColor: {r: 1, g: 0.92, b: 0.72, a: 1}
+  _hitDuration: 0.15
+--- !u!114 &8123400010000000031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38f2c6c375f14885a2b2acd003fb20d9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkActorVisuals
