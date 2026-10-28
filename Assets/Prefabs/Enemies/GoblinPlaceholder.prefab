@@ -19,6 +19,8 @@ GameObject:
   - component: {fileID: 4394771884061138988}
   - component: {fileID: 8867925282917980597}
   - component: {fileID: 3012533523905390994}
+  - component: {fileID: 1142}
+  - component: {fileID: 1143}
   m_Layer: 8
   m_Name: GoblinPlaceholder
   m_TagString: Enemy
@@ -314,9 +316,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkGoblin
   ShowTopMostFoldoutHeaderGroup: 1
-  _bodyRenderer: {fileID: 2120}
-  _hitColor: {r: 1, g: 0, b: 0, a: 1}
-  _hitFlashDuration: 0.15
 --- !u!1 &200
 GameObject:
   m_ObjectHideFlags: 0
@@ -376,7 +375,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
+  - {fileID: 2100000, guid: d150bd8832de467faf2486d059be0488, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -596,3 +595,31 @@ Transform:
   - {fileID: 402}
   m_Father: {fileID: 401}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3c7e562d9d34f679d31b85ef80f0c59, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ActorVisuals
+  _renderers:
+  - {fileID: 2120}
+  _hitColor: {r: 1, g: 0.92, b: 0.72, a: 1}
+  _hitDuration: 0.15
+--- !u!114 &1143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38f2c6c375f14885a2b2acd003fb20d9, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkActorVisuals

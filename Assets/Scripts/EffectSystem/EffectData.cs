@@ -12,6 +12,9 @@ public abstract class EffectData : ScriptableObject
     public bool CanPurged = true;
     public bool Stackable;
     public bool RestartOnReapply = true;
+    [Header("Actor visuals")]
+    public bool TintActor;
+    [Range(0f, 1f)] public float ActorTintStrength = 0.7f;
 
     public abstract Effect CreateEffect(GameObject owner);
 

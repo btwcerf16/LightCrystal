@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 [RequireComponent(typeof(Rigidbody2D), typeof(Animator))]
@@ -15,13 +16,13 @@ public sealed class Goblin : Enemy
     private Rigidbody2D _body;
     private Animator _animator;
     private Vector2 _moveDirection;
-    private Vector2 _aimDirection = Vector2.right;
     private float _nextTargetSearch;
     private bool _isAttacking;
     private bool _isSubscribed;
     private readonly HashSet<IDamageable> _hitTargets = new();
 
     public event Action<string> AnimationTriggered;
+
     public event Action<Vector2> AimChanged;
 
     protected override State InitialState => GetState<GoblinAriseState>();
@@ -71,6 +72,26 @@ public sealed class Goblin : Enemy
         _body.linearVelocity = _moveDirection * Stats.MoveSpeed.Value;
     }
 
+    public Vector2 AimAt(Transform target)
+    {
+        var aimVector = (Vector2)target.position - (Vector2)_weaponAim.position;
+
+        return aimVector;
+    }
+    public void SetAim(Vector2 direction)
+    {
+        if (direction.magnitude < 0.001f)
+            return;
+
+        float side = direction.x < 0f ? -1f : 1f;
+        _facing.localScale = new Vector3(side, 1f, 1f);
+
+        var angle = Mathf.Atan2(direction.y, direction.x * side) * Mathf.Rad2Deg;
+
+        _weaponAim.localRotation = Quaternion.Euler(0, 0, angle);
+
+        AimChanged?.Invoke(direction);
+    }
     private void FindTarget()
     {
         Transform bestTarget = null;
@@ -97,30 +118,6 @@ public sealed class Goblin : Enemy
         SetTemporaryTarget(bestTarget);
     }
 
-    private void AimAt(Transform target)
-    {
-        Collider2D targetCollider = target.GetComponent<Collider2D>();
-        Vector2 targetPosition = targetCollider != null ? targetCollider.bounds.center : target.position;
-        Vector2 origin = (Vector2)transform.position + Vector2.up * 0.375f;
-        SetAim(targetPosition - origin);
-    }
-
-    public void SetAim(Vector2 direction)
-    {
-        if (direction.sqrMagnitude < 0.000001f)
-            return;
-        direction.Normalize();
-        float side = direction.x < 0f ? -1f : 1f;
-        _facing.localScale = new Vector3(side, 1f, 1f);
-        float angle = Mathf.Atan2(direction.y, direction.x * side) * Mathf.Rad2Deg;
-        _weaponAim.localRotation = Quaternion.Euler(0f, 0f, angle);
-        if ((_aimDirection - direction).sqrMagnitude > 0.0001f)
-        {
-            _aimDirection = direction;
-            AimChanged?.Invoke(direction);
-        }
-    }
-
     public override void Arise()
     {
         StopChase();
@@ -135,7 +132,7 @@ public sealed class Goblin : Enemy
 
     public override void Chase(Transform target)
     {
-        AimAt(target);
+        SetAim(AimAt(target));
         _moveDirection = ((Vector2)target.position - _body.position).normalized;
         _animator.SetBool("IsMoving", _moveDirection.sqrMagnitude > 0f);
     }
@@ -156,7 +153,7 @@ public sealed class Goblin : Enemy
 
     public override void Attack()
     {
-        AimAt(CurrentTarget);
+        SetAim(AimAt(CurrentTarget));
         _isAttacking = true;
         _hitTargets.Clear();
         TriggerAnimation("Attack");
