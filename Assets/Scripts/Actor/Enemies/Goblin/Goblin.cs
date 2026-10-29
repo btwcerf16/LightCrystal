@@ -18,6 +18,7 @@ public sealed class Goblin : Enemy
     private Vector2 _moveDirection;
     private float _nextTargetSearch;
     private bool _isAttacking;
+    private bool _isMainTargetLocked;
     private bool _isSubscribed;
     private readonly HashSet<IDamageable> _hitTargets = new();
 
@@ -48,6 +49,7 @@ public sealed class Goblin : Enemy
 
     protected override void OnDisable()
     {
+        _isMainTargetLocked = false;
         if (_isSubscribed)
         {
             Stats.AttackSpeed.ValueChanged -= UpdateAttackSpeed;
@@ -59,6 +61,8 @@ public sealed class Goblin : Enemy
 
     protected override void Update()
     {
+        if (!_isMainTargetLocked && TemporaryTarget != null && !IsInRange(TemporaryTarget))
+            ClearTemporaryTarget();
         if (CurrentState != null && !Health.IsDead && Time.time >= _nextTargetSearch)
         {
             _nextTargetSearch = Time.time + 0.2f;
@@ -92,8 +96,17 @@ public sealed class Goblin : Enemy
 
         AimChanged?.Invoke(direction);
     }
+    private bool IsInRange(Transform target)
+    {
+        Vector2 offset = target.position - transform.position;
+        return offset.sqrMagnitude <= Stats.ViewDistance.Value * Stats.ViewDistance.Value;
+    }
+
     private void FindTarget()
     {
+        if (_isMainTargetLocked && MainTarget != null)
+            return;
+        _isMainTargetLocked = false;
         Transform bestTarget = null;
         int bestPriority = int.MinValue;
         float bestDistance = float.PositiveInfinity;
@@ -104,6 +117,8 @@ public sealed class Goblin : Enemy
                 continue;
             ActorHealth health = player.GetComponent<ActorHealth>();
             if (health == null || health.IsDead)
+                continue;
+            if (!IsInRange(player.transform))
                 continue;
             ActorStats stats = player.GetComponent<ActorStats>();
             int priority = stats != null ? stats.TargetPriority : 0;
@@ -153,6 +168,8 @@ public sealed class Goblin : Enemy
 
     public override void Attack()
     {
+        if (CurrentTarget == MainTarget)
+            _isMainTargetLocked = true;
         SetAim(AimAt(CurrentTarget));
         _isAttacking = true;
         _hitTargets.Clear();

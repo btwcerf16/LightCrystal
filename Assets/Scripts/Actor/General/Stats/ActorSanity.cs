@@ -3,9 +3,12 @@ using UnityEngine;
 
 [DefaultExecutionOrder(-50)]
 [RequireComponent(typeof(ActorStats))]
-public sealed class ActorSanity : MonoBehaviour, ISanity
+public sealed class ActorSanity : MonoBehaviour, ISanity, ILightSensitive
 {
+    [SerializeField, Min(0f)] private float _sanityDrainRate = 1f;
     private ActorStats _stats;
+    private ActorHealth _health;
+    private int _lightSources;
 
     public event Action<float, float> SanityChanged;
     public event Action SanityDepleted;
@@ -13,10 +16,12 @@ public sealed class ActorSanity : MonoBehaviour, ISanity
     public float CurrentSanity { get; private set; }
     public float MaxSanity => _stats.MaxSanity.Value;
     public bool IsSanityDepleted => CurrentSanity <= 0f;
+    public bool IsInLight => _lightSources > 0;
 
     private void Awake()
     {
         _stats = GetComponent<ActorStats>();
+        _health = GetComponent<ActorHealth>();
         CurrentSanity = MaxSanity;
     }
 
@@ -28,6 +33,23 @@ public sealed class ActorSanity : MonoBehaviour, ISanity
     private void OnDisable()
     {
         _stats.MaxSanity.ValueChanged -= OnMaxSanityChanged;
+    }
+
+    public void EnterLight()
+    {
+        _lightSources++;
+    }
+
+    public void ExitLight()
+    {
+        _lightSources = Mathf.Max(0, _lightSources - 1);
+    }
+
+    public void ProcessDarkness(float deltaTime)
+    {
+        if (IsInLight || !isActiveAndEnabled || (_health != null && _health.IsDead))
+            return;
+        DrainSanity(_sanityDrainRate * deltaTime);
     }
 
     public float DrainSanity(float amount)
@@ -62,6 +84,13 @@ public sealed class ActorSanity : MonoBehaviour, ISanity
         if (CurrentSanity <= 0f)
             SanityDepleted?.Invoke();
         return true;
+    }
+
+    public void ReceiveLight(float amount)
+    {
+        if (_health != null && _health.IsDead)
+            return;
+        RestoreSanity(amount);
     }
 
     public float RestoreSanity(float amount)

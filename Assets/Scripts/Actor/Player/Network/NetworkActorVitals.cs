@@ -2,7 +2,7 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 
-[RequireComponent(typeof(ActorHealth), typeof(ActorSanity))]
+[RequireComponent(typeof(ActorHealth))]
 public sealed class NetworkActorVitals : NetworkBehaviour
 {
     private readonly NetworkVariable<Vector4> _state = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -18,13 +18,20 @@ public sealed class NetworkActorVitals : NetworkBehaviour
         _sanity = GetComponent<ActorSanity>();
     }
 
+    private void Update()
+    {
+        if (IsSpawned && IsServer && _sanity != null)
+            _sanity.ProcessDarkness(Time.deltaTime);
+    }
+
     public override void OnNetworkSpawn()
     {
         _state.OnValueChanged += Receive;
         if (IsServer)
         {
             _health.HealthChanged += Publish;
-            _sanity.SanityChanged += Publish;
+            if (_sanity != null)
+                _sanity.SanityChanged += Publish;
             Publish(0f, 0f);
         }
         Changed?.Invoke(State);
@@ -41,7 +48,8 @@ public sealed class NetworkActorVitals : NetworkBehaviour
 
     private void Publish(float current, float maximum)
     {
-        _state.Value = new Vector4(_health.CurrentHealth, _health.MaxHealth, _sanity.CurrentSanity, _sanity.MaxSanity);
+        _state.Value = new Vector4(_health.CurrentHealth, _health.MaxHealth,
+            _sanity != null ? _sanity.CurrentSanity : 0f, _sanity != null ? _sanity.MaxSanity : 0f);
     }
 
     private void Receive(Vector4 previous, Vector4 current)

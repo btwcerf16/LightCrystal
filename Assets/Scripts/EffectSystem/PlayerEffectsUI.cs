@@ -25,10 +25,7 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
     private RectTransform _canvasRect;
     private RectTransform _viewport;
     private RectTransform _row;
-    private RectTransform _tooltip;
-    private Outline _tooltipBorder;
-    private Text _title;
-    private Text _description;
+    private HoverTooltipUI _tooltip;
     private Font _font;
     private EffectView _hovered;
     private bool _isDirty;
@@ -75,22 +72,7 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
         scroll.movementType = ScrollRect.MovementType.Clamped;
         scroll.scrollSensitivity = 32f;
 
-        _tooltip = Rect("EffectTooltip", _canvasRect, new Vector2(320f, 140f));
-        _tooltip.anchoredPosition = new Vector2(-16f, -86f);
-        Background(_tooltip, new Color(0.025f, 0.024f, 0.022f, 0.98f), false);
-        _tooltipBorder = _tooltip.gameObject.AddComponent<Outline>();
-        _tooltipBorder.effectDistance = new Vector2(2f, -2f);
-        _title = Label("Title", _tooltip, 18, new Vector2(292f, 26f));
-        _title.rectTransform.anchoredPosition = new Vector2(-14f, -12f);
-        _title.resizeTextForBestFit = true;
-        _title.resizeTextMinSize = 12;
-        _title.resizeTextMaxSize = 18;
-        _description = Label("Description", _tooltip, 14, new Vector2(292f, 90f));
-        _description.rectTransform.anchoredPosition = new Vector2(-14f, -48f);
-        _description.resizeTextForBestFit = true;
-        _description.resizeTextMinSize = 10;
-        _description.resizeTextMaxSize = 14;
-        _tooltip.gameObject.SetActive(false);
+        _tooltip = HoverTooltipUI.Create(transform, "EffectTooltipCanvas", "EffectTooltip");
         _isDirty = true;
     }
 
@@ -132,7 +114,7 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
         Vector2 pointer = Pointer.current.position.ReadValue();
         if (_hovered != null && IsUnderPointer(_hovered, pointer))
         {
-            FitTooltip();
+            _tooltip.Move(pointer);
             return;
         }
 
@@ -222,28 +204,17 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
     private void ShowTooltip(EffectView view)
     {
         _hovered = view;
-        _tooltipBorder.effectColor = GetBorderColor(view.Data);
-        _title.text = view.Data.EffectName;
+        _tooltip.SetBorderColor(GetBorderColor(view.Data));
+
         string description = view.Data.FormatText(view.Data.EffectDescription);
         string stats = view.Data.FormatText(view.Data.EffectStats);
-        _description.text = string.IsNullOrEmpty(stats) ? description : description + "\n\n" + stats;
-        _tooltip.gameObject.SetActive(true);
-        FitTooltip();
+        string body = string.IsNullOrEmpty(stats) ? description : description + "\n\n" + stats;
+        _tooltip.Show(view, view.Data.EffectName, body, Pointer.current.position.ReadValue());
     }
 
     private Color GetBorderColor(EffectData data)
     {
         return data.IsBuff ? new Color(0.2f, 0.65f, 0.28f) : new Color(0.8f, 0.18f, 0.16f);
-    }
-
-    private void FitTooltip()
-    {
-        float width = Mathf.Min(320f, _canvasRect.rect.width - 32f);
-        _title.rectTransform.sizeDelta = new Vector2(width - 28f, 26f);
-        _description.rectTransform.sizeDelta = new Vector2(width - 28f, 500f);
-        float bodyHeight = Mathf.Min(_description.preferredHeight, _canvasRect.rect.height - 164f);
-        _description.rectTransform.sizeDelta = new Vector2(width - 28f, bodyHeight);
-        _tooltip.sizeDelta = new Vector2(width, bodyHeight + 62f);
     }
 
     private void HideTooltip()
@@ -255,7 +226,7 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
             _isDirty = true;
         }
         _hovered = null;
-        _tooltip.gameObject.SetActive(false);
+        _tooltip.Hide();
     }
 
     private void Unbind()
@@ -264,6 +235,12 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
             _effects.EffectsChanged -= MarkDirty;
         _views.Clear();
         _hovered = null;
+        if (_tooltip != null)
+        {
+            _tooltip.gameObject.SetActive(false);
+            Destroy(_tooltip.gameObject);
+            _tooltip = null;
+        }
         if (_canvasObject != null)
         {
             _canvasObject.SetActive(false);
