@@ -8,7 +8,7 @@ public sealed class RustySword : Weapon
     [SerializeField] private SpriteRenderer _swordRenderer;
     [SerializeField] private float _attackRadius = 0.4f;
     [SerializeField] private TrailRenderer _trail;
-
+    [SerializeField] private Transform _attackPointThrust;
     private ActorHand _hand;
     private ActorStats _stats;
     private NetworkObject _ownerNetworkObject;
@@ -94,7 +94,7 @@ public sealed class RustySword : Weapon
         StopTrail();
     }
 
-    public void StartThrust() => Attack(_attackPoint.position, CurrentDamage);
+    public void StartThrust() => Attack(_attackPointThrust.position, CurrentDamage);
 
     public void StartSweep(int attackPointIndex)
     {

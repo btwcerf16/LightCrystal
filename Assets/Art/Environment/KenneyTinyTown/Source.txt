@@ -1,0 +1,6 @@
+Kenney Tiny Town 1.1
+Author: Kenney (https://kenney.nl)
+Source: https://kenney.nl/assets/tiny-town
+License: CC0 1.0. Original License.txt is included.
+Downloaded: 2026-10-29
+Original tilemap_packed.png is imported unchanged, 16x16 tiles, 16 pixels per unit.

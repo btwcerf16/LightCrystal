@@ -3,20 +3,21 @@ using System;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(ActorStats), typeof(ActorHealth))]
-public abstract class Enemy : MonoBehaviour
+public abstract class Enemy : MonoBehaviour, ILightSensitive
 {
     [SerializeField, Min(0f)] private float _attackDistance = 1.4f;
     [SerializeField] private Transform _mainTarget;
     private readonly Dictionary<Type, State> _states = new();
     private readonly StateMachine _stateMachine = new();
     private bool _isInitialized;
+    private ActorHealth _mainTargetHealth;
 
     protected ActorStats Stats { get; private set; }
     protected ActorHealth Health { get; private set; }
     protected abstract State InitialState { get; }
     protected abstract State DeadState { get; }
 
-    public Transform MainTarget => _mainTarget;
+    public Transform MainTarget => _mainTargetHealth != null && _mainTargetHealth.IsDead ? null : _mainTarget;
     public Transform TemporaryTarget { get; private set; }
     public Transform CurrentTarget => TemporaryTarget != null ? TemporaryTarget : MainTarget;
     public State CurrentState => _stateMachine.CurrentState;
@@ -25,6 +26,8 @@ public abstract class Enemy : MonoBehaviour
     {
         Stats = GetComponent<ActorStats>();
         Health = GetComponent<ActorHealth>();
+        if (_mainTarget != null)
+            _mainTargetHealth = _mainTarget.GetComponent<ActorHealth>();
     }
 
     public void Initialize(Transform mainTarget)
@@ -74,7 +77,9 @@ public abstract class Enemy : MonoBehaviour
     {
         if (!_isInitialized || Health.IsDead || CurrentTarget == null)
             return false;
-        Vector2 offset = CurrentTarget.position - transform.position;
+        Collider2D collider = CurrentTarget.GetComponent<Collider2D>();
+        Vector2 targetPosition = collider != null ? collider.ClosestPoint(transform.position) : CurrentTarget.position;
+        Vector2 offset = targetPosition - (Vector2)transform.position;
         return offset.sqrMagnitude <= _attackDistance * _attackDistance;
     }
 
@@ -85,9 +90,10 @@ public abstract class Enemy : MonoBehaviour
 
     public void SetMainTarget(Transform target)
     {
-        if (MainTarget != null || target == null)
+        if (_mainTarget != null || target == null)
             return;
         _mainTarget = target;
+        _mainTargetHealth = target.GetComponent<ActorHealth>();
     }
 
     public void SetTemporaryTarget(Transform target)
@@ -98,6 +104,14 @@ public abstract class Enemy : MonoBehaviour
     public void ClearTemporaryTarget()
     {
         TemporaryTarget = null;
+    }
+
+    public virtual void EnterLight() { }
+    public virtual void ExitLight() { }
+
+    public virtual void ReceiveLight(float amount)
+    {
+        Health.TakeDamage(amount, EDamageType.Magic);
     }
 
     public abstract void Arise();

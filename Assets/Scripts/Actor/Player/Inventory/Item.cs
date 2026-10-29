@@ -1,7 +1,7 @@
 using Unity.Netcode;
 using UnityEngine;
 
-public abstract class Item : MonoBehaviour
+public abstract class Item : MonoBehaviour, ITooltipSource
 {
     [SerializeField] private Sprite _icon;
     [SerializeField, Min(0)] private int _itemId = 0;
@@ -24,6 +24,9 @@ public abstract class Item : MonoBehaviour
     public float BaseCooldown => _cooldown;
     public string Description => TooltipText.Format(this, _description);
     public string StatsDescription => TooltipText.Format(this, _statsDescription);
+    public string TooltipTitle => DisplayName;
+    public string TooltipDescription => string.IsNullOrEmpty(StatsDescription) ? Description : Description + "\n\n" + StatsDescription;
+    public float TooltipDelay => 0f;
     public float CooldownDuration { get; private set; }
     public double CooldownEndsAt { get; private set; }
     public float CooldownRemaining

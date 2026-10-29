@@ -12,14 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95adb4702d2d3424585a08df57ee3685, type: 3}
   m_Name: GoblinStats
   m_EditorClassIdentifier: Assembly-CSharp::ActorStatsConfig
+  <TargetPriority>k__BackingField: 0
   <ViewDistance>k__BackingField: 12
   <ViewAngle>k__BackingField: 120
-  <MaxHealth>k__BackingField: 30
+  <MaxHealth>k__BackingField: 3000
   <MaxSanity>k__BackingField: 0
   <HealthRegeneration>k__BackingField: 0
   <MoveSpeed>k__BackingField: 2
   <AttackSpeed>k__BackingField: 1
   <CooldownReduction>k__BackingField: 0
+  <PhysicalDamage>k__BackingField: 3
   <PhysicalDamageMultiplier>k__BackingField: 1
   <MagicDamageMultiplier>k__BackingField: 1
   <PhysicalLifeSteal>k__BackingField: 0
@@ -29,5 +31,3 @@ MonoBehaviour:
   <ForceResistance>k__BackingField: 0
   <MadnessResistance>k__BackingField: 0
   <EffectResistance>k__BackingField: 0
-  <PhysicalDamage>k__BackingField: 3
-  <TargetPriority>k__BackingField: 0

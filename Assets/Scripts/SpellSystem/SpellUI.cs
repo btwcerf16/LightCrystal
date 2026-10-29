@@ -26,11 +26,7 @@ public sealed class SpellUI : NetworkBehaviour
     private GameObject _canvas;
     private RectTransform _panel;
     private Font _font;
-    private GameObject _tooltipCanvas;
-    private RectTransform _tooltipArea;
-    private RectTransform _tooltip;
-    private Text _tooltipTitle;
-    private Text _tooltipBody;
+    private HoverTooltipUI _tooltip;
     private int _hoveredIndex = -1;
 
     private void Awake()
@@ -77,12 +73,14 @@ public sealed class SpellUI : NetworkBehaviour
         }
         _slots.Clear();
         HideTooltip();
-        float width = _panel.rect.width / Mathf.Max(1, _holder.Spells.Count);
+        float width = Mathf.Min(64f, _panel.rect.width / Mathf.Max(1, _holder.Spells.Count));
+        float startX = (_panel.rect.width - width * _holder.Spells.Count) * 0.5f;
+        float top = (_panel.rect.height - width) * 0.5f;
         for (int i = 0; i < _holder.Spells.Count; i++)
         {
             int index = i;
             SpellConfig config = _holder.GetConfig(i);
-            RectTransform card = Rect("Spell_" + i, _panel, new Vector2(i * width, 0f), new Vector2(width, _panel.rect.height));
+            RectTransform card = Rect("Spell_" + i, _panel, new Vector2(startX + i * width, -top), new Vector2(width, width));
             Image background = Image(card, new Color(0.035f, 0.032f, 0.028f), true);
             Outline border = card.gameObject.AddComponent<Outline>();
             border.effectColor = new Color(0.32f, 0.26f, 0.16f);
@@ -101,19 +99,25 @@ public sealed class SpellUI : NetworkBehaviour
             exit.callback.AddListener(data => HideTooltip());
             hover.triggers.Add(exit);
 
-            Text binding = Label(card, "Binding", "", new Vector2(5f, -4f), new Vector2(width - 10f, 16f), 11);
-            RectTransform iconRect = Rect("Icon", card, new Vector2((width - 44f) * 0.5f, -22f), new Vector2(44f, 44f));
+            RectTransform iconRect = Rect("Icon", card, new Vector2(2f, -2f), new Vector2(width - 4f, width - 4f));
             Image icon = Image(iconRect, Color.white, false);
             icon.sprite = config != null ? config.SpriteIcon : null;
             icon.preserveAspect = true;
             icon.enabled = icon.sprite != null;
-            RectTransform cooldown = Rect("Cooldown", card, new Vector2((width - 44f) * 0.5f, -22f), new Vector2(44f, 44f));
+            RectTransform cooldown = Rect("Cooldown", card, new Vector2(2f, -2f), new Vector2(width - 4f, width - 4f));
             Image(cooldown, new Color(0f, 0f, 0f, 0.78f), false);
-            Text timer = Label(cooldown, "Timer", "", Vector2.zero, new Vector2(44f, 44f), 22);
+            Text timer = Label(cooldown, "Timer", "", Vector2.zero, cooldown.sizeDelta, 22);
             cooldown.gameObject.SetActive(false);
-            Label(card, "Name", config != null ? config.SpellName : "Пусто", new Vector2(3f, -69f), new Vector2(width - 6f, 19f), 12);
-            Text cost = Label(card, "Cost", "", new Vector2(3f, -90f), new Vector2(width - 6f, 14f), 11);
-            cost.text = config != null && !config.IsPassive ? config.SanityCost.ToString("0.#") + " расс." : "";
+            bool passive = config != null && config.IsPassive;
+            RectTransform bindingBadge = Rect("BindingBadge", card, new Vector2(2f, -2f), new Vector2(22f, 17f));
+            Image(bindingBadge, new Color(0f, 0f, 0f, 0.8f), false);
+            Text binding = Label(bindingBadge, "Binding", "", Vector2.zero, bindingBadge.sizeDelta, 12);
+            bindingBadge.gameObject.SetActive(!passive);
+            RectTransform costBadge = Rect("CostBadge", card, new Vector2(width - 30f, -width + 19f), new Vector2(28f, 17f));
+            Image(costBadge, new Color(0f, 0f, 0f, 0.8f), false);
+            Text cost = Label(costBadge, "Cost", "", Vector2.zero, costBadge.sizeDelta, 12);
+            cost.text = config != null && !passive ? config.SanityCost.ToString("0.#") : "";
+            costBadge.gameObject.SetActive(config != null && !passive);
             _slots.Add(new SlotView { Button = button, Binding = binding, Cost = cost, Timer = timer, Cooldown = cooldown.gameObject });
         }
         RefreshBindings();
@@ -124,7 +128,7 @@ public sealed class SpellUI : NetworkBehaviour
         for (int i = 0; i < _slots.Count; i++)
         {
             SpellConfig config = _holder.GetConfig(i);
-            _slots[i].Binding.text = config != null && config.IsPassive ? "ПАССИВНО" : _bindings.GetBindingLabel(ESlotBindingType.Spell, i);
+            _slots[i].Binding.text = config != null && config.IsPassive ? "" : _bindings.GetBindingLabel(ESlotBindingType.Spell, i);
         }
     }
 
@@ -137,7 +141,7 @@ public sealed class SpellUI : NetworkBehaviour
         if (_input.IsMenuOpen || Pointer.current == null)
             HideTooltip();
         else if (_hoveredIndex >= 0)
-            PositionTooltip(Pointer.current.position.ReadValue());
+            _tooltip.Move(Pointer.current.position.ReadValue());
         for (int i = 0; i < _slots.Count; i++)
         {
             Spell spell = _holder.Spells[i];
@@ -168,38 +172,17 @@ public sealed class SpellUI : NetworkBehaviour
         }
         _slots.Clear();
         HideTooltip();
-        if (_tooltipCanvas != null)
+        if (_tooltip != null)
         {
-            _tooltipCanvas.SetActive(false);
-            Destroy(_tooltipCanvas);
-            _tooltipCanvas = null;
+            _tooltip.gameObject.SetActive(false);
+            Destroy(_tooltip.gameObject);
+            _tooltip = null;
         }
     }
 
     private void CreateTooltip()
     {
-        _tooltipCanvas = new GameObject("SpellTooltipCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
-        _tooltipCanvas.transform.SetParent(transform, false);
-        Canvas canvas = _tooltipCanvas.GetComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        canvas.sortingOrder = 45;
-        CanvasScaler scaler = _tooltipCanvas.GetComponent<CanvasScaler>();
-        scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        scaler.referenceResolution = new Vector2(1920f, 1080f);
-        scaler.matchWidthOrHeight = 0.5f;
-        _tooltipArea = (RectTransform)_tooltipCanvas.transform;
-        _tooltip = Rect("SpellTooltip", _tooltipArea, Vector2.zero, new Vector2(340f, 180f));
-        _tooltip.anchorMin = _tooltip.anchorMax = new Vector2(0.5f, 0.5f);
-        Image(_tooltip, new Color(0.025f, 0.024f, 0.022f, 0.98f), false);
-        Outline border = _tooltip.gameObject.AddComponent<Outline>();
-        border.effectColor = new Color(0.4f, 0.32f, 0.19f);
-        border.effectDistance = new Vector2(2f, -2f);
-        _tooltipTitle = Label(_tooltip, "Title", "", new Vector2(14f, -12f), new Vector2(312f, 28f), 18);
-        _tooltipTitle.alignment = TextAnchor.MiddleLeft;
-        _tooltipBody = Label(_tooltip, "Description", "", new Vector2(14f, -48f), new Vector2(312f, 200f), 14);
-        _tooltipBody.alignment = TextAnchor.UpperLeft;
-        _tooltipBody.supportRichText = false;
-        _tooltip.gameObject.SetActive(false);
+        _tooltip = HoverTooltipUI.Create(transform, "SpellTooltipCanvas", "SpellTooltip");
     }
 
     private void ShowTooltip(int index)
@@ -210,48 +193,27 @@ public sealed class SpellUI : NetworkBehaviour
         if (config == null)
             return;
         _hoveredIndex = index;
-        _tooltipTitle.text = config.SpellName;
-        _tooltipBody.text = config.Description;
+        string description = config.Description;
         if (!string.IsNullOrEmpty(config.Stats))
-            _tooltipBody.text += "\n\n" + config.Stats;
+            description += "\n\n" + config.Stats;
         if (config.IsPassive)
-            _tooltipBody.text += "\n\nПассивная способность";
+            description += "\n\nПассивная способность";
         else
         {
             Spell spell = index < _holder.Spells.Count ? _holder.Spells[index] : null;
             float cooldown = spell != null ? spell.CooldownTime : config.CooldownTime;
-            _tooltipBody.text += $"\n\nРассудок: {config.SanityCost:0.#}\nКулдаун: {cooldown:0.#} с";
+            description += $"\n\nРассудок: {config.SanityCost:0.#}\nКулдаун: {cooldown:0.#} с";
         }
-        _tooltip.gameObject.SetActive(true);
+
         if (Pointer.current != null)
-            PositionTooltip(Pointer.current.position.ReadValue());
+            _tooltip.Show(index, config.SpellName, description, Pointer.current.position.ReadValue());
     }
 
     private void HideTooltip()
     {
         _hoveredIndex = -1;
         if (_tooltip != null)
-            _tooltip.gameObject.SetActive(false);
-    }
-
-    private void PositionTooltip(Vector2 pointer)
-    {
-        Rect area = _tooltipArea.rect;
-        float width = Mathf.Min(340f, area.width - 32f);
-        _tooltipTitle.rectTransform.sizeDelta = new Vector2(width - 28f, 28f);
-        _tooltipBody.rectTransform.sizeDelta = new Vector2(width - 28f, 600f);
-        float bodyHeight = Mathf.Min(_tooltipBody.preferredHeight, area.height - 94f);
-        float height = bodyHeight + 62f;
-        _tooltipBody.rectTransform.sizeDelta = new Vector2(width - 28f, bodyHeight);
-        _tooltip.sizeDelta = new Vector2(width, height);
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(_tooltipArea, pointer, null, out Vector2 position);
-        position.x += position.x + width + 16f > area.xMax ? -width - 16f : 16f;
-        position.y -= 16f;
-        if (position.y - height < area.yMin)
-            position.y += height + 32f;
-        position.x = Mathf.Clamp(position.x, area.xMin + 8f, area.xMax - width - 8f);
-        position.y = Mathf.Clamp(position.y, area.yMin + height + 8f, area.yMax - 8f);
-        _tooltip.anchoredPosition = position;
+            _tooltip.Hide();
     }
 
     private RectTransform Rect(string name, Transform parent, Vector2 position, Vector2 size)
