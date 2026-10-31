@@ -558,6 +558,10 @@ GameObject:
   - component: {fileID: 8123400010000000029}
   - component: {fileID: 8123400010000000030}
   - component: {fileID: 8123400010000000031}
+  - component: {fileID: 4477702443826972998}
+  - component: {fileID: 2839765519976864821}
+  - component: {fileID: 3890409975640271699}
+  - component: {fileID: 5039696420110450829}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -1504,6 +1508,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76b4d73fcb5d4c24820c92ceb405e289, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHUD
+  _currencyIcon: {fileID: -5119336362666540660, guid: cb40d685519376c43a550a0c6a59c0b6, type: 3}
 --- !u!114 &8123400010000000030
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1532,3 +1537,55 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38f2c6c375f14885a2b2acd003fb20d9, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkActorVisuals
+--- !u!114 &4477702443826972998
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98aa0bf5be4a1e4488f6152947174b22, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ActorWallet
+  _startingCurrency: 0
+--- !u!114 &2839765519976864821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7b7fbfba988e394ca8d2b104379a3c2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerWallet
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &3890409975640271699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6009af878d168cb45a97660e4d07c4da, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ShopConsoleCommands
+  _shopPrefab: {fileID: 3801610260901209035, guid: bc6ffe39c2db17b48940021ae59f0824, type: 3}
+  _zonePrefab: {fileID: 8618744320305533015, guid: 52f10192a4d847048bce715a46d5e215, type: 3}
+--- !u!114 &5039696420110450829
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5dfe4760b4319d94d892a1fc8807c3d6, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::WalletConsoleCommands

@@ -63,7 +63,19 @@ public sealed class ConsoleCommandRegistry
                 return matches;
             ParameterInfo[] parameters = commands[0].Method.GetParameters();
             int argumentIndex = words.Count - argumentStart;
-            if (argumentIndex >= parameters.Length || parameters[argumentIndex].GetCustomAttribute<ConsoleStatNameAttribute>() == null)
+            if (argumentIndex >= parameters.Length)
+                return matches;
+            if (parameters[argumentIndex].ParameterType.IsEnum)
+            {
+                foreach (string name in Enum.GetNames(parameters[argumentIndex].ParameterType))
+                {
+                    if (name.StartsWith(fragment, StringComparison.OrdinalIgnoreCase))
+                        matches.Add(leading + name);
+                }
+                matches.Sort(StringComparer.OrdinalIgnoreCase);
+                return matches;
+            }
+            if (parameters[argumentIndex].GetCustomAttribute<ConsoleStatNameAttribute>() == null)
                 return matches;
 
             foreach (PropertyInfo property in typeof(ActorStats).GetProperties(BindingFlags.Instance | BindingFlags.Public))

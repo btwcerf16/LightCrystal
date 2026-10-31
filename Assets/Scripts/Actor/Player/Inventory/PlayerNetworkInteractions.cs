@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Runtime.CompilerServices;
 using Unity.Netcode;
 using UnityEngine;
@@ -11,6 +11,8 @@ public class PlayerNetworkInteractions : NetworkBehaviour
     private Inventory _actorInventory;
     private ActorHand _hand;
     private ItemFactory _itemFactory;
+    private ActorWallet _wallet;
+    private NetworkPlayerWallet _networkWallet;
 
     private Weapon _lastUsedWeapon;
     private int _lastUsedWeaponIndex;
@@ -22,6 +24,8 @@ public class PlayerNetworkInteractions : NetworkBehaviour
 
     private void Awake()
     {
+        _wallet = GetComponent<ActorWallet>();
+        _networkWallet = GetComponent<NetworkPlayerWallet>();
         _inputReader = GetComponent<PlayerInputReader>();
         _actorArsenal = GetComponent<ActorArsenal>();
         _actorInventory = GetComponent<Inventory>();
@@ -167,12 +171,19 @@ public class PlayerNetworkInteractions : NetworkBehaviour
         if (index < 0)
             return;
 
+        if (worldItem.IsForSale && (_wallet == null || !_wallet.CanAfford(worldItem.Price)))
+        {
+            _networkWallet.ShowInsufficientFunds();
+            return;
+        }
+
         Transform parent = isWeapon ? _hand.HandTransform : transform;
         Item item = _itemFactory.GetOrCreateItem(worldItem.ItemId, worldItem.Uid, parent);
         if (item == null)
             return;
 
-        worldItem.HideWorldItem();
+        if (!worldItem.TryPickUp(_wallet))
+            return;
         item.SetWorldItem(worldItem.gameObject);
         if (isWeapon)
             _actorArsenal.SetWeapon(index, (Weapon)item);

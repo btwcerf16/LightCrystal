@@ -1,9 +1,18 @@
+using DG.Tweening;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
 
 public sealed class PlayerHUD : NetworkBehaviour
 {
+    [SerializeField] private Sprite _currencyIcon;
+    private ActorWallet _wallet;
+    private NetworkPlayerWallet _networkWallet;
+    private Text _currencyText;
+    private Text _hintText;
+    private CanvasGroup _hintGroup;
+    private RectTransform _hintRect;
+    private Sequence _hintAnimation;
     private GameObject _canvas;
     private RectTransform _root;
 
@@ -53,6 +62,74 @@ public sealed class PlayerHUD : NetworkBehaviour
         Outline border = _root.GetComponent<Outline>();
         border.effectColor = new Color(0.32f, 0.26f, 0.16f);
         border.effectDistance = new Vector2(2f, -2f);
+        CreateWalletUI();
+    }
+
+    private void CreateWalletUI()
+    {
+        _wallet = GetComponent<ActorWallet>();
+        _networkWallet = GetComponent<NetworkPlayerWallet>();
+        RectTransform panel = Section("Currency", new Vector2(ArsenalWidth + CenterWidth, Height), new Vector2(InventoryWidth, 32f));
+        panel.gameObject.AddComponent<Image>().color = new Color(0.065f, 0.055f, 0.025f);
+        var border = panel.gameObject.AddComponent<Outline>();
+        border.effectColor = new Color(0.32f, 0.26f, 0.16f);
+        border.effectDistance = new Vector2(1f, -1f);
+
+        RectTransform coin = new GameObject("Coin", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
+        coin.SetParent(panel, false);
+        coin.anchorMin = coin.anchorMax = new Vector2(0f, 0.5f);
+        coin.anchoredPosition = new Vector2(20f, 0f);
+        coin.sizeDelta = new Vector2(24f, 24f);
+        coin.GetComponent<Image>().sprite = _currencyIcon;
+        coin.GetComponent<Image>().raycastTarget = false;
+        _currencyText = CreateLabel(panel, "CurrencyValue", new Color(0.95f, 0.79f, 0.33f));
+        _currencyText.alignment = TextAnchor.MiddleLeft;
+        _currencyText.rectTransform.offsetMin = new Vector2(40f, 0f);
+        _wallet.CurrencyChanged += UpdateCurrency;
+        _networkWallet.HintRequested += ShowHint;
+        UpdateCurrency(_wallet.Currency);
+
+        _hintRect = Section("Hint", new Vector2(ArsenalWidth, Height + 38f), new Vector2(CenterWidth, 36f));
+        _hintRect.gameObject.AddComponent<Image>().color = new Color(0.12f, 0.025f, 0.02f, 0.9f);
+        _hintGroup = _hintRect.gameObject.AddComponent<CanvasGroup>();
+        _hintGroup.alpha = 0f;
+        _hintGroup.interactable = false;
+        _hintGroup.blocksRaycasts = false;
+        _hintText = CreateLabel(_hintRect, "HintText", new Color(1f, 0.45f, 0.35f));
+    }
+
+    private Text CreateLabel(RectTransform parent, string name, Color color)
+    {
+        var text = new GameObject(name, typeof(RectTransform), typeof(Text)).GetComponent<Text>();
+        text.transform.SetParent(parent, false);
+        text.rectTransform.anchorMin = Vector2.zero;
+        text.rectTransform.anchorMax = Vector2.one;
+        text.rectTransform.offsetMin = text.rectTransform.offsetMax = Vector2.zero;
+        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        text.fontSize = 18;
+        text.color = color;
+        text.alignment = TextAnchor.MiddleCenter;
+        text.raycastTarget = false;
+        return text;
+    }
+
+    private void UpdateCurrency(int currency)
+    {
+        _currencyText.text = currency.ToString();
+    }
+
+    private void ShowHint(string message)
+    {
+        _hintAnimation?.Kill();
+        _hintText.text = message;
+        _hintGroup.alpha = 0f;
+        _hintRect.anchoredPosition = new Vector2(ArsenalWidth, Height + 38f);
+        _hintAnimation = DOTween.Sequence()
+            .Append(_hintGroup.DOFade(1f, 0.12f))
+            .Join(_hintRect.DOAnchorPosY(Height + 46f, 0.12f))
+            .AppendInterval(1.08f)
+            .Append(_hintGroup.DOFade(0f, 0.3f))
+            .SetUpdate(true);
     }
 
     public override void OnNetworkDespawn() => Hide();
@@ -61,6 +138,11 @@ public sealed class PlayerHUD : NetworkBehaviour
 
     private void Hide()
     {
+        if (_wallet != null)
+            _wallet.CurrencyChanged -= UpdateCurrency;
+        if (_networkWallet != null)
+            _networkWallet.HintRequested -= ShowHint;
+        _hintAnimation?.Kill();
         if (_canvas == null)
             return;
         _canvas.SetActive(false);

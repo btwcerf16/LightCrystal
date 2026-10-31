@@ -8,11 +8,19 @@ public class WorldItem : NetworkBehaviour
     [SerializeField] private SpriteRenderer _itemVisualSpriteRenderer;
     [SerializeField] private BoxCollider2D _boxCollider;
 
+    [SerializeField] private TextMesh _priceText;
+    private Material _priceMaterial;
+    private bool _hasPendingItem;
+    private bool _initializeForSale;
+
+    private readonly NetworkVariable<bool> _isForSale = new(false);
     private readonly NetworkVariable<int> _itemId = new NetworkVariable<int>();
     private readonly NetworkVariable<ulong> _uid = new NetworkVariable<ulong>();
     private readonly NetworkVariable<bool> _isVisible = new NetworkVariable<bool>(true);
     private readonly NetworkVariable<Vector2> _position = new NetworkVariable<Vector2>();
 
+    public bool IsForSale => _isForSale.Value;
+    public int Price => ItemPrefab != null ? Mathf.Max(0, ItemPrefab.Price) : 0;
     public int ItemId => _itemId.Value;
     public ulong Uid => _uid.Value;
     public Item ItemPrefab => _itemDatabase != null ? _itemDatabase.GetPrefab(ItemId) : null;
@@ -24,6 +32,12 @@ public class WorldItem : NetworkBehaviour
             _itemVisualSpriteRenderer = GetComponent<SpriteRenderer>();
         if (_boxCollider == null)
             _boxCollider = GetComponent<BoxCollider2D>();
+        if (_priceText != null)
+        {
+            var renderer = _priceText.GetComponent<MeshRenderer>();
+            _priceMaterial = new Material(renderer.sharedMaterial);
+            renderer.sharedMaterial = _priceMaterial;
+        }
     }
 
     public override void OnNetworkSpawn()
@@ -31,10 +45,15 @@ public class WorldItem : NetworkBehaviour
         if (IsServer)
         {
             _position.Value = transform.position;
-            if (ItemId == 0 && _itemPrefab != null)
-                SetItem(_itemPrefab);
+            if (_itemPrefab != null && (ItemId == 0 || _hasPendingItem))
+            {
+                SetItem(_itemPrefab, _initializeForSale);
+                _hasPendingItem = false;
+            }
         }
 
+        _isForSale.OnValueChanged += OnSaleChanged;
+        Font.textureRebuilt += RefreshPriceFont;
         _itemId.OnValueChanged += OnItemChanged;
         _isVisible.OnValueChanged += SetVisible;
         _position.OnValueChanged += OnPositionChanged;
@@ -45,19 +64,79 @@ public class WorldItem : NetworkBehaviour
 
     public override void OnNetworkDespawn()
     {
+        _isForSale.OnValueChanged -= OnSaleChanged;
+        Font.textureRebuilt -= RefreshPriceFont;
+        if (_priceText != null)
+            _priceText.gameObject.SetActive(false);
         _itemId.OnValueChanged -= OnItemChanged;
         _isVisible.OnValueChanged -= SetVisible;
         _position.OnValueChanged -= OnPositionChanged;
     }
 
-    public void SetItem(GameObject itemObject)
+    public void SetItem(GameObject itemObject, bool isForSale = false)
     {
         Item item = itemObject.GetComponent<Item>();
         if (item == null)
             return;
 
+        if (!IsSpawned)
+        {
+            _itemPrefab = itemObject;
+            _initializeForSale = isForSale;
+            _hasPendingItem = true;
+            return;
+        }
+        if (!IsServer)
+            return;
+
+        _isForSale.Value = isForSale;
         _itemId.Value = item.ItemId;
         _uid.Value = item.Uid != 0 ? item.Uid : NetworkManager.GetComponent<ItemUidGenerator>().GenerateUid();
+    }
+
+    public bool TryPickUp(ActorWallet wallet)
+    {
+        if (!IsServer || !CanBePicked)
+            return false;
+        if (IsForSale && (wallet == null || !wallet.TrySpend(Price)))
+            return false;
+
+        _isForSale.Value = false;
+        HideWorldItem();
+        return true;
+    }
+
+    private void OnSaleChanged(bool previous, bool current)
+    {
+        RefreshPrice();
+    }
+
+    private void RefreshPrice()
+    {
+        if (_priceText == null)
+            return;
+        _priceText.gameObject.SetActive(IsSpawned && IsForSale && _isVisible.Value && ItemId > 0);
+        _priceText.text = $"{Price}$";
+        if (_itemVisualSpriteRenderer.sprite != null)
+        {
+            Bounds bounds = _itemVisualSpriteRenderer.sprite.bounds;
+            _priceText.transform.localPosition = new Vector3(bounds.center.x, bounds.min.y - 0.12f, 0f);
+        }
+        RefreshPriceFont(_priceText.font);
+    }
+
+    private void RefreshPriceFont(Font font)
+    {
+        if (_priceMaterial != null && _priceText != null && font == _priceText.font)
+            _priceMaterial.mainTexture = font.material.mainTexture;
+    }
+
+    public override void OnDestroy()
+    {
+        Font.textureRebuilt -= RefreshPriceFont;
+        if (_priceMaterial != null)
+            Destroy(_priceMaterial);
+        base.OnDestroy();
     }
 
     public void ShowAt(Vector2 position)
@@ -104,5 +183,6 @@ public class WorldItem : NetworkBehaviour
         bool isVisible = newVisible && ItemId > 0;
         _itemVisualSpriteRenderer.enabled = isVisible;
         _boxCollider.enabled = isVisible;
+        RefreshPrice();
     }
 }

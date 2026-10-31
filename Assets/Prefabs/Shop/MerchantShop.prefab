@@ -40,6 +40,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2139782441003621597}
+  - component: {fileID: 4217550918128061283}
+  - component: {fileID: 4736522903007328301}
+  - component: {fileID: 3801610260901209035}
   m_Layer: 0
   m_Name: MerchantShop
   m_TagString: Untagged
@@ -435,3 +438,66 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &4217550918128061283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 112365221973676291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
+  GlobalObjectIdHash: 1668109703
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
+--- !u!114 &4736522903007328301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 112365221973676291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 985bf9fe747260c41b10367c594bce89, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::Shop
+  _itemDatabase: {fileID: 11400000, guid: 9a9431e9f0574b108ea8a4e14ceedeb3, type: 2}
+  _itemsPosition:
+  - {fileID: 988819363851825967}
+  - {fileID: 7738024626020882734}
+  - {fileID: 2969331242742229353}
+  _lowRarityWeights: 4100000019000000070000000200000001000000
+  _averageRarityWeights: 2800000023000000110000000600000002000000
+  _highRarityWeights: 0f0000001e0000001e0000001200000007000000
+  _secretRarityWeights: 000000000000000000000000460000001e000000
+  _worldItems: []
+  _worldItemPrefab: {fileID: 477985363, guid: a2ef457c21d14f0fbc6e609cb7b0af17, type: 3}
+--- !u!114 &3801610260901209035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 112365221973676291}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 941bade26c8736d4c88822cf44797a2a, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkShop
+  ShowTopMostFoldoutHeaderGroup: 1
+  _worldItems: []
+  _lifetime: 60

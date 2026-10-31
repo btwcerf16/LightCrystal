@@ -44,4 +44,16 @@ public sealed class ItemDatabase : ScriptableObject
                 Debug.LogError($"Item ID {item.ItemId} is used more than once.", this);
         }
     }
+    public List<Item> GetItemsByRarity(EItemRarity minimumRarity, EItemRarity maximumRarity)
+    {
+        List<Item> items = new List<Item>();
+        foreach (Item item in _items)
+        {
+            if (item != null && item.ItemId > 0 && item.Rarity >= minimumRarity && item.Rarity <= maximumRarity)
+                items.Add(item);
+        }
+        return items;
+    }
+
+    public int GetLength() => _items.Length;
 }

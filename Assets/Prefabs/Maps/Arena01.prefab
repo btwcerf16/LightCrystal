@@ -99747,6 +99747,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5324483151762325456}
   - component: {fileID: 811861588698926517}
+  - component: {fileID: 6343370826363017723}
   m_Layer: 0
   m_Name: Arena01
   m_TagString: Untagged
@@ -108200,3 +108201,17 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 114, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &6343370826363017723
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5971779558997101311}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1d5456f1fdb198243879a1ee7d1bbb5e, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ShopSpawnArea
+  _ground: {fileID: 4997848477258619179}
+  _edgePadding: 8
