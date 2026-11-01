@@ -3,6 +3,7 @@ using UnityEngine;
 public sealed class ActorVisuals : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer[] _renderers = new SpriteRenderer[0];
+    [SerializeField] private ParticleSystem _hitParticles;
     [SerializeField] private Color _hitColor = new Color(1f, 0.92f, 0.72f);
     [SerializeField, Min(0.01f)] private float _hitDuration = 0.15f;
 
@@ -11,6 +12,8 @@ public sealed class ActorVisuals : MonoBehaviour
     private static readonly int HitColor = Shader.PropertyToID("_HitColor");
     private static readonly int HitAmount = Shader.PropertyToID("_HitAmount");
     private MaterialPropertyBlock _properties;
+    private EffectHandler _effects;
+    private Animator[] _animators;
     private Color _effectColor = Color.white;
     private float _effectAmount;
     private float _hitAmount;
@@ -19,6 +22,23 @@ public sealed class ActorVisuals : MonoBehaviour
     private void Awake()
     {
         _properties = new MaterialPropertyBlock();
+        _effects = GetComponent<EffectHandler>();
+        _animators = GetComponentsInChildren<Animator>(true);
+    }
+
+    private void OnEnable()
+    {
+        if (_effects != null)
+            _effects.StatusChanged += UpdateStatus;
+        UpdateStatus();
+    }
+
+    private void UpdateStatus()
+    {
+        bool stunned = _effects != null && _effects.IsStunned;
+        foreach (Animator animator in _animators)
+            if (animator != null)
+                animator.speed = stunned ? 0f : 1f;
     }
 
     public void SetEffectTint(Color color, float amount)
@@ -36,6 +56,11 @@ public sealed class ActorVisuals : MonoBehaviour
 
     public void FlashHit()
     {
+        if (_hitParticles != null)
+        {
+            _hitParticles.Play();
+            _hitParticles.Emit(6);
+        }
         _hitAmount = 1f;
         _hitEndsAt = Time.time + _hitDuration;
         Apply();
@@ -49,6 +74,30 @@ public sealed class ActorVisuals : MonoBehaviour
         Apply();
     }
 
+    public void ShowDamage(float damage)
+    {
+        FloatingDamage.Show(transform.position, damage);
+    }
+
+    public void Explosion(float radius)
+    {
+        if (_hitParticles == null)
+            return;
+        _hitParticles.Play();
+        for (int i = 0; i < 20; i++)
+        {
+            Vector2 direction = Random.insideUnitCircle.normalized;
+            ParticleSystem.EmitParams particle = new ParticleSystem.EmitParams
+            {
+                startColor = new Color(1f, 0.45f, 0.08f),
+                startLifetime = 0.3f,
+                startSize = 0.07f,
+                velocity = direction * radius * 3f
+            };
+            _hitParticles.Emit(particle, 1);
+        }
+    }
+
     public void ClearHit()
     {
         _hitAmount = 0f;
@@ -57,7 +106,14 @@ public sealed class ActorVisuals : MonoBehaviour
 
     private void OnDisable()
     {
+        if (_effects != null)
+            _effects.StatusChanged -= UpdateStatus;
+        foreach (Animator animator in _animators)
+            if (animator != null)
+                animator.speed = 1f;
         ClearHit();
+        if (_hitParticles != null)
+            _hitParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
     }
 
     private void Apply()

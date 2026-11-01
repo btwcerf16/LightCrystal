@@ -15,7 +15,7 @@ MonoBehaviour:
   <TargetPriority>k__BackingField: 0
   <ViewDistance>k__BackingField: 14
   <ViewAngle>k__BackingField: 120
-  <MaxHealth>k__BackingField: 2000
+  <MaxHealth>k__BackingField: 10
   <MaxSanity>k__BackingField: 0
   <HealthRegeneration>k__BackingField: 0
   <MoveSpeed>k__BackingField: 1.5

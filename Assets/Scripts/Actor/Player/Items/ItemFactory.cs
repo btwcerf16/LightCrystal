@@ -7,10 +7,38 @@ public sealed class ItemFactory : MonoBehaviour
 {
     [SerializeField] private ItemDatabase _itemDatabase;
 
+    [SerializeField] private EnchantDatabase _enchantDatabase;
+    public EnchantDatabase EnchantDatabase => _enchantDatabase;
+
     private NetworkManager _networkManager;
     private ItemUidGenerator _uidGenerator;
 
     public Item GetPrefab(int itemId) => _itemDatabase.GetPrefab(itemId);
+
+    public bool ApplyItemState(Item item, EItemRarity rarity, EnchantState state)
+    {
+        if (item is not Weapon weapon)
+            return item.SetRarity(rarity);
+        System.Collections.Generic.List<EnchantData> definitions = new();
+        bool empty = false;
+        for (int i = 0; i < 3; i++)
+        {
+            int id = state.GetId(i);
+            if (id == 0)
+            {
+                empty = true;
+                continue;
+            }
+            EnchantData data = _enchantDatabase != null ? _enchantDatabase.GetEnchant(id) : null;
+            if (empty || data == null)
+            {
+                Debug.LogError($"Unknown or misplaced enchant ID {id}.", this);
+                return false;
+            }
+            definitions.Add(data);
+        }
+        return weapon.SetEnchants(definitions, rarity);
+    }
 
     private void Awake()
     {

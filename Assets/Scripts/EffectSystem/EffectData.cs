@@ -9,6 +9,7 @@ public abstract class EffectData : ScriptableObject
     public Sprite SpriteIcon;
     public Color EffectColor = Color.white;
     public bool IsBuff;
+    public EActorStatus Status;
     public bool CanPurged = true;
     public bool Stackable;
     public bool RestartOnReapply = true;

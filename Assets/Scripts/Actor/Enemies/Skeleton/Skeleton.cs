@@ -25,6 +25,7 @@ public sealed class Skeleton : Enemy
 
     public event Action<Vector2> AimChanged;
     public event Action<string> AnimationTriggered;
+    protected override State ChaseState => GetState<SkeletonChaseState>();
     protected override State InitialState => GetState<SkeletonAriseState>();
     protected override State DeadState => GetState<SkeletonDeathState>();
 
@@ -56,8 +57,6 @@ public sealed class Skeleton : Enemy
 
     protected override void Update()
     {
-        if (!_isMainTargetLocked && TemporaryTarget != null && !IsInRange(TemporaryTarget))
-            ClearTemporaryTarget();
         if (CurrentState != null && !Health.IsDead && Time.time >= _nextTargetSearch)
         {
             _nextTargetSearch = Time.time + 0.2f;
@@ -74,6 +73,8 @@ public sealed class Skeleton : Enemy
 
     private void FindTarget()
     {
+        if (TemporaryTarget != null)
+            return;
         if (_isMainTargetLocked && MainTarget != null)
             return;
         _isMainTargetLocked = false;
@@ -128,7 +129,7 @@ public sealed class Skeleton : Enemy
     public override void Chase(Transform target)
     {
         SetAim(target.position - _weaponAim.position);
-        _body.linearVelocity = ((Vector2)(target.position - transform.position)).normalized * Stats.MoveSpeed.Value;
+        _body.linearVelocity = GetChaseDirection(target.position) * Stats.MoveSpeed.Value;
         _animator.SetBool("IsMoving", true);
     }
 
@@ -157,10 +158,11 @@ public sealed class Skeleton : Enemy
 
     public void ReleaseArrow()
     {
-        if (!isActiveAndEnabled || !_isShooting || Health.IsDead)
+        if (!isActiveAndEnabled || !_isShooting || Health.IsDead || IsStunned)
             return;
         _isShooting = false;
-        SkeletonArrow arrow = Instantiate(_arrowPrefab, _muzzle.position, Quaternion.identity);
+        SkeletonArrow arrow = GetComponent<NetworkObject>().NetworkManager.GetComponent<NetworkObjectPool>()
+            .GetObject(_arrowPrefab, _muzzle.position, Quaternion.identity);
         ProjectileData data = new ProjectileData
         {
             Direction = _shotDirection,

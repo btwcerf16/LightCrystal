@@ -10,6 +10,7 @@ public sealed class NetworkShopSummonZone : NetworkBehaviour
     private readonly NetworkVariable<double> _startedAt = new();
     private ShopSummonZone _zone;
     private double _lastTick;
+    private bool _waitForWave;
 
     public float Capacity => _capacity.Value;
 
@@ -36,11 +37,29 @@ public sealed class NetworkShopSummonZone : NetworkBehaviour
         if (!IsServer || now - _lastTick < 0.1)
             return;
 
+        ProcessZone(now);
+        if (_zone.IsComplete && !_waitForWave)
+            CreateShop();
+    }
+
+    private void ProcessZone(double now)
+    {
         _zone.Process((float)(now - _lastTick), HasPlayer());
         _lastTick = now;
         _capacity.Value = _zone.Capacity;
-        if (_zone.IsComplete)
-            CreateShop();
+    }
+
+    public void SetWaitForWave(bool waitForWave)
+    {
+        _waitForWave = waitForWave;
+    }
+
+    public void OpenShop()
+    {
+        if (!IsServer || !IsSpawned)
+            return;
+        ProcessZone(NetworkManager.ServerTime.Time);
+        CreateShop();
     }
 
     private bool HasPlayer()

@@ -1,7 +1,7 @@
 using Unity.Netcode;
 using UnityEngine;
 
-public class WorldItem : NetworkBehaviour
+public class WorldItem : NetworkBehaviour, ITooltipSource
 {
     [SerializeField] private GameObject _itemPrefab;
     [SerializeField] private ItemDatabase _itemDatabase;
@@ -13,11 +13,29 @@ public class WorldItem : NetworkBehaviour
     private bool _hasPendingItem;
     private bool _initializeForSale;
 
+    private readonly NetworkVariable<EItemRarity> _rarity = new();
+    private readonly NetworkVariable<EnchantState> _enchants = new();
+    public EItemRarity Rarity => _rarity.Value;
+    public EnchantState Enchants => _enchants.Value;
+
     private readonly NetworkVariable<bool> _isForSale = new(false);
     private readonly NetworkVariable<int> _itemId = new NetworkVariable<int>();
     private readonly NetworkVariable<ulong> _uid = new NetworkVariable<ulong>();
     private readonly NetworkVariable<bool> _isVisible = new NetworkVariable<bool>(true);
     private readonly NetworkVariable<Vector2> _position = new NetworkVariable<Vector2>();
+
+    public string TooltipTitle => ItemPrefab != null ? ItemPrefab.DisplayName : "Предмет";
+    public float TooltipDelay => 0f;
+    public string TooltipDescription
+    {
+        get
+        {
+            Item prefab = ItemPrefab;
+            if (prefab == null)
+                return "";
+            return prefab.Description + "\n\n" + prefab.StatsDescription;
+        }
+    }
 
     public bool IsForSale => _isForSale.Value;
     public int Price => ItemPrefab != null ? Mathf.Max(0, ItemPrefab.Price) : 0;
@@ -89,6 +107,8 @@ public class WorldItem : NetworkBehaviour
         if (!IsServer)
             return;
 
+        _rarity.Value = item.Rarity;
+        _enchants.Value = item is Weapon weapon ? weapon.GetEnchantState() : default;
         _isForSale.Value = isForSale;
         _itemId.Value = item.ItemId;
         _uid.Value = item.Uid != 0 ? item.Uid : NetworkManager.GetComponent<ItemUidGenerator>().GenerateUid();

@@ -830,7 +830,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.2947668, g: 0.29753572, b: 0.3018868, a: 0}
+  m_BackGroundColor: {r: 0.006, g: 0.009, b: 0.012, a: 1}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -1335,7 +1335,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1180138589939634847, guid: cba775c4858b7bf41aa596de2b663b06, type: 3}
       propertyPath: GlobalObjectIdHash
-      value: 915727131
+      value: 3659172404
       objectReference: {fileID: 0}
     - target: {fileID: 1180138589939634847, guid: cba775c4858b7bf41aa596de2b663b06, type: 3}
       propertyPath: SceneMigrationSynchronization
@@ -5077,6 +5077,9 @@ GameObject:
   - component: {fileID: 2121476095}
   - component: {fileID: 2121476096}
   - component: {fileID: 2121476097}
+  - component: {fileID: 2121476098}
+  - component: {fileID: 2121476099}
+  - component: {fileID: 2121476100}
   m_Layer: 0
   m_Name: NetworkManager
   m_TagString: Untagged
@@ -5226,6 +5229,55 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ItemFactory
   _itemDatabase: {fileID: 11400000, guid: 9a9431e9f0574b108ea8a4e14ceedeb3, type: 2}
+  _enchantDatabase: {fileID: 11400000, guid: d96ea67d00bbb914784dae4b7c8c0875, type: 2}
+--- !u!114 &2121476098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2121476090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc7401b34cf7ccc459926a3af43d502d, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::WaveDirector
+  _enemyDatabase: {fileID: 11400000, guid: 2db1efbd41b741489d75aad158b563e3, type: 2}
+  _mainTarget: {fileID: 0}
+  _spawnArea: {fileID: 0}
+  _minimumCrystalDistance: 20
+  _waveBudget: 10
+  _budgetPerWave: 5
+  _calmBudget: 4
+  _enemiesPerSubwave: 3
+  _initialCalmDuration: 20
+  _calmDurationPerWave: 5
+--- !u!114 &2121476099
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2121476090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 195ca37095bd4a82b917c5f86cac481e, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkWaveDirector
+  _shopZonePrefab: {fileID: 8618744320305533015, guid: 52f10192a4d847048bce715a46d5e215, type: 3}
+  _zoneMinimumCrystalDistance: 30
+--- !u!114 &2121476100
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2121476090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0067d32b51fb41b5ab5939e7e8b0dbaf, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkObjectPool
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

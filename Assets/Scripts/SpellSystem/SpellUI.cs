@@ -9,6 +9,8 @@ using UnityEngine.UI;
 [RequireComponent(typeof(SpellHolder), typeof(NetworkActorVitals), typeof(PlayerSlotBindings))]
 public sealed class SpellUI : NetworkBehaviour
 {
+    public float Width => Mathf.Max(1, GetComponent<SpellHolder>().Count) * 64f + 16f;
+
     private sealed class SlotView
     {
         public Button Button;
@@ -66,6 +68,7 @@ public sealed class SpellUI : NetworkBehaviour
 
     private void BuildSlots()
     {
+        GetComponent<PlayerHUD>().RefreshLayout();
         foreach (Transform child in _panel)
         {
             child.gameObject.SetActive(false);
@@ -141,7 +144,7 @@ public sealed class SpellUI : NetworkBehaviour
         if (_input.IsMenuOpen || Pointer.current == null)
             HideTooltip();
         else if (_hoveredIndex >= 0)
-            _tooltip.Move(Pointer.current.position.ReadValue());
+            ShowTooltip(_hoveredIndex);
         for (int i = 0; i < _slots.Count; i++)
         {
             Spell spell = _holder.Spells[i];
@@ -193,14 +196,15 @@ public sealed class SpellUI : NetworkBehaviour
         if (config == null)
             return;
         _hoveredIndex = index;
-        string description = config.Description;
-        if (!string.IsNullOrEmpty(config.Stats))
-            description += "\n\n" + config.Stats;
+        Spell spell = index < _holder.Spells.Count ? _holder.Spells[index] : null;
+        string description = spell != null ? spell.Description : config.Description;
+        string stats = spell != null ? spell.StatsDescription : config.Stats;
+        if (!string.IsNullOrEmpty(stats))
+            description += "\n\n" + stats;
         if (config.IsPassive)
             description += "\n\nПассивная способность";
         else
         {
-            Spell spell = index < _holder.Spells.Count ? _holder.Spells[index] : null;
             float cooldown = spell != null ? spell.CooldownTime : config.CooldownTime;
             description += $"\n\nРассудок: {config.SanityCost:0.#}\nКулдаун: {cooldown:0.#} с";
         }

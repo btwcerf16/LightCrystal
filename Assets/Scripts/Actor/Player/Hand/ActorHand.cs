@@ -8,6 +8,13 @@ public sealed class ActorHand : MonoBehaviour
     [SerializeField] private WorldItem _worldItemPrefab;
     [SerializeField, Min(0f)] private float _maxRadius = 1f;
 
+    private EffectHandler _effects;
+
+    private void Awake()
+    {
+        _effects = GetComponentInParent<EffectHandler>();
+    }
+
     public Vector2 CurrentOffset => _handTransform.localPosition;
     public Transform HandTransform => _handTransform;
     public Vector2 Position => _handTransform.position;
@@ -55,6 +62,8 @@ public sealed class ActorHand : MonoBehaviour
 
     public void SetOffset(Vector2 offset)
     {
+        if (_effects != null && _effects.IsStunned)
+            return;
         Offset = ClampOffset(offset);
         _handTransform.localPosition = Offset;
 

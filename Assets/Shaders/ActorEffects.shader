@@ -10,6 +10,8 @@ Shader "LightCrystal/Actor Effects"
         _EffectAmount("Effect Amount", Range(0,1)) = 0
         _HitColor("Hit Color", Color) = (1,0.92,0.72,1)
         _HitAmount("Hit Amount", Range(0,1)) = 0
+        _OutlineColor("Outline Color", Color) = (1,0.15,0.13,1)
+        _OutlineWidth("Outline Width (Pixels)", Range(0,2)) = 0
 
         // Legacy properties. They're here so that materials using this shader can gracefully fallback to the legacy sprite shader.
         [HideInInspector] _Color("Tint", Color) = (1,1,1,1)

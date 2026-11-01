@@ -14,6 +14,8 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
     private PointerEventData _pointerData;
     private PlayerInputReader _input;
     private Camera _camera;
+    private ActorStats _stats;
+    private EnchantDatabase _enchantDatabase;
 
     public override void OnNetworkSpawn() => Bind();
     public override void OnGainedOwnership() => Bind();
@@ -27,6 +29,8 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
         if (!IsSpawned || !IsClient || !IsOwner || !isActiveAndEnabled || _tooltip != null)
             return;
         _input = GetComponent<PlayerInputReader>();
+        _stats = GetComponent<ActorStats>();
+        _enchantDatabase = NetworkManager.GetComponent<ItemFactory>().EnchantDatabase;
         if (EventSystem.current == null)
             new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
         _pointerData = new PointerEventData(EventSystem.current);
@@ -51,8 +55,16 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
         }
         if (source is Item item)
             _tooltip.SetRarity(item.Rarity);
+        else if (source is WorldItem worldItem)
+            _tooltip.SetRarity(worldItem.Rarity);
         else
             _tooltip.SetBorderColor(new Color(0.3f, 0.75f, 0.85f));
+        if (source is Weapon weapon)
+            _tooltip.SetEnchantments(weapon.GetEnchantState(), weapon.Rarity, _enchantDatabase, weapon.OwnerStats != null ? weapon.OwnerStats : _stats);
+        else if (source is WorldItem droppedWeapon && droppedWeapon.ItemPrefab is Weapon)
+            _tooltip.SetEnchantments(droppedWeapon.Enchants, droppedWeapon.Rarity, _enchantDatabase, _stats);
+        else
+            _tooltip.ClearEnchantments();
         _tooltip.Show(source, source.TooltipTitle, source.TooltipDescription, pointer, source.TooltipDelay);
     }
 
@@ -85,7 +97,7 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
         {
             WorldItem worldItem = hit.GetComponentInParent<WorldItem>();
             if (worldItem != null && worldItem.CanBePicked)
-                return worldItem.ItemPrefab;
+                return worldItem;
             ITooltipSource source = hit.GetComponentInParent<ITooltipSource>();
             if (source != null)
                 return source;

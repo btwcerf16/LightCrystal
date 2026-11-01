@@ -18,13 +18,16 @@ public sealed class ActorArsenal : MonoBehaviour
     public event Action<int> WeaponDropRequested;
 
     private bool _canUseWeapons = true;
-    public bool CanUseWeapons => _canUseWeapons && ActiveWeapon != null;
+    public bool CanUseWeapons => _canUseWeapons && ActiveWeapon != null && ActiveWeapon.IsAvailable;
 
     private void Awake()
     {
         for (int i = 0; i < _weapons.Length; i++)
             if (_weapons[i] != null)
+            {
+                _weapons[i].StateChanged += OnStateChanged;
                 _weapons[i].gameObject.SetActive(i == _activeWeaponIndex);
+            }
         ActiveWeapon?.Equip();
     }
 
@@ -81,7 +84,11 @@ public sealed class ActorArsenal : MonoBehaviour
                 _weapons[index].gameObject.SetActive(false);
             }
         }
+        if (_weapons[index] != null)
+            _weapons[index].StateChanged -= OnStateChanged;
         _weapons[index] = weapon;
+        if (weapon != null)
+            weapon.StateChanged += OnStateChanged;
         if (weapon != null)
             weapon.gameObject.SetActive(index == _activeWeaponIndex);
         if (index == _activeWeaponIndex)
@@ -171,5 +178,17 @@ public sealed class ActorArsenal : MonoBehaviour
     {
         return index >= 0 && index < _weapons.Length && _weapons[index] != null;
     }
+    private void OnStateChanged()
+    {
+        ContentsChanged?.Invoke();
+    }
+
+    private void OnDestroy()
+    {
+        foreach (Weapon weapon in _weapons)
+            if (weapon != null)
+                weapon.StateChanged -= OnStateChanged;
+    }
+
     public void SetCanUseWeapon(bool canUseWeapon) { _canUseWeapons = canUseWeapon; }
 }

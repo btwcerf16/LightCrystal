@@ -28,6 +28,6 @@ Material:
     - _Phase: 0
     - _Progress: 0
     m_Colors:
-    - _Color: {r: 0.24999997, g: 0.85, b: 1, a: 1}
+    - _Color: {r: 0.86, g: 0.61, b: 0.28, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

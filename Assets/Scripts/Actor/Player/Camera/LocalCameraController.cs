@@ -1,4 +1,4 @@
-﻿using Cinemachine;
+using Cinemachine;
 using UnityEngine;
 
 public class LocalCameraController : MonoBehaviour
@@ -24,6 +24,11 @@ public class LocalCameraController : MonoBehaviour
     {
         _shake.StopShake();
         _virtualCamera.Follow = target;
+    }
+
+    public void ShakeWeaponImpact(bool heavy)
+    {
+        _shake.ShakeCamera(heavy ? 0.25f : 0.14f, heavy ? 0.22f : 0.16f);
     }
 
     public void ShakeOnDamage(bool receivedDamage)

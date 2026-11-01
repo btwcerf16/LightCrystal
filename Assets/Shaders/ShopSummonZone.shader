@@ -2,7 +2,7 @@ Shader "LightCrystal/Shop Summon Zone"
 {
     Properties
     {
-        _Color("Color", Color) = (0.25,0.85,1,1)
+        _Color("Color", Color) = (0.86,0.61,0.28,1)
         _Progress("Progress", Range(0,1)) = 0
         _Phase("Wave Phase", Range(0,1)) = 0
     }
@@ -33,16 +33,23 @@ Shader "LightCrystal/Shop Summon Zone"
                 output.uv = input.uv;
                 return output;
             }
+            float Line(float distance, float thickness)
+            {
+                return 1.0 - smoothstep(thickness, thickness + 0.012, abs(distance));
+            }
             half4 Frag(Varyings input) : SV_Target
             {
-                float radius = length(input.uv * 2.0 - 1.0);
-                float aa = max(fwidth(radius), 0.003);
-                float inside = 1.0 - smoothstep(0.995, 1.0, radius);
-                float border = smoothstep(0.97 - aa, 0.98, radius) * inside;
-                float wave = 1.0 - smoothstep(0.015, 0.05 + aa, abs(radius - _Phase));
-                float alpha = max(border * 0.9, wave * lerp(0.08, 0.65, _Progress) * inside);
-                alpha = max(alpha, inside * lerp(0.015, 0.05, _Progress));
-                return half4(_Color.rgb, alpha * _Color.a);
+                float2 p = (floor(input.uv * 160.0) + 0.5) / 160.0 * 2.0 - 1.0;
+                float radius = length(p);
+                float angle = (atan2(p.y, p.x) + PI) / TWO_PI;
+                float segments = step(0.14, frac(angle * 16.0));
+                float outer = Line(radius - 0.94, 0.005) * segments;
+                float arc = Line(radius - 0.94, 0.005) * step(angle, _Progress) * step(0.001, _Progress);
+                float inside = 1.0 - smoothstep(0.94, 1.0, radius);
+                float wave = Line(radius - _Phase * 0.94, 0.004) * inside;
+                float alpha = max(outer * 0.48, arc * 0.9);
+                alpha = max(alpha, wave * lerp(0.025, 0.19, _Progress));
+                return half4(_Color.rgb, saturate(alpha) * _Color.a);
             }
             ENDHLSL
         }

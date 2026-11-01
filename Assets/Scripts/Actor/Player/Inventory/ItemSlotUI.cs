@@ -10,7 +10,6 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
     private EItemRarity _shownRarity;
     private ItemRarityBorder _ornament;
     private Image _icon;
-    private Text _name;
     private Component _container;
     private int _index;
     private Action<int, int> _swap;
@@ -33,19 +32,11 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
         Outline outline = GetComponent<Outline>();
         if (outline != null)
             outline.enabled = false;
-        RectTransform icon = Child("Icon", new Vector2(0f, 0.26f), new Vector2(1f, 0.92f));
+        RectTransform icon = Child("Icon", new Vector2(0f, 0.12f), new Vector2(1f, 0.88f));
         _icon = icon.gameObject.AddComponent<Image>();
         _icon.preserveAspect = true;
         _icon.raycastTarget = false;
-        RectTransform nameRect = Child("ItemName", Vector2.zero, new Vector2(1f, 0.26f));
-        _name = nameRect.gameObject.AddComponent<Text>();
-        _name.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-        _name.fontSize = 9;
-        _name.alignment = TextAnchor.MiddleCenter;
-        _name.color = new Color(0.84f, 0.8f, 0.72f);
-        _name.raycastTarget = false;
-
-        RectTransform cooldown = Child("Cooldown", new Vector2(0f, 0.26f), new Vector2(1f, 0.92f));
+        RectTransform cooldown = Child("Cooldown", new Vector2(0f, 0.12f), new Vector2(1f, 0.88f));
         _cooldownPanel = cooldown.gameObject;
         Image shade = new GameObject("Shade", typeof(RectTransform), typeof(Image)).GetComponent<Image>();
         shade.transform.SetParent(cooldown, false);
@@ -62,13 +53,14 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
         timer.anchorMax = Vector2.one;
         timer.offsetMin = timer.offsetMax = Vector2.zero;
         _cooldownText = timer.gameObject.AddComponent<Text>();
-        _cooldownText.font = _name.font;
+        _cooldownText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         _cooldownText.fontSize = 18;
         _cooldownText.alignment = TextAnchor.MiddleCenter;
         _cooldownText.color = new Color(0.95f, 0.91f, 0.82f);
         _cooldownText.raycastTarget = false;
         _ornament = ItemRarityBorder.Create(transform);
         _ornament.DrawFrame = true;
+        _ornament.transform.SetAsFirstSibling();
         Refresh(_getItem());
         RefreshCooldown(_getItem());
     }
@@ -130,6 +122,7 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
         Item item = _getItem?.Invoke();
         if (item != _shownItem || (item != null && item.Rarity != _shownRarity))
             Refresh(item);
+        _icon.color = item is Weapon weapon && !weapon.IsAvailable ? new Color(0.35f, 0.35f, 0.35f) : Color.white;
         RefreshCooldown(item);
     }
 
@@ -160,7 +153,6 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
             : new Color(0.16f, 0.145f, 0.12f);
         _icon.sprite = item != null ? item.Icon : null;
         _icon.enabled = _icon.sprite != null;
-        _name.text = item != null ? item.DisplayName : "";
     }
 
     private RectTransform Child(string name, Vector2 min, Vector2 max)

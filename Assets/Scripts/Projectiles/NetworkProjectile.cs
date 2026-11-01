@@ -28,6 +28,6 @@ public sealed class NetworkProjectile : NetworkBehaviour
     private void Despawn()
     {
         if (IsSpawned && IsServer)
-            NetworkObject.Despawn();
+            NetworkManager.GetComponent<NetworkObjectPool>().ReturnObject(NetworkObject);
     }
 }

@@ -13,6 +13,8 @@ public abstract class Item : MonoBehaviour, ITooltipSource
 
     private NetworkObject _ownerNetworkObject;
     private ActorStats _ownerStats;
+    private EffectHandler _ownerEffects;
+    protected bool IsOwnerStunned => _ownerEffects != null && _ownerEffects.IsStunned;
     public GameObject WorldItem {  get; private set; }
     public bool IsEquipped { get; private set; }
     public virtual string DisplayName => name;
@@ -25,7 +27,7 @@ public abstract class Item : MonoBehaviour, ITooltipSource
     public string Description => TooltipText.Format(this, _description);
     public string StatsDescription => TooltipText.Format(this, _statsDescription);
     public string TooltipTitle => DisplayName;
-    public string TooltipDescription => string.IsNullOrEmpty(StatsDescription) ? Description : Description + "\n\n" + StatsDescription;
+    public virtual string TooltipDescription => string.IsNullOrEmpty(StatsDescription) ? Description : Description + "\n\n" + StatsDescription;
     public float TooltipDelay => 0f;
     public float CooldownDuration { get; private set; }
     public double CooldownEndsAt { get; private set; }
@@ -39,9 +41,17 @@ public abstract class Item : MonoBehaviour, ITooltipSource
         }
     }
 
+    public virtual bool SetRarity(EItemRarity rarity)
+    {
+        if (rarity < EItemRarity.Common || rarity > EItemRarity.Legendary)
+            return false;
+        _rarity = rarity;
+        return true;
+    }
+
     public bool TryUse()
     {
-        if (!IsEquipped || _ownerNetworkObject == null || !_ownerNetworkObject.IsSpawned || !_ownerNetworkObject.NetworkManager.IsServer || CooldownRemaining > 0f)
+        if (IsOwnerStunned || !IsEquipped || _ownerNetworkObject == null || !_ownerNetworkObject.IsSpawned || !_ownerNetworkObject.NetworkManager.IsServer || CooldownRemaining > 0f)
             return false;
 
         float cdr = _ownerStats != null ? _ownerStats.CooldownReduction.Value : 0f;
@@ -61,6 +71,7 @@ public abstract class Item : MonoBehaviour, ITooltipSource
     {
         _ownerNetworkObject = GetComponentInParent<NetworkObject>();
         _ownerStats = GetComponentInParent<ActorStats>();
+        _ownerEffects = GetComponentInParent<EffectHandler>();
         IsEquipped = true;
     }
 

@@ -6,6 +6,17 @@ public sealed class ShopSpawnArea : MonoBehaviour
     [SerializeField] private Tilemap _ground;
     [SerializeField, Min(0)] private int _edgePadding = 8;
 
+    public bool IsInsideMap(Vector3 position)
+    {
+        if (_ground == null)
+            return false;
+        Vector3Int cell = _ground.WorldToCell(position);
+        BoundsInt bounds = _ground.cellBounds;
+        return cell.x >= bounds.xMin + _edgePadding && cell.x < bounds.xMax - _edgePadding
+            && cell.y >= bounds.yMin + _edgePadding && cell.y < bounds.yMax - _edgePadding
+            && _ground.HasTile(cell);
+    }
+
     public bool TryGetPosition(Vector2 crystalPosition, float minimumDistance, out Vector3 position)
     {
         position = Vector3.zero;
@@ -21,7 +32,7 @@ public sealed class ShopSpawnArea : MonoBehaviour
             var cell = new Vector3Int(Random.Range(bounds.xMin + _edgePadding, bounds.xMax - _edgePadding),
                 Random.Range(bounds.yMin + _edgePadding, bounds.yMax - _edgePadding), 0);
             Vector3 candidate = _ground.GetCellCenterWorld(cell);
-            if (!_ground.HasTile(cell) || ((Vector2)candidate - crystalPosition).sqrMagnitude < minimumDistance * minimumDistance)
+            if (!IsInsideMap(candidate) || ((Vector2)candidate - crystalPosition).sqrMagnitude < minimumDistance * minimumDistance)
                 continue;
 
             bool overlapsShop = false;

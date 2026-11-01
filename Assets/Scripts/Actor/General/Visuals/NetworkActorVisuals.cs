@@ -37,13 +37,26 @@ public sealed class NetworkActorVisuals : NetworkBehaviour
 
     private void OnDamageTaken(float damage)
     {
-        FlashHitRpc();
+        FlashHitRpc(damage);
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    private void FlashHitRpc()
+    private void FlashHitRpc(float damage)
     {
         _visuals.FlashHit();
+        _visuals.ShowDamage(damage);
+    }
+
+    public void PlayExplosion(float radius)
+    {
+        if (IsSpawned && IsServer)
+            ExplosionRpc(radius);
+    }
+
+    [Rpc(SendTo.ClientsAndHost, InvokePermission = RpcInvokePermission.Server)]
+    private void ExplosionRpc(float radius)
+    {
+        _visuals.Explosion(radius);
     }
 
     private void RefreshTint()

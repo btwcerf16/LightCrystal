@@ -27,6 +27,7 @@ public sealed class NetworkGoblin : NetworkBehaviour
         {
             _goblin.AimChanged += PublishAim;
             _goblin.AnimationTriggered += PlayAnimation;
+            _goblin.SetAim(Vector2.right);
             if (_goblin.MainTarget == null)
             {
                 Crystal crystal = FindFirstObjectByType<Crystal>();

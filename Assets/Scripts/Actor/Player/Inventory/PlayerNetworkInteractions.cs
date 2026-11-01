@@ -13,6 +13,7 @@ public class PlayerNetworkInteractions : NetworkBehaviour
     private ItemFactory _itemFactory;
     private ActorWallet _wallet;
     private NetworkPlayerWallet _networkWallet;
+    private EffectHandler _effects;
 
     private Weapon _lastUsedWeapon;
     private int _lastUsedWeaponIndex;
@@ -24,6 +25,7 @@ public class PlayerNetworkInteractions : NetworkBehaviour
 
     private void Awake()
     {
+        _effects = GetComponent<EffectHandler>();
         _wallet = GetComponent<ActorWallet>();
         _networkWallet = GetComponent<NetworkPlayerWallet>();
         _inputReader = GetComponent<PlayerInputReader>();
@@ -34,6 +36,8 @@ public class PlayerNetworkInteractions : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         _itemFactory = NetworkManager.GetComponent<ItemFactory>();
+        if (IsServer && _effects != null)
+            _effects.StatusChanged += OnStatusChanged;
         if (IsServer || IsOwner)
         {
             _actorArsenal.WeaponDropRequested += OnWeaponDropRequested;
@@ -57,6 +61,8 @@ public class PlayerNetworkInteractions : NetworkBehaviour
     }
     public override void OnNetworkDespawn()
     {
+        if (_effects != null)
+            _effects.StatusChanged -= OnStatusChanged;
         _actorArsenal.WeaponDropRequested -= OnWeaponDropRequested;
         _actorInventory.ItemDropRequested -= OnItemDropRequested;
         if (!IsOwner || !_isSubscribed)
@@ -74,6 +80,12 @@ public class PlayerNetworkInteractions : NetworkBehaviour
         _inputReader.InteractPressed -= OnInteractPressed;
 
         _isSubscribed = false;
+    }
+
+    private void OnStatusChanged()
+    {
+        if (_effects.IsStunned)
+            CancelWeaponActivities();
     }
 
     private void OnDropWeaponPressed()
@@ -113,6 +125,8 @@ public class PlayerNetworkInteractions : NetworkBehaviour
 
     private void DropItemOnServer(ulong uid, bool isWeapon)
     {
+        if (_effects != null && _effects.IsStunned)
+            return;
         if (uid == 0)
             return;
 
@@ -123,6 +137,8 @@ public class PlayerNetworkInteractions : NetworkBehaviour
             if (item == null || item.Uid != uid)
                 continue;
 
+            if (item is Weapon unavailableWeapon && !unavailableWeapon.IsAvailable)
+                return;
             WorldItem worldItem = item.WorldItem != null ? item.WorldItem.GetComponent<WorldItem>() : null;
             worldItem = _hand.DropItem(worldItem, item.gameObject);
             if (worldItem == null)
@@ -156,6 +172,8 @@ public class PlayerNetworkInteractions : NetworkBehaviour
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
     private void PickupRpc(ulong worldItemId)
     {
+        if (_effects != null && _effects.IsStunned)
+            return;
         if (!NetworkManager.SpawnManager.SpawnedObjects.TryGetValue(worldItemId, out NetworkObject networkObject))
             return;
 
@@ -169,7 +187,10 @@ public class PlayerNetworkInteractions : NetworkBehaviour
         bool isWeapon = prefab is Weapon;
         int index = isWeapon ? _actorArsenal.FindEmptySlot() : _actorInventory.FindEmptySlot();
         if (index < 0)
+        {
+            _networkWallet.ShowHint(isWeapon ? "Нет места в арсенале" : "Нет места в инвентаре");
             return;
+        }
 
         if (worldItem.IsForSale && (_wallet == null || !_wallet.CanAfford(worldItem.Price)))
         {
@@ -182,6 +203,8 @@ public class PlayerNetworkInteractions : NetworkBehaviour
         if (item == null)
             return;
 
+        if (!_itemFactory.ApplyItemState(item, worldItem.Rarity, worldItem.Enchants))
+            return;
         if (!worldItem.TryPickUp(_wallet))
             return;
         item.SetWorldItem(worldItem.gameObject);
@@ -194,6 +217,8 @@ public class PlayerNetworkInteractions : NetworkBehaviour
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
     private void PrimaryUseRpc()
     {
+        if (_effects != null && _effects.IsStunned)
+            return;
         if (_lastInputType != EInputType.None)
             return;
         _lastUsedWeapon = _actorArsenal.ActiveWeapon;
@@ -220,14 +245,17 @@ public class PlayerNetworkInteractions : NetworkBehaviour
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
     private void SecondaryUseRpc()
     {
+        if (_effects != null && _effects.IsStunned)
+            return;
         if(_lastInputType != EInputType.None)
             return;
 
         _lastUsedWeapon = _actorArsenal.ActiveWeapon;
         if (_actorArsenal.CanUseWeapons && _lastUsedWeapon != null && _lastUsedWeapon.IsEquipped)
         {
+            if (!_lastUsedWeapon.BeginSecondaryUse())
+                return;
             _lastInputType = EInputType.Secondary;
-            _lastUsedWeapon.BeginSecondaryUse();
             _lastUsedWeaponIndex = _actorArsenal.ActiveWeaponIndex;
             PlayWeaponActionRpc(_lastUsedWeaponIndex, EInputType.Secondary);
         }

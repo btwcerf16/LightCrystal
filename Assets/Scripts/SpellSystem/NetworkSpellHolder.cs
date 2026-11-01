@@ -22,6 +22,7 @@ public sealed class NetworkSpellHolder : NetworkBehaviour
             for (int i = 0; i < _holder.Spells.Count; i++)
                 _cooldowns.Add(0);
             _holder.SpellCast += PublishCooldown;
+            _holder.CastFailed += ShowCastFailure;
         }
         else
         {
@@ -36,6 +37,7 @@ public sealed class NetworkSpellHolder : NetworkBehaviour
     {
         _holder.CastRequested -= RequestCast;
         _holder.SpellCast -= PublishCooldown;
+        _holder.CastFailed -= ShowCastFailure;
         _cooldowns.OnListChanged -= ReceiveCooldowns;
         _holder.ClearSpells();
     }
@@ -66,6 +68,11 @@ public sealed class NetworkSpellHolder : NetworkBehaviour
             Target = targetObject != null ? targetObject.gameObject : null,
             Caster = gameObject
         });
+    }
+
+    private void ShowCastFailure(string message)
+    {
+        GetComponent<NetworkPlayerWallet>().ShowHint(message);
     }
 
     private void PublishCooldown(int index)

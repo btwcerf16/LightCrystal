@@ -49,6 +49,19 @@ public sealed class NetworkPlayerSetup : NetworkBehaviour
         ShakeCameraRpc(false);
     }
 
+    public void PlayWeaponImpact(bool heavy)
+    {
+        if (IsSpawned && IsServer)
+            WeaponImpactRpc(heavy);
+    }
+
+    [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Server)]
+    private void WeaponImpactRpc(bool heavy)
+    {
+        if (_cameraController != null)
+            _cameraController.ShakeWeaponImpact(heavy);
+    }
+
     [Rpc(SendTo.Owner)]
     private void ShakeCameraRpc(bool receivedDamage)
     {

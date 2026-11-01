@@ -8,9 +8,13 @@ public abstract class Spell : MonoBehaviour
     protected ActorStats _ownerStats;
     private NetworkObject _networkObject;
     private ActorSanity _ownerSanity;
+    private EffectHandler _ownerEffects;
 
     public SpellConfig SpellData { get; private set; }
     public bool IsActive { get; private set; }
+    public ActorStats OwnerStats => _ownerStats;
+    public string Description => TooltipText.Format(this, SpellData.SpellDescription, SpellData);
+    public string StatsDescription => TooltipText.Format(this, SpellData.StatsDescription, SpellData);
     public double CooldownEndsAt { get; private set; }
     public float CooldownTime => SpellData.CooldownTime * (1f - _ownerStats.CooldownReduction.Value);
     public float CooldownRemaining => Mathf.Max(0f, (float)(CooldownEndsAt - CurrentTime));
@@ -30,6 +34,7 @@ public abstract class Spell : MonoBehaviour
         _ownerStats = owner.GetComponent<ActorStats>();
         _networkObject = owner.GetComponent<NetworkObject>();
         _ownerSanity = owner.GetComponent<ActorSanity>();
+        _ownerEffects = owner.GetComponent<EffectHandler>();
     }
 
     public virtual void Activate()
@@ -42,14 +47,27 @@ public abstract class Spell : MonoBehaviour
         IsActive = false;
     }
 
-    public bool TryCast(SpellCastData data)
+    public bool TryCast(SpellCastData data, out string error)
     {
+        error = null;
         data.Caster = _owner;
-        if (!IsActive || !isActiveAndEnabled || SpellData.IsPassive || CooldownRemaining > 0f || !CanCast(data))
+        if (!IsActive || !isActiveAndEnabled || SpellData.IsPassive || CooldownRemaining > 0f)
+            return false;
+
+        if (_ownerEffects != null && (_ownerEffects.IsStunned || _ownerEffects.IsSilenced))
+        {
+            error = _ownerEffects.IsStunned ? "Вы оглушены" : "Вы под действием безмолвия";
+            return false;
+        }
+
+        if (!CanCast(data))
             return false;
 
         if (SpellData.SanityCost > 0f && (_ownerSanity == null || !_ownerSanity.TrySpendSanity(SpellData.SanityCost)))
+        {
+            error = "Недостаточно рассудка";
             return false;
+        }
 
         CooldownEndsAt = CurrentTime + CooldownTime;
         Cast(data);

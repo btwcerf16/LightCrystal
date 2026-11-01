@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -9,8 +9,11 @@ public class NetworkPlayerInventory: NetworkBehaviour
     private ItemFactory _itemFactory;
 
 
+    private EffectHandler _effects;
+
     private void Awake()
     {
+        _effects = GetComponent<EffectHandler>();
         _slots = new NetworkList<NetworkInventorySlot>(readPerm:NetworkVariableReadPermission.Everyone,
             writePerm:NetworkVariableWritePermission.Server);
         _inventory = GetComponent<Inventory>();
@@ -79,6 +82,8 @@ public class NetworkPlayerInventory: NetworkBehaviour
             Item item = _itemFactory.GetOrCreateItem(slot.ItemId, slot.Uid, transform);
             if (item != null)
             {
+                if (!_itemFactory.ApplyItemState(item, slot.Rarity, slot.Enchants))
+                    continue;
                 item.SetCooldown(slot.CooldownDuration, slot.CooldownEndsAt);
                 _inventory.SetItem(slot.SlotIndex, slot.Uid);
             }
@@ -95,15 +100,20 @@ public class NetworkPlayerInventory: NetworkBehaviour
             bool isOccupied = item != null;
             int itemId = isOccupied ? item.ItemId : 0;
             ulong uid = isOccupied ? item.Uid : 0;
+            EItemRarity rarity = isOccupied ? item.Rarity : EItemRarity.Common;
+            EnchantState enchants = item is Weapon enchantedWeapon ? enchantedWeapon.GetEnchantState() : default;
             float cooldownDuration = isOccupied ? item.CooldownDuration : 0f;
             double cooldownEndsAt = isOccupied ? item.CooldownEndsAt : 0d;
 
             if (slot.IsConquered != isOccupied || slot.ItemId != itemId || slot.Uid != uid
+                || slot.Rarity != rarity || !slot.Enchants.Equals(enchants)
                 || slot.CooldownDuration != cooldownDuration || slot.CooldownEndsAt != cooldownEndsAt)
             {
                 slot.IsConquered = isOccupied;
                 slot.ItemId = itemId;
                 slot.Uid = uid;
+                slot.Rarity = rarity;
+                slot.Enchants = enchants;
                 slot.CooldownDuration = cooldownDuration;
                 slot.CooldownEndsAt = cooldownEndsAt;
                 _slots[i] = slot;
@@ -113,6 +123,8 @@ public class NetworkPlayerInventory: NetworkBehaviour
     }
     private void OnSlotChangeRequested(int previousIndex, int newIndex)
     {
+        if (_effects != null && _effects.IsStunned)
+            return;
         if (IsServer)
             _inventory.ChangeItemSlot(previousIndex, newIndex);
         else
@@ -121,6 +133,8 @@ public class NetworkPlayerInventory: NetworkBehaviour
 
     private void OnItemUseRequested(int index)
     {
+        if (_effects != null && _effects.IsStunned)
+            return;
         if (IsServer)
             _inventory.UseItem(index);
         else
@@ -130,12 +144,16 @@ public class NetworkPlayerInventory: NetworkBehaviour
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
     private void UseItemRpc(int index)
     {
+        if (_effects != null && _effects.IsStunned)
+            return;
         _inventory.UseItem(index);
     }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
     public void ChangeInventorySlotsRpc(int previousIndex, int newIndex)
     {
+        if (_effects != null && _effects.IsStunned)
+            return;
         _inventory.ChangeItemSlot(previousIndex, newIndex);
     }
 }

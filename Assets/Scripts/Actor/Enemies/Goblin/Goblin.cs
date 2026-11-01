@@ -26,6 +26,7 @@ public sealed class Goblin : Enemy
 
     public event Action<Vector2> AimChanged;
 
+    protected override State ChaseState => GetState<GoblinChaseState>();
     protected override State InitialState => GetState<GoblinAriseState>();
     protected override State DeadState => GetState<GoblinDeathState>();
 
@@ -61,8 +62,6 @@ public sealed class Goblin : Enemy
 
     protected override void Update()
     {
-        if (!_isMainTargetLocked && TemporaryTarget != null && !IsInRange(TemporaryTarget))
-            ClearTemporaryTarget();
         if (CurrentState != null && !Health.IsDead && Time.time >= _nextTargetSearch)
         {
             _nextTargetSearch = Time.time + 0.2f;
@@ -104,6 +103,8 @@ public sealed class Goblin : Enemy
 
     private void FindTarget()
     {
+        if (TemporaryTarget != null)
+            return;
         if (_isMainTargetLocked && MainTarget != null)
             return;
         _isMainTargetLocked = false;
@@ -148,7 +149,7 @@ public sealed class Goblin : Enemy
     public override void Chase(Transform target)
     {
         SetAim(AimAt(target));
-        _moveDirection = ((Vector2)target.position - _body.position).normalized;
+        _moveDirection = GetChaseDirection(target.position);
         _animator.SetBool("IsMoving", _moveDirection.sqrMagnitude > 0f);
     }
 
@@ -178,7 +179,7 @@ public sealed class Goblin : Enemy
 
     public void StartThrust()
     {
-        if (!isActiveAndEnabled || !_isAttacking || Health.IsDead)
+        if (!isActiveAndEnabled || !_isAttacking || Health.IsDead || IsStunned)
             return;
         foreach (Collider2D target in Physics2D.OverlapCircleAll(_attackPoint.position, _attackRadius, _targetMask))
         {

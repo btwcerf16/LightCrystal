@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adc725940b564d6fb3e297e9e0ca0fbf, type: 3}
+  m_Name: EnchantDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::EnchantDatabase
+  _enchants:
+  - {fileID: 11400000, guid: c46a0af0e2c4d1d458162e613ac14605, type: 2}
+  - {fileID: 11400000, guid: 2128f2d02712e0c48970548b031bc6e7, type: 2}
+  - {fileID: 11400000, guid: 18af2c8bae00584458d91cfcf8325af0, type: 2}
+  - {fileID: 11400000, guid: b781732d288012c4e8278afe8236bfdc, type: 2}

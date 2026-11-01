@@ -21,6 +21,7 @@ public sealed class SpellHolder : MonoBehaviour
     }
     public event Action<int, SpellCastData> CastRequested;
     public event Action<int> SpellCast;
+    public event Action<string> CastFailed;
 
     private void Awake()
     {
@@ -62,8 +63,12 @@ public sealed class SpellHolder : MonoBehaviour
             return;
         }
         Spell spell = _spells[index];
-        if (spell != null && spell.TryCast(data))
+        if (spell == null)
+            return;
+        if (spell.TryCast(data, out string error))
             SpellCast?.Invoke(index);
+        else if (error != null)
+            CastFailed?.Invoke(error);
     }
 
     public void ClearSpells()

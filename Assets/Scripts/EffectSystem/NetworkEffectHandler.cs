@@ -8,6 +8,7 @@ public sealed class NetworkEffectHandler : NetworkBehaviour
     [SerializeField] private EffectData[] _effectData = new EffectData[0];
     private NetworkList<NetworkEffectSlot> _effects;
     private EffectHandler _handler;
+    private readonly NetworkVariable<EActorStatus> _status = new();
 
     public int Count => _effects.Count;
     public event Action EffectsChanged;
@@ -23,6 +24,9 @@ public sealed class NetworkEffectHandler : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         _effects.OnListChanged += OnEffectsChanged;
+        _status.OnValueChanged += ReceiveStatus;
+        if (!IsServer)
+            _handler.SetStatus(_status.Value);
         if (IsServer)
         {
             _handler.EffectsChanged += PublishEffects;
@@ -33,7 +37,15 @@ public sealed class NetworkEffectHandler : NetworkBehaviour
     public override void OnNetworkDespawn()
     {
         _effects.OnListChanged -= OnEffectsChanged;
+        _status.OnValueChanged -= ReceiveStatus;
+        _handler.SetStatus(EActorStatus.None);
         _handler.EffectsChanged -= PublishEffects;
+    }
+
+    private void ReceiveStatus(EActorStatus previous, EActorStatus current)
+    {
+        if (!IsServer)
+            _handler.SetStatus(current);
     }
 
     private void OnEffectsChanged(NetworkListEvent<NetworkEffectSlot> change)
@@ -43,6 +55,7 @@ public sealed class NetworkEffectHandler : NetworkBehaviour
 
     private void PublishEffects()
     {
+        _status.Value = _handler.Status;
         int count = 0;
         for (int i = 0; i < _handler.ActiveEffects.Count; i++)
         {

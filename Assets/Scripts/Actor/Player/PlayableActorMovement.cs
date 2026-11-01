@@ -7,6 +7,7 @@ public sealed class PlayableActorMovement : MonoBehaviour, IMovable
     private float _moveSpeed = 5f;
 
     private Rigidbody2D _rigidbody;
+    private EffectHandler _effects;
 
     private Vector2 _moveDirection;
 
@@ -21,6 +22,7 @@ public sealed class PlayableActorMovement : MonoBehaviour, IMovable
     private void Awake()
     {
         _rigidbody = GetComponent<Rigidbody2D>();
+        _effects = GetComponent<EffectHandler>();
     }
 
     private void OnDisable()
@@ -32,7 +34,7 @@ public sealed class PlayableActorMovement : MonoBehaviour, IMovable
     {
         UpdateForce();
 
-        Vector2 movementVelocity = _moveDirection * _moveSpeed;
+        Vector2 movementVelocity = _effects != null && _effects.IsStunned ? Vector2.zero : _moveDirection * _moveSpeed;
 
         _rigidbody.linearVelocity = movementVelocity + _forceVelocity;
     }

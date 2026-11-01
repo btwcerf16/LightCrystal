@@ -5,11 +5,10 @@ using UnityEngine.UI;
 [RequireComponent(typeof(NetworkActorVitals))]
 public sealed class PlayerVitalsUI : NetworkBehaviour
 {
-    [SerializeField, Min(200f)] private float _width = 560f;
     [SerializeField] private Color _healthColor = new Color(0.19f, 0.34f, 0.23f, 1f);
     [SerializeField] private Color _sanityColor = new Color(0.72f, 0.32f, 0.075f, 1f);
 
-    public float Width => _width;
+    public float Width => GetComponent<SpellUI>().Width;
 
     private NetworkActorVitals _vitals;
     private GameObject _canvasObject;

@@ -25,6 +25,7 @@ public sealed class NetworkSkeleton : NetworkBehaviour
         {
             _skeleton.AimChanged += PublishAim;
             _skeleton.AnimationTriggered += PlayAnimation;
+            _skeleton.SetAim(Vector2.right);
             Crystal crystal = FindFirstObjectByType<Crystal>();
             if (_skeleton.MainTarget == null && crystal != null)
                 _skeleton.SetMainTarget(crystal.transform);

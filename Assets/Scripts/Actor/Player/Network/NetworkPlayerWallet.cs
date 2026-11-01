@@ -47,13 +47,18 @@ public sealed class NetworkPlayerWallet : NetworkBehaviour
 
     public void ShowInsufficientFunds()
     {
+        ShowHint("Недостаточно средств");
+    }
+
+    public void ShowHint(string message)
+    {
         if (IsSpawned && IsServer)
-            ShowInsufficientFundsRpc();
+            ShowHintRpc(message);
     }
 
     [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Server)]
-    private void ShowInsufficientFundsRpc()
+    private void ShowHintRpc(string message)
     {
-        HintRequested?.Invoke("Недостаточно средств");
+        HintRequested?.Invoke(message);
     }
 }

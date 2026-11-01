@@ -12,8 +12,11 @@ public sealed class NetworkPlayerArsenal : NetworkBehaviour
     private ActorHand _hand;
     private ItemFactory _itemFactory;
 
+    private EffectHandler _effects;
+
     private void Awake()
     {
+        _effects = GetComponent<EffectHandler>();
         _arsenal = GetComponent<ActorArsenal>();
         _hand = GetComponentInChildren<ActorHand>();
         _slots = new NetworkList<NetworkInventorySlot>(readPerm: NetworkVariableReadPermission.Everyone,
@@ -70,17 +73,24 @@ public sealed class NetworkPlayerArsenal : NetworkBehaviour
             var slot = _slots[i];
             var weapon = _arsenal.GetWeapon(i);
             bool isOccupied = weapon != null;
+            bool unavailable = isOccupied && !weapon.IsAvailable;
             int itemId = isOccupied ? weapon.ItemId : 0;
             ulong uid = isOccupied ? weapon.Uid : 0;
+            EItemRarity rarity = isOccupied ? weapon.Rarity : EItemRarity.Common;
+            EnchantState enchants = weapon is Weapon enchantedWeapon ? enchantedWeapon.GetEnchantState() : default;
             float cooldownDuration = isOccupied ? weapon.CooldownDuration : 0f;
             double cooldownEndsAt = isOccupied ? weapon.CooldownEndsAt : 0d;
 
-            if (slot.IsConquered != isOccupied || slot.ItemId != itemId || slot.Uid != uid
+            if (slot.IsConquered != isOccupied || slot.IsUnavailable != unavailable || slot.ItemId != itemId || slot.Uid != uid
+                || slot.Rarity != rarity || !slot.Enchants.Equals(enchants)
                 || slot.CooldownDuration != cooldownDuration || slot.CooldownEndsAt != cooldownEndsAt)
             {
                 slot.IsConquered = isOccupied;
+                slot.IsUnavailable = unavailable;
                 slot.ItemId = itemId;
                 slot.Uid = uid;
+                slot.Rarity = rarity;
+                slot.Enchants = enchants;
                 slot.CooldownDuration = cooldownDuration;
                 slot.CooldownEndsAt = cooldownEndsAt;
                 _slots[i] = slot;
@@ -109,8 +119,11 @@ public sealed class NetworkPlayerArsenal : NetworkBehaviour
             }
 
             Item item = _itemFactory.GetOrCreateItem(slot.ItemId, slot.Uid, _hand.HandTransform);
-            if (item is Weapon)
+            if (item is Weapon receivedWeapon)
             {
+                if (!_itemFactory.ApplyItemState(item, slot.Rarity, slot.Enchants))
+                    continue;
+                receivedWeapon.SetAvailable(!slot.IsUnavailable);
                 item.SetCooldown(slot.CooldownDuration, slot.CooldownEndsAt);
                 _arsenal.SetWeapon(slot.SlotIndex, slot.Uid);
             }
@@ -130,6 +143,8 @@ public sealed class NetworkPlayerArsenal : NetworkBehaviour
 
     private void OnSlotChangeRequested(int previousIndex, int newIndex)
     {
+        if (_effects != null && _effects.IsStunned)
+            return;
         if (IsServer)
             _arsenal.ChangeWeaponSlot(previousIndex, newIndex);
         else
@@ -138,6 +153,8 @@ public sealed class NetworkPlayerArsenal : NetworkBehaviour
 
     private void OnWeaponSelectionRequested(int index)
     {
+        if (_effects != null && _effects.IsStunned)
+            return;
         if (IsServer)
             _arsenal.TrySelectWeapon(index);
         else
@@ -147,12 +164,16 @@ public sealed class NetworkPlayerArsenal : NetworkBehaviour
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
     private void ChangeWeaponSlotsRpc(int previousIndex, int newIndex)
     {
+        if (_effects != null && _effects.IsStunned)
+            return;
         _arsenal.ChangeWeaponSlot(previousIndex, newIndex);
     }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
     private void SelectWeaponRpc(int index)
     {
+        if (_effects != null && _effects.IsStunned)
+            return;
         _arsenal.TrySelectWeapon(index);
     }
 }

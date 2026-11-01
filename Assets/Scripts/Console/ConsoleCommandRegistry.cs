@@ -75,6 +75,16 @@ public sealed class ConsoleCommandRegistry
                 matches.Sort(StringComparer.OrdinalIgnoreCase);
                 return matches;
             }
+            if (parameters[argumentIndex].ParameterType == typeof(EnchantData))
+            {
+                EnchantDatabase database = Unity.Netcode.NetworkManager.Singleton?.GetComponent<ItemFactory>()?.EnchantDatabase;
+                if (database != null)
+                    foreach (EnchantData enchant in database.Enchants)
+                        if (enchant != null && enchant.name.StartsWith(fragment, StringComparison.OrdinalIgnoreCase))
+                            matches.Add(leading + (enchant.name.Contains(" ") ? "\"" + enchant.name + "\"" : enchant.name));
+                matches.Sort(StringComparer.OrdinalIgnoreCase);
+                return matches;
+            }
             if (parameters[argumentIndex].GetCustomAttribute<ConsoleStatNameAttribute>() == null)
                 return matches;
 
@@ -138,21 +148,21 @@ public sealed class ConsoleCommandRegistry
         if (words.Count == 0)
             return null;
         if (!_commands.TryGetValue(words[0], out List<Command> commands))
-            throw new ArgumentException("Неизвестная команда. Введи Help.");
+            throw new ArgumentException("РќРµРёР·РІРµСЃС‚РЅР°СЏ РєРѕРјР°РЅРґР°. Р’РІРµРґРё Help.");
         commands = ResolveTargets(commands, words, out int argumentStart);
         if (commands.Count == 0)
-            throw new ArgumentException("Команда недоступна для этой цели. Введи Players, чтобы посмотреть игроков.");
+            throw new ArgumentException("РљРѕРјР°РЅРґР° РЅРµРґРѕСЃС‚СѓРїРЅР° РґР»СЏ СЌС‚РѕР№ С†РµР»Рё. Р’РІРµРґРё Players, С‡С‚РѕР±С‹ РїРѕСЃРјРѕС‚СЂРµС‚СЊ РёРіСЂРѕРєРѕРІ.");
         if (commands.Count != 1)
-            throw new ArgumentException("Неоднозначная команда. Укажи имя класса: ClassName.MethodName. Если объекты одного класса, оставь один источник команды.");
+            throw new ArgumentException("РќРµРѕРґРЅРѕР·РЅР°С‡РЅР°СЏ РєРѕРјР°РЅРґР°. РЈРєР°Р¶Рё РёРјСЏ РєР»Р°СЃСЃР°: ClassName.MethodName. Р•СЃР»Рё РѕР±СЉРµРєС‚С‹ РѕРґРЅРѕРіРѕ РєР»Р°СЃСЃР°, РѕСЃС‚Р°РІСЊ РѕРґРёРЅ РёСЃС‚РѕС‡РЅРёРє РєРѕРјР°РЅРґС‹.");
 
         Command command = commands[0];
         if (!isServer && (command.Attribute.ServerOnly || !command.IsDefaultTarget))
-            throw new InvalidOperationException("Эта команда или управление другим игроком доступны только хосту или серверу.");
+            throw new InvalidOperationException("Р­С‚Р° РєРѕРјР°РЅРґР° РёР»Рё СѓРїСЂР°РІР»РµРЅРёРµ РґСЂСѓРіРёРј РёРіСЂРѕРєРѕРј РґРѕСЃС‚СѓРїРЅС‹ С‚РѕР»СЊРєРѕ С…РѕСЃС‚Сѓ РёР»Рё СЃРµСЂРІРµСЂСѓ.");
 
         ParameterInfo[] parameters = command.Method.GetParameters();
         int count = words.Count - argumentStart;
         if (count > parameters.Length)
-            throw new ArgumentException("Формат: " + Signature(command));
+            throw new ArgumentException("Р¤РѕСЂРјР°С‚: " + Signature(command));
 
         object[] arguments = new object[parameters.Length];
         for (int i = 0; i < parameters.Length; i++)
@@ -161,7 +171,7 @@ public sealed class ConsoleCommandRegistry
             if (i >= count)
             {
                 if (!parameter.HasDefaultValue)
-                    throw new ArgumentException("Формат: " + Signature(command));
+                    throw new ArgumentException("Р¤РѕСЂРјР°С‚: " + Signature(command));
                 arguments[i] = parameter.DefaultValue;
                 continue;
             }
@@ -172,7 +182,7 @@ public sealed class ConsoleCommandRegistry
             }
             catch (Exception error) when (error is FormatException || error is OverflowException || error is ArgumentException || error is NotSupportedException)
             {
-                throw new ArgumentException($"Неверный параметр {parameter.Name} ({parameter.ParameterType.Name}). Формат: {Signature(command)}");
+                throw new ArgumentException($"РќРµРІРµСЂРЅС‹Р№ РїР°СЂР°РјРµС‚СЂ {parameter.Name} ({parameter.ParameterType.Name}). Р¤РѕСЂРјР°С‚: {Signature(command)}");
             }
         }
 
@@ -192,7 +202,7 @@ public sealed class ConsoleCommandRegistry
         if (!string.IsNullOrWhiteSpace(name))
         {
             if (!_commands.TryGetValue(name, out List<Command> commands))
-                return "Команда не найдена.";
+                return "РљРѕРјР°РЅРґР° РЅРµ РЅР°Р№РґРµРЅР°.";
             return string.Join("\n", new HashSet<string>(commands.ConvertAll(Signature)));
         }
 
@@ -249,6 +259,14 @@ public sealed class ConsoleCommandRegistry
             if (!Enum.IsDefined(type, value))
                 throw new ArgumentException("Unknown enum value.");
             return value;
+        }
+        if (type == typeof(EnchantData))
+        {
+            EnchantDatabase database = Unity.Netcode.NetworkManager.Singleton?.GetComponent<ItemFactory>()?.EnchantDatabase;
+            EnchantData enchant = database != null ? database.GetEnchant(text) : null;
+            if (enchant == null)
+                throw new ArgumentException("Unknown enchant.");
+            return enchant;
         }
         if (type == typeof(string))
             return text;
@@ -307,7 +325,7 @@ public sealed class ConsoleCommandRegistry
             }
         }
         if (isQuoted)
-            throw new FormatException("Не закрыта кавычка.");
+            throw new FormatException("РќРµ Р·Р°РєСЂС‹С‚Р° РєР°РІС‹С‡РєР°.");
         if (isStarted)
             words.Add(word.ToString());
         return words;

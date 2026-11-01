@@ -5,6 +5,8 @@ public sealed class KnightStrike : Spell
 {
     private readonly HashSet<IDamageable> _hitTargets = new();
 
+    public float Damage => DamageCalculator.CalculateDamage(((KnightStrikeConfig)SpellData).Damage, EDamageType.Physical, _ownerStats, null);
+
     protected override void Cast(SpellCastData data)
     {
         KnightStrikeConfig config = (KnightStrikeConfig)SpellData;

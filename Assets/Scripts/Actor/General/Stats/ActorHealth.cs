@@ -5,6 +5,7 @@ using UnityEngine;
 [RequireComponent(typeof(ActorStats))]
 public sealed class ActorHealth : MonoBehaviour, IDamageable
 {
+    [SerializeField] private LayerMask _damageSourceMask = ~0;
     private ActorStats _stats;
 
     public event Action<float, float> HealthChanged;
@@ -36,6 +37,9 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
     {
         if (amount <= 0f || IsDead)
             return 0f;
+        if (_damageSourceMask.value != -1 && (attacker == null
+            || (_damageSourceMask.value & (1 << attacker.gameObject.layer)) == 0))
+            return 0f;
 
         amount = DamageCalculator.CalculateDamage(amount, damageType, attacker, _stats);
         if (amount <= 0f)
@@ -58,6 +62,13 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
             Kill();
 
         return dealtDamage;
+    }
+
+    public void ResetHealth()
+    {
+        IsDead = false;
+        CurrentHealth = MaxHealth;
+        HealthChanged?.Invoke(CurrentHealth, MaxHealth);
     }
 
     public float Heal(float amount)

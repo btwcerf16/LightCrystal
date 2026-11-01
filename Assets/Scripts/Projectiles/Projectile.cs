@@ -9,6 +9,8 @@ public abstract class Projectile : MonoBehaviour
     private Vector2 _direction;
     private float _remaining;
     private bool _isFlying;
+    private bool _isFinished;
+    protected bool IsFlying => _isFlying;
 
     protected ProjectileData Data { get; private set; }
     public event Action Finished;
@@ -19,6 +21,7 @@ public abstract class Projectile : MonoBehaviour
         _direction = data.Direction.normalized;
         _remaining = data.LifeTime;
         _isFlying = true;
+        _isFinished = false;
         float angle = Mathf.Atan2(_direction.y, _direction.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0f, 0f, angle);
     }
@@ -27,17 +30,18 @@ public abstract class Projectile : MonoBehaviour
     {
         if (!_isFlying)
             return;
-        _remaining -= Time.fixedDeltaTime;
-        if (_remaining <= 0f)
+        float deltaTime = Mathf.Min(Time.fixedDeltaTime, _remaining);
+        if (deltaTime <= 0f)
         {
-            Finish();
+            OnLifetimeExpired();
             return;
         }
 
-        float distance = Mathf.Max(0f, Data.Speed) * Time.fixedDeltaTime;
+        _remaining -= deltaTime;
+        float distance = Mathf.Max(0f, Data.Speed) * deltaTime;
         ContactFilter2D filter = new ContactFilter2D();
         filter.SetLayerMask(Data.LayerMask);
-        filter.useTriggers = false;
+        filter.useTriggers = true;
         Physics2D.CircleCast(transform.position, _radius, _direction, filter, _hits, distance);
         Collider2D closest = null;
         float closestDistance = float.PositiveInfinity;
@@ -52,10 +56,14 @@ public abstract class Projectile : MonoBehaviour
             OnHit(closest);
         else
             transform.position += (Vector3)(_direction * distance);
+        if (_isFlying && _remaining <= 0f)
+            OnLifetimeExpired();
     }
 
     protected virtual bool CanHit(Collider2D collider)
     {
+        if (collider.isTrigger && collider.GetComponentInParent<IDamageable>() == null)
+            return false;
         return Data.Attacker == null || collider.GetComponentInParent<ActorStats>() != Data.Attacker;
     }
 
@@ -69,16 +77,24 @@ public abstract class Projectile : MonoBehaviour
         Finish();
     }
 
+    protected virtual void OnLifetimeExpired() => Finish();
+    protected void StopFlight() => _isFlying = false;
+
     protected void Finish()
     {
-        if (!_isFlying)
+        if (_isFinished)
             return;
+        _isFinished = true;
         _isFlying = false;
         Finished?.Invoke();
     }
 
-    private void OnDisable()
+    protected virtual void OnDisable()
     {
         _isFlying = false;
+        _direction = Vector2.zero;
+        _remaining = 0f;
+        _hits.Clear();
+        Data = default;
     }
 }

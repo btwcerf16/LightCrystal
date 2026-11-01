@@ -9,6 +9,7 @@ public sealed class RustySword : Weapon
     [SerializeField] private float _attackRadius = 0.4f;
     [SerializeField] private TrailRenderer _trail;
     [SerializeField] private Transform _attackPointThrust;
+    [SerializeField, Min(0.01f)] private float _thrustPointSpacing = 0.8f;
     private ActorHand _hand;
     private ActorStats _stats;
     private NetworkObject _ownerNetworkObject;
@@ -18,6 +19,11 @@ public sealed class RustySword : Weapon
 
     public override string DisplayName => "Ржавый меч";
     public float SecondaryDamagePercent => SecondaryDamageMultiplier * 100f;
+    public float PrimaryDamage => DamageCalculator.CalculateDamage(CurrentDamage, EDamageType.Physical, _stats, null);
+    public float SecondaryDamage => PrimaryDamage * SecondaryDamageMultiplier;
+    public float AttackSpeed => _stats != null ? _stats.AttackSpeed.Value : 1f;
+    public override string TooltipDescription => base.TooltipDescription
+        + $"\n\nУрон ЛКМ: {PrimaryDamage:0.#}\nУрон ПКМ: {SecondaryDamage:0.#}\nСкорость атаки: {AttackSpeed:0.##}\nЦелей за удар: {TargetLimit}";
 
     private void Awake()
     {
@@ -61,7 +67,7 @@ public sealed class RustySword : Weapon
 
     public override void BeginPrimaryUse()
     {
-        if (!IsEquipped || _isAttacking)
+        if (IsOwnerStunned || !IsEquipped || _isAttacking)
             return;
 
         _isAttacking = true;
@@ -69,14 +75,15 @@ public sealed class RustySword : Weapon
         _animator.SetTrigger("ThrustHit");
     }
     public override void EndPrimaryUse() { }
-    public override void BeginSecondaryUse()
+    public override bool BeginSecondaryUse()
     {
-        if (!IsEquipped || _isAttacking)
-            return;
+        if (IsOwnerStunned || !IsEquipped || _isAttacking)
+            return false;
 
         _isAttacking = true;
         _hitTargets.Clear();
         _animator.SetTrigger("SweepHit");
+        return true;
     }
     public override void EndSecondaryUse() { }
 
@@ -94,7 +101,14 @@ public sealed class RustySword : Weapon
         StopTrail();
     }
 
-    public void StartThrust() => Attack(_attackPointThrust.position, CurrentDamage);
+    public void StartThrust(int attackPointIndex)
+    {
+        if (attackPointIndex < 1 || attackPointIndex > 3)
+            return;
+        Vector2 position = _attackPointThrust.position;
+        position += (Vector2)_attackPointThrust.up * (attackPointIndex - 2) * _thrustPointSpacing;
+        Attack(position, CurrentDamage);
+    }
 
     public void StartSweep(int attackPointIndex)
     {
@@ -125,31 +139,42 @@ public sealed class RustySword : Weapon
 
     private void Attack(Vector2 position, float damage)
     {
-        if (!IsEquipped || !_isAttacking || _ownerNetworkObject == null || !_ownerNetworkObject.IsSpawned || !_ownerNetworkObject.NetworkManager.IsServer)
+        if (IsOwnerStunned || !IsEquipped || !_isAttacking || _ownerNetworkObject == null || !_ownerNetworkObject.IsSpawned || !_ownerNetworkObject.NetworkManager.IsServer)
             return;
 
         Collider2D[] targets = Physics2D.OverlapCircleAll(position, _attackRadius);
         foreach (Collider2D target in targets)
         {
+            if (_hitTargets.Count >= TargetLimit)
+                return;
             if (target.transform.root == transform.root)
                 continue;
 
             IDamageable damageable = target.GetComponentInParent<IDamageable>();
             if (damageable != null && _hitTargets.Add(damageable))
             {
-                damageable.TakeDamage(damage, EDamageType.Physical, _stats);
+                float dealt = damageable.TakeDamage(damage, EDamageType.Physical, _stats);
+                if (dealt > 0f)
+                    NotifyHit(damageable);
+                else
+                    _hitTargets.Remove(damageable);
             }
         }
     }
 
     private void OnDrawGizmosSelected()
     {
-        if (_attackPoint == null)
-            return;
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(_attackPoint.position, _attackRadius);
-        for (int i = -1; i <= 1; i++)
-            Gizmos.DrawWireSphere(_attackPoint.position + _attackPoint.right * i, _attackRadius);
+        if (_attackPoint != null)
+        {
+            Gizmos.color = Color.red;
+            for (int i = -1; i <= 1; i++)
+                Gizmos.DrawWireSphere(_attackPoint.position + _attackPoint.right * i, _attackRadius);
+        }
+        if (_attackPointThrust != null)
+        {
+            Gizmos.color = Color.yellow;
+            for (int i = -1; i <= 1; i++)
+                Gizmos.DrawWireSphere(_attackPointThrust.position + _attackPointThrust.up * i * _thrustPointSpacing, _attackRadius);
+        }
     }
 }
