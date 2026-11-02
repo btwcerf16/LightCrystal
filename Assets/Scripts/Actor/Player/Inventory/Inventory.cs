@@ -102,11 +102,31 @@ public class Inventory : MonoBehaviour
         _items[index] = null;
         ContentsChanged?.Invoke();
     }
+    public float SpellCooldownReduction
+    {
+        get
+        {
+            float reduction = 0f;
+            foreach (Item item in _items)
+            {
+                OctarineCore core = item as OctarineCore;
+                if (core != null && core.IsEquipped)
+                    reduction += core.SpellCooldownReduction;
+            }
+            return reduction;
+        }
+    }
+
     public void UseItem(int index)
     {
         if (!HasItem(index))
             return;
-        if (_items[index].TryUse())
+        Item item = _items[index];
+        if (!item.TryUse())
+            return;
+        if (item.DestroyOnDrop)
+            RequestDropItem(index);
+        else
             ContentsChanged?.Invoke();
     }
 

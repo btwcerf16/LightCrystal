@@ -90,7 +90,7 @@ SpriteRenderer:
   m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!1 &1169456044593569600
 GameObject:
@@ -191,8 +191,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ActorVision
   _worldCamera: {fileID: 0}
   _innerRadiusPercent: 0.8
-  _innerAnglePercent: 0.85
+  _innerAnglePercent: 0.7
   _rotationOffset: -90
+  _turnSmoothTime: 0.08
 --- !u!1 &4744536051468730502
 GameObject:
   m_ObjectHideFlags: 0
@@ -366,7 +367,7 @@ SpriteRenderer:
   m_Size: {x: 0.625, y: 0.6666667}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_SpriteSortPoint: 0
 --- !u!1 &6222999524411212262
 GameObject:
@@ -874,6 +875,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a3c4006554c8724489a2437b05318736, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ActorHealth
+  _damageSourceMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
 --- !u!114 &7203364025331181898
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -886,6 +890,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb3dcef1c89d34c41a9241a74ffee18c, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ActorSanity
+  _sanityDrainRate: 1
 --- !u!114 &7203364025331181899
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -899,7 +904,6 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerVitalsUI
   ShowTopMostFoldoutHeaderGroup: 1
-  _width: 560
   _healthColor: {r: 0.19, g: 0.34, b: 0.23, a: 1}
   _sanityColor: {r: 0.72, g: 0.32, b: 0.075, a: 1}
 --- !u!114 &7203364025331181900
@@ -1183,10 +1187,24 @@ TrailRenderer:
   m_StaticBatchRoot: {fileID: 0}
   m_ProbeAnchor: {fileID: 0}
   m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 2
+  m_MaskInteraction: 0
   m_Time: 0.12
+  m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 0.12
@@ -1322,9 +1340,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RustySword
   _icon: {fileID: 21300000, guid: b55e93f8adf8c814aa62f93a9fae300d, type: 3}
   _itemId: 1
+  _rarity: 0
+  _price: 0
+  _cooldown: 0
+  _description:
+  _statsDescription:
   _damage: 3
   _attackPoint: {fileID: 8123400010000000008}
   _animator: {fileID: 8123400010000000009}
+  _maxTargets: 1
+  _enchantDefinitions: []
   _swordRenderer: {fileID: 8123400010000000006}
   _attackRadius: 0.4
   _trail: {fileID: 8123400010000000014}
@@ -1342,6 +1367,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f14c0796d16e9f74da11fad4160c2cd9, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerNetworkInteractions
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &8123400010000000016
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1354,6 +1380,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 37dd60ef149a4c13b87a6d50ae598a66, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerArsenal
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &8123400010000000017
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1366,6 +1393,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0dc613c9f4de5b34d8d682990ba2c065, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerInventory
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &8123400010000000018
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1378,6 +1406,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6908f93ed4849b4846436fd71a4d8fc, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerSlotBindings
+  ShowTopMostFoldoutHeaderGroup: 1
   _settings: {fileID: 11400000, guid: d26395559b654054a70549c275d59e46, type: 2}
 --- !u!114 &8123400010000000019
 MonoBehaviour:
@@ -1391,6 +1420,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90f4d3523dd5443384c6e214f1a9072b, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerMenuUI
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &8123400010000000020
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1415,12 +1445,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38ae149da59442daa9aa16b7113e9f2d, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkEffectHandler
+  ShowTopMostFoldoutHeaderGroup: 1
   _effectData:
   - {fileID: 11400000, guid: c5e72efe395a40a1a039dd1ff565f910, type: 2}
   - {fileID: 11400000, guid: 4574ff5500224fc4c9f53fa736e316ae, type: 2}
   - {fileID: 11400000, guid: 5c12adf68d976264e867ba4942d5d33b, type: 2}
   - {fileID: 11400000, guid: 801729d0ef23eb74186e2ed9e5cc9f69, type: 2}
   - {fileID: 11400000, guid: 6ed531e5fdd340947afce7de8226555c, type: 2}
+  - {fileID: 11400000, guid: 4df0339bda54085419e4fd6db7983017, type: 2}
 --- !u!114 &8123400010000000022
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1433,6 +1465,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9e2c58955994c1b849fe01115cf7e24, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerEffectsUI
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &8123400010000000023
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1445,6 +1478,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4a17bd3c562d4a7c81e78f522c597f49, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerItemTooltipUI
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &8123400010000000024
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1457,6 +1491,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 11c735a75a544afda8abda5232213adb, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::GameConsole
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &8123400010000000025
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1497,6 +1532,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73059f3475e44442b13740c1a9c162f2, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkSpellHolder
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &8123400010000000028
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1509,6 +1545,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ab9f1bf599e4491ac62ca71aac11006, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::SpellUI
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &8123400010000000029
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1521,6 +1558,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 76b4d73fcb5d4c24820c92ceb405e289, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHUD
+  ShowTopMostFoldoutHeaderGroup: 1
   _currencyIcon: {fileID: -5119336362666540660, guid: cb40d685519376c43a550a0c6a59c0b6, type: 3}
 --- !u!114 &8123400010000000030
 MonoBehaviour:
@@ -1536,9 +1574,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ActorVisuals
   _renderers:
   - {fileID: 2520797166062340064}
+  _hitParticles: {fileID: 920851322913532699}
   _hitColor: {r: 1, g: 0.92, b: 0.72, a: 1}
   _hitDuration: 0.15
-  _hitParticles: {fileID: 920851322913532699}
 --- !u!114 &8123400010000000031
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1551,6 +1589,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38f2c6c375f14885a2b2acd003fb20d9, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkActorVisuals
+  ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &4477702443826972998
 MonoBehaviour:
   m_ObjectHideFlags: 0

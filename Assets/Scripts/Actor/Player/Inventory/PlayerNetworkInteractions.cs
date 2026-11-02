@@ -139,6 +139,21 @@ public class PlayerNetworkInteractions : NetworkBehaviour
 
             if (item is Weapon unavailableWeapon && !unavailableWeapon.IsAvailable)
                 return;
+            if (!isWeapon && item.DestroyOnDrop)
+            {
+                _actorInventory.DropItem(i);
+                if (item.WorldItem != null)
+                {
+                    NetworkObject worldObject = item.WorldItem.GetComponent<NetworkObject>();
+                    if (worldObject.IsSpawned)
+                        worldObject.Despawn();
+                    else
+                        Destroy(item.WorldItem);
+                }
+                RemoveConsumedItemRpc(item.Uid);
+                Destroy(item.gameObject);
+                return;
+            }
             WorldItem worldItem = item.WorldItem != null ? item.WorldItem.GetComponent<WorldItem>() : null;
             worldItem = _hand.DropItem(worldItem, item.gameObject);
             if (worldItem == null)
@@ -153,6 +168,19 @@ public class PlayerNetworkInteractions : NetworkBehaviour
                 _actorInventory.DropItem(i);
             item.gameObject.SetActive(false);
             return;
+        }
+    }
+
+    [Rpc(SendTo.NotServer, InvokePermission = RpcInvokePermission.Server)]
+    private void RemoveConsumedItemRpc(ulong uid)
+    {
+        foreach (Item item in GetComponentsInChildren<Item>(true))
+        {
+            if (item.Uid != uid)
+                continue;
+            item.Drop();
+            Destroy(item.gameObject);
+            break;
         }
     }
 

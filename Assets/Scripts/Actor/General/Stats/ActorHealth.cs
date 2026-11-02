@@ -12,6 +12,7 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
     public event Action<float> DamageTaken;
     public event Action<float> DamageDealt;
     public event Action Died;
+    public event Action<ActorHealth> EnemyKilled;
 
     public float CurrentHealth { get; private set; }
     public float MaxHealth => _stats.MaxHealth.Value;
@@ -59,7 +60,15 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
         }
 
         if (CurrentHealth <= 0f)
+        {
             Kill();
+            if (attacker != null && attacker.gameObject != gameObject && GetComponent<Enemy>() != null)
+            {
+                ActorHealth killer = attacker.GetComponent<ActorHealth>();
+                if (killer != null)
+                    killer.EnemyKilled?.Invoke(this);
+            }
+        }
 
         return dealtDamage;
     }

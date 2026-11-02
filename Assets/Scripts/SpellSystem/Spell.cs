@@ -8,6 +8,7 @@ public abstract class Spell : MonoBehaviour
     protected ActorStats _ownerStats;
     private NetworkObject _networkObject;
     private ActorSanity _ownerSanity;
+    private Inventory _inventory;
     private EffectHandler _ownerEffects;
 
     public SpellConfig SpellData { get; private set; }
@@ -16,7 +17,16 @@ public abstract class Spell : MonoBehaviour
     public string Description => TooltipText.Format(this, SpellData.SpellDescription, SpellData);
     public string StatsDescription => TooltipText.Format(this, SpellData.StatsDescription, SpellData);
     public double CooldownEndsAt { get; private set; }
-    public float CooldownTime => SpellData.CooldownTime * (1f - _ownerStats.CooldownReduction.Value);
+    public float CooldownTime
+    {
+        get
+        {
+            float reduction = _ownerStats.CooldownReduction.Value;
+            if (_inventory != null)
+                reduction += _inventory.SpellCooldownReduction;
+            return SpellData.CooldownTime * (1f - Mathf.Clamp(reduction, 0f, 0.9f));
+        }
+    }
     public float CooldownRemaining => Mathf.Max(0f, (float)(CooldownEndsAt - CurrentTime));
     private double CurrentTime => _networkObject != null && _networkObject.IsSpawned
         ? _networkObject.NetworkManager.ServerTime.Time : Time.timeAsDouble;
@@ -32,6 +42,7 @@ public abstract class Spell : MonoBehaviour
     {
         _owner = owner;
         _ownerStats = owner.GetComponent<ActorStats>();
+        _inventory = owner.GetComponent<Inventory>();
         _networkObject = owner.GetComponent<NetworkObject>();
         _ownerSanity = owner.GetComponent<ActorSanity>();
         _ownerEffects = owner.GetComponent<EffectHandler>();

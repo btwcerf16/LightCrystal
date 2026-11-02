@@ -17,6 +17,7 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
     [SerializeField, Min(0f)] private float _separationStrength = 0.9f;
     private readonly Collider2D[] _neighbors = new Collider2D[24];
     private Vector2 _separation;
+    private Coroutine _knockback;
     private float _nextSeparationCheck;
 
     protected EffectHandler Effects { get; private set; }
@@ -165,6 +166,7 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
     public void ResetForSpawn()
     {
         StopAllCoroutines();
+        _knockback = null;
         ClearTemporaryTarget();
         _mainTarget = null;
         _mainTargetHealth = null;
@@ -179,6 +181,32 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
         Animator animator = GetComponent<Animator>();
         animator.Rebind();
         animator.Update(0f);
+    }
+
+    public void ApplyKnockback(Vector2 direction, float strength, float duration)
+    {
+        if (Health.IsDead || strength <= 0f || duration <= 0f)
+            return;
+        strength *= 1f - Stats.ForceResistance.Value;
+        if (strength <= 0f)
+            return;
+        if (_knockback != null)
+            StopCoroutine(_knockback);
+        _knockback = StartCoroutine(Knockback(direction.normalized * strength, duration));
+    }
+
+    private IEnumerator Knockback(Vector2 velocity, float duration)
+    {
+        Rigidbody2D body = GetComponent<Rigidbody2D>();
+        WaitForFixedUpdate wait = new WaitForFixedUpdate();
+        float remaining = duration;
+        while (remaining > 0f && !Health.IsDead)
+        {
+            yield return wait;
+            body.MovePosition(body.position + velocity * (remaining / duration) * Time.fixedDeltaTime);
+            remaining -= Time.fixedDeltaTime;
+        }
+        _knockback = null;
     }
 
     public void SetMainTarget(Transform target)

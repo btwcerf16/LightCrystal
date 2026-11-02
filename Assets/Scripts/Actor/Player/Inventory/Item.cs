@@ -12,8 +12,10 @@ public abstract class Item : MonoBehaviour, ITooltipSource
     [SerializeField, TextArea] private string _statsDescription;
 
     private NetworkObject _ownerNetworkObject;
-    private ActorStats _ownerStats;
+    protected ActorStats _ownerStats;
     private EffectHandler _ownerEffects;
+    protected bool IsServer => _ownerNetworkObject != null && _ownerNetworkObject.IsSpawned && _ownerNetworkObject.NetworkManager.IsServer;
+    public bool DestroyOnDrop { get; protected set; }
     protected bool IsOwnerStunned => _ownerEffects != null && _ownerEffects.IsStunned;
     public GameObject WorldItem {  get; private set; }
     public bool IsEquipped { get; private set; }
