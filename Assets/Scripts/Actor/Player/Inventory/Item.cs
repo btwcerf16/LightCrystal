@@ -4,6 +4,7 @@ using UnityEngine;
 public abstract class Item : MonoBehaviour, ITooltipSource
 {
     [SerializeField] private Sprite _icon;
+    [SerializeField] private Sprite _worldIcon;
     [SerializeField, Min(0)] private int _itemId = 0;
     [SerializeField] private EItemRarity _rarity = EItemRarity.Common;
     [SerializeField, Min(0)] private int _price;
@@ -13,6 +14,7 @@ public abstract class Item : MonoBehaviour, ITooltipSource
 
     private NetworkObject _ownerNetworkObject;
     protected ActorStats _ownerStats;
+    protected bool _bonusApplied;
     private EffectHandler _ownerEffects;
     protected bool IsServer => _ownerNetworkObject != null && _ownerNetworkObject.IsSpawned && _ownerNetworkObject.NetworkManager.IsServer;
     public bool DestroyOnDrop { get; protected set; }
@@ -21,11 +23,12 @@ public abstract class Item : MonoBehaviour, ITooltipSource
     public bool IsEquipped { get; private set; }
     public virtual string DisplayName => name;
     public virtual Sprite Icon => _icon;
+    public Sprite WorldIcon => _worldIcon != null ? _worldIcon : Icon;
     public int ItemId => _itemId;
     public EItemRarity Rarity => _rarity;
     public int Price => _price;
     public ulong Uid { get; private set; }
-    public float BaseCooldown => _cooldown;
+    public virtual float BaseCooldown => _cooldown;
     public string Description => TooltipText.Format(this, _description);
     public string StatsDescription => TooltipText.Format(this, _statsDescription);
     public string TooltipTitle => DisplayName;
@@ -53,11 +56,12 @@ public abstract class Item : MonoBehaviour, ITooltipSource
 
     public bool TryUse()
     {
-        if (IsOwnerStunned || !IsEquipped || _ownerNetworkObject == null || !_ownerNetworkObject.IsSpawned || !_ownerNetworkObject.NetworkManager.IsServer || CooldownRemaining > 0f)
+        if (IsOwnerStunned || !IsEquipped || _ownerNetworkObject == null || !_ownerNetworkObject.IsSpawned ||
+            !_ownerNetworkObject.NetworkManager.IsServer || CooldownRemaining > 0f || !CanUse())
             return false;
 
         float cdr = _ownerStats != null ? _ownerStats.CooldownReduction.Value : 0f;
-        CooldownDuration = _cooldown * (1f - Mathf.Clamp(cdr, 0f, 0.9f));
+        CooldownDuration = BaseCooldown * (1f - Mathf.Clamp(cdr, 0f, 0.9f));
         CooldownEndsAt = _ownerNetworkObject.NetworkManager.ServerTime.Time + CooldownDuration;
         Use();
         return true;
@@ -68,6 +72,7 @@ public abstract class Item : MonoBehaviour, ITooltipSource
         CooldownDuration = duration;
         CooldownEndsAt = endsAt;
     }
+    protected virtual bool CanUse() => true;
     public abstract void Use();
     public virtual void Equip()
     {

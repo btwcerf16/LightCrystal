@@ -12,6 +12,7 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
     private InputAction[] _inventoryActions;
     private InputAction[] _arsenalActions;
     private InputAction[] _spellActions;
+    private InputAction _cancelCastAction;
     private SpellHolder _spells;
     private InputActionRebindingExtensions.RebindingOperation _rebind;
     private PlayerInputReader _input;
@@ -57,13 +58,13 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
 
         for (int i = 0; i < _spellActions.Length; i++)
         {
-            SpellConfig config = _spells.GetConfig(i);
-            if (config == null || config.IsPassive)
-                continue;
             int index = i;
             _spellActions[i] = CreateAction(ESlotBindingType.Spell, i, _settings.GetBinding(ESlotBindingType.Spell, i));
             _spellActions[i].performed += context => UseSpell(index);
         }
+
+        _cancelCastAction = CreateAction(ESlotBindingType.CancelCast, 0, _settings.GetBinding(ESlotBindingType.CancelCast, 0));
+        _cancelCastAction.performed += context => CancelCast();
 
         HashSet<string> usedPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         foreach (InputAction action in _actions)
@@ -73,7 +74,62 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
                 action.ApplyBindingOverride(0, "");
         }
 
+        inventory.SizeChanged += ResizeInventoryBindings;
+        _spells.SpellsChanged += ResizeSpellBindings;
         InputSystem.onDeviceChange += OnDeviceChanged;
+    }
+
+    private void ResizeInventoryBindings()
+    {
+        Inventory inventory = GetComponent<Inventory>();
+        CancelRebind();
+        _actions.Disable();
+        for (int i = inventory.Size; i < _inventoryActions.Length; i++)
+            _inventoryActions[i].RemoveAction();
+        int previousSize = _inventoryActions.Length;
+        Array.Resize(ref _inventoryActions, inventory.Size);
+        _settings.Load(inventory.Size, _arsenalActions.Length, _spellActions.Length);
+        for (int i = previousSize; i < inventory.Size; i++)
+        {
+            int index = i;
+            string path = _settings.GetBinding(false, i);
+            if (IsReserved(path) || IsAssigned(path, null))
+                path = "";
+            _inventoryActions[i] = CreateAction(ESlotBindingType.Inventory, i, path);
+            _inventoryActions[i].performed += context =>
+            {
+                if (!_input.IsMenuOpen && !_input.IsStatsOpen)
+                    inventory.RequestUseItem(index);
+            };
+        }
+        if (IsSpawned && IsOwner && IsClient)
+            _actions.Enable();
+        BindingsChanged?.Invoke();
+    }
+
+    private void ResizeSpellBindings()
+    {
+        if (_spellActions.Length == _spells.Count)
+            return;
+        CancelRebind();
+        _actions.Disable();
+        for (int i = _spells.Count; i < _spellActions.Length; i++)
+            _spellActions[i].RemoveAction();
+        int previousSize = _spellActions.Length;
+        Array.Resize(ref _spellActions, _spells.Count);
+        _settings.Load(_inventoryActions.Length, _arsenalActions.Length, _spells.Count);
+        for (int i = previousSize; i < _spellActions.Length; i++)
+        {
+            int index = i;
+            string path = _settings.GetBinding(ESlotBindingType.Spell, i);
+            if (IsReserved(path) || IsAssigned(path, null))
+                path = "";
+            _spellActions[i] = CreateAction(ESlotBindingType.Spell, i, path);
+            _spellActions[i].performed += context => UseSpell(index);
+        }
+        if (IsSpawned && IsOwner && IsClient)
+            _actions.Enable();
+        BindingsChanged?.Invoke();
     }
 
     private void OnDeviceChanged(InputDevice device, InputDeviceChange change)
@@ -140,6 +196,11 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
         InputAction action = GetAction(type, index);
         if (action == null)
         {
+            completed("Слот привязки недоступен.");
+            return;
+        }
+        if (type == ESlotBindingType.Spell && _spells.GetConfig(index) != null && _spells.GetConfig(index).IsPassive)
+        {
             completed("Пассивной способности клавиша не нужна.");
             return;
         }
@@ -196,6 +257,7 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
         for (int i = 0; i < _spellActions.Length; i++)
             if (_spellActions[i] != null)
                 _spellActions[i].ApplyBindingOverride(0, _settings.GetBinding(ESlotBindingType.Spell, i));
+        _cancelCastAction.ApplyBindingOverride(0, _settings.GetBinding(ESlotBindingType.CancelCast, 0));
         _actions.Enable();
         BindingsChanged?.Invoke();
     }
@@ -207,8 +269,17 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
         _spells.CastSpell(index, new SpellCastData { Position = transform.position });
     }
 
+    public void CancelCast()
+    {
+        if (!IsSpawned || !IsOwner || !IsClient || !_input.isActiveAndEnabled || _input.IsMenuOpen || _input.IsStatsOpen)
+            return;
+        _spells.CancelCast();
+    }
+
     private InputAction GetAction(ESlotBindingType type, int index)
     {
+        if (type == ESlotBindingType.CancelCast)
+            return index == 0 ? _cancelCastAction : null;
         InputAction[] actions;
         switch (type)
         {
@@ -247,6 +318,8 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
 
     public override void OnDestroy()
     {
+        GetComponent<Inventory>().SizeChanged -= ResizeInventoryBindings;
+        _spells.SpellsChanged -= ResizeSpellBindings;
         InputSystem.onDeviceChange -= OnDeviceChanged;
         StopInput();
         _actions.Dispose();

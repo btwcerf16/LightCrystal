@@ -12,6 +12,14 @@ public class EffectHandler : MonoBehaviour
     private NetworkObject _networkObject;
 
     public IReadOnlyList<Effect> ActiveEffects => _activeEffects;
+    public bool HasEffect(EffectData data)
+    {
+        foreach (Effect effect in _activeEffects)
+            if (effect.EffectData == data)
+                return true;
+        return false;
+    }
+
     public event Action EffectsChanged;
     public event Action StatusChanged;
     public EActorStatus Status { get; private set; }
@@ -65,10 +73,10 @@ public class EffectHandler : MonoBehaviour
 
     public Effect AddEffect(EffectData effectData)
     {
-        if (!CanProcess || !isActiveAndEnabled || effectData == null || effectData.EffectDuration <= 0f)
+        if (!CanProcess || !isActiveAndEnabled || effectData == null || (!effectData.IsPermanent && effectData.EffectDuration <= 0f))
             return null;
 
-        float duration = effectData.EffectDuration;
+        float duration = effectData.IsPermanent ? float.PositiveInfinity : effectData.EffectDuration;
         if (!effectData.IsBuff && effectData.Status != EActorStatus.None)
             duration *= 1f - Mathf.Clamp01(_ownerStats.EffectResistance.Value);
         if (duration <= 0f)

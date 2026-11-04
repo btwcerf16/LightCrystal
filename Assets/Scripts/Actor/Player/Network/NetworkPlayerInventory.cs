@@ -64,6 +64,7 @@ public class NetworkPlayerInventory: NetworkBehaviour
         if (IsServer || _inventory == null)
             return;
 
+        _inventory.SetSize(_slots.Count);
         for (int i = 0; i < _slots.Count; i++)
         {
             NetworkInventorySlot slot = _slots[i];
@@ -92,6 +93,10 @@ public class NetworkPlayerInventory: NetworkBehaviour
 
     private void PublishContents()
     {
+        while (_slots.Count > _inventory.Size)
+            _slots.RemoveAt(_slots.Count - 1);
+        while (_slots.Count < _inventory.Size)
+            _slots.Add(new NetworkInventorySlot { SlotIndex = _slots.Count });
         for (int i = 0; i < _inventory.Size; i++)
         {
 

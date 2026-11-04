@@ -43,7 +43,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3a41cf620293c4d46bf26f51c396c12a, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::WornMagicHat
+  m_EditorClassIdentifier: Assembly-CSharp::WornMagicHatItem
   _icon: {fileID: 21300000, guid: cb67c6dc81714dd5b73c1527dbdaa810, type: 3}
   _itemId: 13
   _rarity: 0

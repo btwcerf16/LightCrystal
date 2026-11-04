@@ -100,7 +100,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0885878896db42ca98c2bf5e5079ff64, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RustySword
+  m_EditorClassIdentifier: Assembly-CSharp::RustySwordWeapon
   _icon: {fileID: 21300000, guid: b55e93f8adf8c814aa62f93a9fae300d, type: 3}
   _itemId: 1
   _rarity: 0

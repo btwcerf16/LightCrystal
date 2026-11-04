@@ -15,7 +15,7 @@ public sealed class ArsenalUI : NetworkBehaviour
 
     private int Columns => Mathf.Min(GetComponent<ActorArsenal>().WeaponSize, Mathf.Max(1, _maxColumns));
     public float Width => Columns * _slotSize + 16f;
-    public float Height => Columns > 0 ? Mathf.CeilToInt((float)GetComponent<ActorArsenal>().WeaponSize / Columns) * _slotSize + 40f : 0f;
+    public float Height => Columns > 0 ? Mathf.CeilToInt((float)GetComponent<ActorArsenal>().WeaponSize / Columns) * _slotSize + 32f : 0f;
 
     public override void OnNetworkSpawn() => Show();
     public override void OnGainedOwnership() => Show();
@@ -41,11 +41,8 @@ public sealed class ArsenalUI : NetworkBehaviour
 
         RectTransform panel = GetComponent<PlayerHUD>().ArsenalPanel;
         _canvasObject = panel.gameObject;
-        Paint(panel, new Color(0.025f, 0.024f, 0.022f));
-        Outline border = panel.gameObject.AddComponent<Outline>();
-        border.effectColor = new Color(0.27f, 0.23f, 0.16f);
-        border.effectDistance = new Vector2(1f, -1f);
-        Label(panel, "АРСЕНАЛ", new Vector2(8f, -14f), width, 11);
+        Paint(panel, HudStyle.Surface);
+        Label(panel, "Арсенал", new Vector2(8f, -12f), width, 12);
 
         RectTransform grid = Rect("WeaponSlots", panel, Vector2.zero, Vector2.zero, new Vector2(8f, 8f), new Vector2(width, height));
         GridLayoutGroup layout = grid.gameObject.AddComponent<GridLayoutGroup>();
@@ -57,12 +54,12 @@ public sealed class ArsenalUI : NetworkBehaviour
         for (int i = 0; i < count; i++)
         {
             RectTransform slot = Rect("WeaponSlot_" + i, grid, Vector2.zero, Vector2.zero, Vector2.zero, layout.cellSize);
-            Paint(slot, new Color(0.085f, 0.071f, 0.048f));
-            _bindingLabels.Add(Label(slot, _slotBindings.GetBindingLabel(true, i), new Vector2(6f, -11f), _slotSize - 12f, 10));
+            Paint(slot, HudStyle.Slot);
             int index = i;
             ActorArsenal arsenal = GetComponent<ActorArsenal>();
             slot.gameObject.AddComponent<ItemSlotUI>().Bind(() => arsenal.GetWeapon(index), arsenal, index,
                 arsenal.RequestChangeWeaponSlot, arsenal.RequestDropWeapon, arsenal.RequestSelectWeapon);
+            _bindingLabels.Add(HudStyle.Binding(slot, _slotBindings.GetBindingLabel(true, i)));
         }
         _slotBindings.BindingsChanged += RefreshBindings;
     }
@@ -70,7 +67,7 @@ public sealed class ArsenalUI : NetworkBehaviour
     private void RefreshBindings()
     {
         for (int i = 0; i < _bindingLabels.Count; i++)
-            _bindingLabels[i].text = _slotBindings.GetBindingLabel(true, i);
+            HudStyle.SetBinding(_bindingLabels[i], _slotBindings.GetBindingLabel(true, i));
     }
 
     private void Hide()
@@ -111,9 +108,9 @@ public sealed class ArsenalUI : NetworkBehaviour
         text.text = value;
         text.fontSize = size;
         text.resizeTextForBestFit = true;
-        text.resizeTextMinSize = 7;
+        text.resizeTextMinSize = 10;
         text.resizeTextMaxSize = size;
-        text.color = new Color(0.67f, 0.61f, 0.49f);
+        text.color = HudStyle.Muted;
         text.alignment = TextAnchor.MiddleLeft;
         text.raycastTarget = false;
         return text;

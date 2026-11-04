@@ -178,7 +178,14 @@ public class PlayerNetworkInteractions : NetworkBehaviour
         {
             if (item.Uid != uid)
                 continue;
-            item.Drop();
+            for (int i = 0; i < _actorInventory.Size; i++)
+            {
+                Item slottedItem = _actorInventory.GetItem(i);
+                if (slottedItem != null && slottedItem.Uid == uid)
+                    _actorInventory.SetItem(i, 0);
+            }
+            if (item.IsEquipped)
+                item.Drop();
             Destroy(item.gameObject);
             break;
         }

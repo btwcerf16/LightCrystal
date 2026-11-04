@@ -2,5 +2,6 @@ public enum ESlotBindingType
 {
     Inventory,
     Arsenal,
-    Spell
+    Spell,
+    CancelCast
 }

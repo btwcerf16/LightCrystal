@@ -190,5 +190,5 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d7be260fbc6dec3418398e7c0304c91f, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::DawnWave
+  m_EditorClassIdentifier: Assembly-CSharp::DawnWaveProjectile
   _radius: 0.65

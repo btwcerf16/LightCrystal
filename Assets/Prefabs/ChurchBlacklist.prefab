@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6342692930379493249
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7018224541870668582}
+  - component: {fileID: 1332558693726375035}
+  m_Layer: 0
+  m_Name: ChurchBlacklist
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7018224541870668582
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6342692930379493249}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1332558693726375035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6342692930379493249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78c9086afd064d1da440f151b5e0c3dc, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::ChurchBlacklistItem
+  _icon: {fileID: 21300000, guid: 4fdc10e11506497cbe2325443b50c4c6, type: 3}
+  _worldIcon: {fileID: 21300000, guid: 9e5234b2ca5e43d3897fe683c7e0ead4, type: 3}
+  _itemId: 29
+  _rarity: 4
+  _price: 0
+  _cooldown: 0
+  _description: "Церковь сгорела дотла, но список её врагов пережил пожар. Выстрелы выпускают веер из четырёх огненных снарядов. При применении гасит свои метки и исцеляет владельца; веер отключается на время перезарядки."
+  _statsDescription: "Магический урон: +{MagicDamageBonus:P0}\nОбзор: +{ViewBonus:P0}\nПронзания снарядов: +{ExtraPiercing}\nОгненный снаряд: {ExtraProjectileDamage:P0} исходного урона\nМетка: {BrandDamage:P0} исходного урона при каждой атаке врага\nЛечение: {HealingPerEnemy:P0} максимального HP за живую отмеченную цель, до {MaximumHealing:P0}"
+  _brand: {fileID: 11400000, guid: 3253a5084dac41a1994375a8f50cc960, type: 2}
+  _firePrefab: {fileID: 2018494615889206388, guid: 40d474d847594e16a51ae61320061590, type: 3}

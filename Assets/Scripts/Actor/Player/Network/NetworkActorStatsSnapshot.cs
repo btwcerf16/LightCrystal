@@ -22,6 +22,16 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
     public NetworkStatValue ForceResistance;
     public NetworkStatValue MadnessResistance;
     public NetworkStatValue EffectResistance;
+    public NetworkStatValue Stability;
+    public NetworkStatValue CameraDistance;
+    public NetworkStatValue CastSpeed;
+    public NetworkStatValue ProjectileSpeed;
+    public NetworkStatValue ProjectileSpeedMultiplier;
+    public NetworkStatValue ProjectileRange;
+    public NetworkStatValue ProjectilePiercing;
+    public NetworkStatValue SanityCostReduction;
+    public NetworkStatValue CriticalChance;
+    public NetworkStatValue CriticalDamageMultiplier;
     public int TargetPriority;
 
     public NetworkActorStatsSnapshot(ActorStats stats)
@@ -44,6 +54,16 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
         ForceResistance = new NetworkStatValue(stats.ForceResistance);
         MadnessResistance = new NetworkStatValue(stats.MadnessResistance);
         EffectResistance = new NetworkStatValue(stats.EffectResistance);
+        Stability = new NetworkStatValue(stats.Stability);
+        CameraDistance = new NetworkStatValue(stats.CameraDistance);
+        CastSpeed = new NetworkStatValue(stats.CastSpeed);
+        ProjectileSpeed = new NetworkStatValue(stats.ProjectileSpeed);
+        ProjectileSpeedMultiplier = new NetworkStatValue(stats.ProjectileSpeedMultiplier);
+        ProjectileRange = new NetworkStatValue(stats.ProjectileRange);
+        ProjectilePiercing = new NetworkStatValue(stats.ProjectilePiercing);
+        SanityCostReduction = new NetworkStatValue(stats.SanityCostReduction);
+        CriticalChance = new NetworkStatValue(stats.CriticalChance);
+        CriticalDamageMultiplier = new NetworkStatValue(stats.CriticalDamageMultiplier);
         TargetPriority = stats.TargetPriority;
     }
 
@@ -67,6 +87,16 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
         serializer.SerializeValue(ref ForceResistance);
         serializer.SerializeValue(ref MadnessResistance);
         serializer.SerializeValue(ref EffectResistance);
+        serializer.SerializeValue(ref Stability);
+        serializer.SerializeValue(ref CameraDistance);
+        serializer.SerializeValue(ref CastSpeed);
+        serializer.SerializeValue(ref ProjectileSpeed);
+        serializer.SerializeValue(ref ProjectileSpeedMultiplier);
+        serializer.SerializeValue(ref ProjectileRange);
+        serializer.SerializeValue(ref ProjectilePiercing);
+        serializer.SerializeValue(ref SanityCostReduction);
+        serializer.SerializeValue(ref CriticalChance);
+        serializer.SerializeValue(ref CriticalDamageMultiplier);
         serializer.SerializeValue(ref TargetPriority);
     }
 
@@ -90,6 +120,16 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
             && ForceResistance.Equals(other.ForceResistance)
             && MadnessResistance.Equals(other.MadnessResistance)
             && EffectResistance.Equals(other.EffectResistance)
+            && Stability.Equals(other.Stability)
+            && CameraDistance.Equals(other.CameraDistance)
+            && CastSpeed.Equals(other.CastSpeed)
+            && ProjectileSpeed.Equals(other.ProjectileSpeed)
+            && ProjectileSpeedMultiplier.Equals(other.ProjectileSpeedMultiplier)
+            && ProjectileRange.Equals(other.ProjectileRange)
+            && ProjectilePiercing.Equals(other.ProjectilePiercing)
+            && SanityCostReduction.Equals(other.SanityCostReduction)
+            && CriticalChance.Equals(other.CriticalChance)
+            && CriticalDamageMultiplier.Equals(other.CriticalDamageMultiplier)
             && TargetPriority == other.TargetPriority;
     }
 }

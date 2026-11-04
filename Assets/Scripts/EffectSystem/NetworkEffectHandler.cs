@@ -71,7 +71,7 @@ public sealed class NetworkEffectHandler : NetworkBehaviour
             {
                 InstanceId = effect.GetInstanceID(),
                 EffectIndex = effectIndex,
-                EndsAt = NetworkManager.ServerTime.Time + effect.TimeRemaining
+                EndsAt = effect.EffectData.IsPermanent ? 0 : NetworkManager.ServerTime.Time + effect.TimeRemaining
             };
             if (count >= _effects.Count)
                 _effects.Add(slot);

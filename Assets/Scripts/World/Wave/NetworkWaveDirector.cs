@@ -28,8 +28,9 @@ public sealed class NetworkWaveDirector : MonoBehaviour
             StartCycle();
     }
 
-    private void StartCycle()
+    public void StartCycle()
     {
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "Arena01") return;
         _director.enabled = true;
         _director.Initialize();
     }

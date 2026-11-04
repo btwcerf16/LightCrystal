@@ -191,7 +191,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0246a7f02fb744208096051393eeaf72, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::Spear
+  m_EditorClassIdentifier: Assembly-CSharp::SpearWeapon
   _icon: {fileID: 21300000, guid: fcde791adde446959b6eee707d277bc4, type: 3}
   _itemId: 4
   _rarity: 0

@@ -185,7 +185,7 @@ public class WorldItem : NetworkBehaviour, ITooltipSource
     private void RefreshSprite()
     {
         Item prefab = _itemDatabase.GetPrefab(ItemId);
-        _itemVisualSpriteRenderer.sprite = prefab != null ? prefab.Icon : null;
+        _itemVisualSpriteRenderer.sprite = prefab != null ? prefab.WorldIcon : null;
         if (_itemVisualSpriteRenderer.sprite != null)
         {
             _boxCollider.size = _itemVisualSpriteRenderer.sprite.bounds.size;

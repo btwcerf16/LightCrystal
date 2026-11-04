@@ -43,7 +43,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 88f60f294a4f6b54c808744eb30013a1, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::MadnessOrb
+  m_EditorClassIdentifier: Assembly-CSharp::MadnessOrbItem
   _icon: {fileID: 21300000, guid: d7e1f90f700b4596b1c701482d2b313c, type: 3}
   _itemId: 12
   _rarity: 3

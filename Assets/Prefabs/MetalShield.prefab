@@ -43,7 +43,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e5de967a4d1034948b5fe79c5fd3a6a4, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::MetalShield
+  m_EditorClassIdentifier: Assembly-CSharp::MetalShieldItem
   _icon: {fileID: 21300000, guid: e63ae3c085e249ceac64bab44dc08929, type: 3}
   _itemId: 10
   _rarity: 1

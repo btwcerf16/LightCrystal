@@ -118,7 +118,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7d7b5b63331fc34479796aa4e1af59bc, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::SkeletonArrow
+  m_EditorClassIdentifier: Assembly-CSharp::SkeletonArrowProjectile
   _radius: 0.06
 --- !u!212 &7180166960644503386
 SpriteRenderer:

@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c2111eadd2a40a5adcf4516d3ad4b6d, type: 3}
+  m_Name: WeaponPragmatism
+  m_EditorClassIdentifier: Assembly-CSharp::KnightPragmatismConfig
+  SpellName: "Оружейный прагматизм"
+  SpellDescription: "Чем проще оружие, тем увереннее рыцарь им владеет."
+  StatsDescription: "Физический урон:\nОбычное: +30%\nРедкое: +20%\nЭпическое: 0%\nМифическое: −10%\nЛегендарное: −20%"
+  IsPassive: 1
+  CooldownTime: 0
+  SanityCost: 0
+  CastTime: 0
+  SpriteIcon: {fileID: 21300000, guid: be06cc5732124f4587be9b1d548abf4e, type: 3}
+  DamageByRarity: [0.3, 0.2, 0, -0.1, -0.2]

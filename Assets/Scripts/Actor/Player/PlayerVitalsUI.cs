@@ -38,9 +38,9 @@ public sealed class PlayerVitalsUI : NetworkBehaviour
         _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         RectTransform panel = GetComponent<PlayerHUD>().VitalsPanel;
         _canvasObject = panel.gameObject;
-        AddImage(panel, new Color(0.025f, 0.024f, 0.022f, 1f));
+        AddImage(panel, HudStyle.Surface);
         Outline border = panel.gameObject.AddComponent<Outline>();
-        border.effectColor = new Color(0.16f, 0.145f, 0.12f, 1f);
+        border.effectColor = HudStyle.Line;
         border.effectDistance = new Vector2(1f, -1f);
 
         CreateBar(panel, "Health", "Здоровье", -8f, 26f, _healthColor, out _healthFill, out _healthText);
@@ -82,7 +82,7 @@ public sealed class PlayerVitalsUI : NetworkBehaviour
         track.pivot = new Vector2(0.5f, 1f);
         track.anchoredPosition = new Vector2(0f, top);
         track.sizeDelta = new Vector2(-16f, height);
-        AddImage(track, new Color(0.045f, 0.04f, 0.035f, 1f));
+        AddImage(track, HudStyle.Slot);
 
         fill = CreateRect("Fill", track);
         Stretch(fill);
@@ -90,7 +90,8 @@ public sealed class PlayerVitalsUI : NetworkBehaviour
         Text label = CreateText(track, "Title", title, TextAnchor.MiddleLeft, 11);
         label.rectTransform.offsetMin = new Vector2(10f, 0f);
         label.rectTransform.offsetMax = new Vector2(-10f, 0f);
-        value = CreateText(track, "Value", "", TextAnchor.MiddleCenter, 12);
+        value = CreateText(track, "Value", "", TextAnchor.MiddleRight, 12);
+        value.rectTransform.offsetMax = new Vector2(-8f, 0f);
     }
 
     private RectTransform CreateRect(string objectName, Transform parent)
@@ -123,7 +124,7 @@ public sealed class PlayerVitalsUI : NetworkBehaviour
         text.fontSize = fontSize;
         text.text = content;
         text.alignment = alignment;
-        text.color = new Color(0.87f, 0.83f, 0.74f, 1f);
+        text.color = HudStyle.Text;
         text.raycastTarget = false;
         Shadow shadow = rect.gameObject.AddComponent<Shadow>();
         shadow.effectColor = new Color(0f, 0f, 0f, 0.65f);

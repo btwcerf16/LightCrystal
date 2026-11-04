@@ -13,6 +13,9 @@ public sealed class ActorArsenal : MonoBehaviour
 
     public event Action<int, Weapon> ActiveWeaponChanged;
     public event Action ContentsChanged;
+    public event Action<IDamageable> MeleeHit;
+
+    public void NotifyMeleeHit(IDamageable target) => MeleeHit?.Invoke(target);
     public event Action<int, int> SlotChangeRequested;
     public event Action<int> WeaponSelectionRequested;
     public event Action<int> WeaponDropRequested;

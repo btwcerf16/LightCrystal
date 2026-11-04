@@ -6,6 +6,8 @@ public sealed class ShopSpawnArea : MonoBehaviour
     [SerializeField] private Tilemap _ground;
     [SerializeField, Min(0)] private int _edgePadding = 8;
 
+    public Tilemap Ground => _ground;
+
     public bool IsInsideMap(Vector3 position)
     {
         if (_ground == null)

@@ -15,6 +15,6 @@ public sealed class KnightArmorConfig : SpellConfig
 
     public override Spell AddSpell(GameObject owner)
     {
-        return owner.AddComponent<KnightArmor>();
+        return owner.AddComponent<KnightArmorSpell>();
     }
 }

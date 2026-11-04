@@ -20,6 +20,17 @@ public sealed class ActorStats : MonoBehaviour
     public Stat AttackSpeed { get; private set; }
     public Stat CooldownReduction { get; private set; }
 
+    public Stat Stability { get; private set; }
+    public Stat CameraDistance { get; private set; }
+    public Stat CastSpeed { get; private set; }
+    public Stat ProjectileSpeed { get; private set; }
+    public Stat ProjectileSpeedMultiplier { get; private set; }
+    public Stat ProjectileRange { get; private set; }
+    public Stat ProjectilePiercing { get; private set; }
+    public Stat SanityCostReduction { get; private set; }
+    public Stat CriticalChance { get; private set; }
+    public Stat CriticalDamageMultiplier { get; private set; }
+
     public Stat PhysicalDamage { get; private set; }
     public Stat PhysicalDamageMultiplier { get; private set; }
     public Stat MagicDamageMultiplier { get; private set; }
@@ -55,6 +66,17 @@ public sealed class ActorStats : MonoBehaviour
         AttackSpeed = new Stat(_config.AttackSpeed, 0f);
         CooldownReduction = new Stat(_config.CooldownReduction, 0f, 0.9f);
 
+        Stability = new Stat(_config.Stability, 0f, 360f);
+        CameraDistance = new Stat(_config.CameraDistance, 0.1f);
+        CastSpeed = new Stat(_config.CastSpeed, 0.01f);
+        ProjectileSpeed = new Stat(_config.ProjectileSpeed, 0f);
+        ProjectileSpeedMultiplier = new Stat(_config.ProjectileSpeedMultiplier, 0f);
+        ProjectileRange = new Stat(_config.ProjectileRange, 0f);
+        ProjectilePiercing = new Stat(_config.ProjectilePiercing, 0f);
+        SanityCostReduction = new Stat(_config.SanityCostReduction, 0f, 1f);
+        CriticalChance = new Stat(_config.CriticalChance, 0f, 1f);
+        CriticalDamageMultiplier = new Stat(_config.CriticalDamageMultiplier, 1f);
+
         PhysicalDamage = new Stat(_config.PhysicalDamage, 0f);
         PhysicalDamageMultiplier = new Stat(_config.PhysicalDamageMultiplier, 0f);
         MagicDamageMultiplier = new Stat(_config.MagicDamageMultiplier, 0f);
@@ -67,6 +89,40 @@ public sealed class ActorStats : MonoBehaviour
         ForceResistance = new Stat(_config.ForceResistance, 0f, 1f);
         MadnessResistance = new Stat(_config.MadnessResistance, 0f, 1f);
         EffectResistance = new Stat(_config.EffectResistance, 0f, 1f);
+    }
+
+    public void ApplyConfig(ActorStatsConfig config)
+    {
+        _config = config;
+        SetTargetPriority(config.TargetPriority);
+        ViewDistance.SetBaseValue(config.ViewDistance);
+        ViewAngle.SetBaseValue(config.ViewAngle);
+        MaxHealth.SetBaseValue(config.MaxHealth);
+        MaxSanity.SetBaseValue(config.MaxSanity);
+        HealthRegeneration.SetBaseValue(config.HealthRegeneration);
+        MoveSpeed.SetBaseValue(config.MoveSpeed);
+        AttackSpeed.SetBaseValue(config.AttackSpeed);
+        CooldownReduction.SetBaseValue(config.CooldownReduction);
+        Stability.SetBaseValue(config.Stability);
+        CameraDistance.SetBaseValue(config.CameraDistance);
+        CastSpeed.SetBaseValue(config.CastSpeed);
+        ProjectileSpeed.SetBaseValue(config.ProjectileSpeed);
+        ProjectileSpeedMultiplier.SetBaseValue(config.ProjectileSpeedMultiplier);
+        ProjectileRange.SetBaseValue(config.ProjectileRange);
+        ProjectilePiercing.SetBaseValue(config.ProjectilePiercing);
+        SanityCostReduction.SetBaseValue(config.SanityCostReduction);
+        CriticalChance.SetBaseValue(config.CriticalChance);
+        CriticalDamageMultiplier.SetBaseValue(config.CriticalDamageMultiplier);
+        PhysicalDamage.SetBaseValue(config.PhysicalDamage);
+        PhysicalDamageMultiplier.SetBaseValue(config.PhysicalDamageMultiplier);
+        MagicDamageMultiplier.SetBaseValue(config.MagicDamageMultiplier);
+        PhysicalLifeSteal.SetBaseValue(config.PhysicalLifeSteal);
+        MagicLifeSteal.SetBaseValue(config.MagicLifeSteal);
+        PhysicalResistance.SetBaseValue(config.PhysicalResistance);
+        MagicResistance.SetBaseValue(config.MagicResistance);
+        ForceResistance.SetBaseValue(config.ForceResistance);
+        MadnessResistance.SetBaseValue(config.MadnessResistance);
+        EffectResistance.SetBaseValue(config.EffectResistance);
     }
 
     public void SetTargetPriority(int priority)

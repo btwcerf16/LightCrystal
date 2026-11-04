@@ -103,7 +103,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: aa56bf35d5364b7c8798c332b2912ffa, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RestorationBottle
+  m_EditorClassIdentifier: Assembly-CSharp::RestorationBottleItem
   _icon: {fileID: 21300000, guid: 4120d9bdf38843baa7e11480d98a6234, type: 3}
   _itemId: 3
   _rarity: 1

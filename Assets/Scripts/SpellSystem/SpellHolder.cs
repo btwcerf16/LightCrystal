@@ -20,8 +20,27 @@ public sealed class SpellHolder : MonoBehaviour
         return index >= 0 && index < _spellConfigs.Length ? _spellConfigs[index] : null;
     }
     public event Action<int, SpellCastData> CastRequested;
+    public event Action CancelCastRequested;
     public event Action<int> SpellCast;
     public event Action<string> CastFailed;
+    public event Action CooldownsChanged;
+    public event Action SpellsChanged;
+
+    public void SetSpells(SpellConfig[] configs, bool canProcess)
+    {
+        ClearSpells();
+        _spellConfigs = configs;
+        Initialize(canProcess);
+        SpellsChanged?.Invoke();
+    }
+
+    public void ResetCooldowns()
+    {
+        foreach (Spell spell in _spells)
+            if (spell != null)
+                spell.SetCooldown(0);
+        CooldownsChanged?.Invoke();
+    }
 
     private void Awake()
     {
@@ -69,6 +88,18 @@ public sealed class SpellHolder : MonoBehaviour
             SpellCast?.Invoke(index);
         else if (error != null)
             CastFailed?.Invoke(error);
+    }
+
+    public void CancelCast()
+    {
+        if (!_canProcess)
+        {
+            CancelCastRequested?.Invoke();
+            return;
+        }
+        foreach (Spell spell in _spells)
+            if (spell != null)
+                spell.CancelCast();
     }
 
     public void ClearSpells()

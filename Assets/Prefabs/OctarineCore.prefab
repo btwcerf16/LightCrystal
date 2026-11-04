@@ -43,7 +43,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5d142544b3e059147b553609d305d34c, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::OctarineCore
+  m_EditorClassIdentifier: Assembly-CSharp::OctarineCoreItem
   _icon: {fileID: 21300000, guid: d7984521660840b199d459d205152986, type: 3}
   _itemId: 9
   _rarity: 4

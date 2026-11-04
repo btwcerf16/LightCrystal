@@ -9,7 +9,7 @@ public sealed class Skeleton : Enemy
     [SerializeField] private Transform _weaponAim;
     [SerializeField] private Transform _muzzle;
     [SerializeField] private Collider2D _bodyCollider;
-    [SerializeField] private SkeletonArrow _arrowPrefab;
+    [SerializeField] private SkeletonArrowProjectile _arrowPrefab;
     [SerializeField, Min(0f)] private float _arrowSpeed = 12f;
     [SerializeField, Min(0.1f)] private float _arrowLifetime = 4f;
     [SerializeField] private LayerMask _arrowHitMask = ~0;
@@ -148,6 +148,8 @@ public sealed class Skeleton : Enemy
 
     public override void Attack()
     {
+        NotifyAttackStarted();
+        if (Health.IsDead) return;
         if (CurrentTarget == MainTarget)
             _isMainTargetLocked = true;
         SetAim(CurrentTarget.position - _weaponAim.position);
@@ -161,11 +163,12 @@ public sealed class Skeleton : Enemy
         if (!isActiveAndEnabled || !_isShooting || Health.IsDead || IsStunned)
             return;
         _isShooting = false;
-        SkeletonArrow arrow = GetComponent<NetworkObject>().NetworkManager.GetComponent<NetworkObjectPool>()
+        SkeletonArrowProjectile arrow = GetComponent<NetworkObject>().NetworkManager.GetComponent<NetworkObjectPool>()
             .GetObject(_arrowPrefab, _muzzle.position, Quaternion.identity);
         ProjectileData data = new ProjectileData
         {
             Direction = _shotDirection,
+            IsArrow = true,
             Speed = _arrowSpeed,
             Damage = Stats.PhysicalDamage.Value,
             LifeTime = _arrowLifetime,

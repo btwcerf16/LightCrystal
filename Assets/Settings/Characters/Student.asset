@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 881338c6cfdd492cab2dbf5097165bf4, type: 3}
+  m_Name: Student
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterConfig
+  DisplayName: "Студент магической академии"
+  Description: "Магические шары, телепортация и щит рассудка. Силен, пока рядом немного врагов."
+  Preview: {fileID: 21300000, guid: 9234244843a04fe987e7e11df34ec1b6, type: 3}
+  BodySprite: {fileID: 21300000, guid: 44423a01be54431b99c14065d739e069, type: 3}
+  Stats: {fileID: 11400000, guid: f5f46fdad4054717b79e217706c0bb4a, type: 2}
+  Spells:
+  - {fileID: 11400000, guid: 5eff4c5412f9444f9d1432e8ead1c2c7, type: 2}
+  - {fileID: 11400000, guid: 091f0e2d21294f57bab2e6632c5ccae5, type: 2}
+  - {fileID: 11400000, guid: 795fcd85731245e68e37914793f095cc, type: 2}
+  - {fileID: 11400000, guid: eb4d86a9048e4324a8ec36e152cd5473, type: 2}
+  PlayerPrefab: {fileID: 247892929754694301, guid: 52671da2c5a17d44babb16e9f72faa55, type: 3}

@@ -169,6 +169,8 @@ public sealed class Goblin : Enemy
 
     public override void Attack()
     {
+        NotifyAttackStarted();
+        if (Health.IsDead) return;
         if (CurrentTarget == MainTarget)
             _isMainTargetLocked = true;
         SetAim(AimAt(CurrentTarget));

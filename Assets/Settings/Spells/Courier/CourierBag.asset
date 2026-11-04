@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a83413902a254308a63e3014b85dbcd8, type: 3}
+  m_Name: CourierBag
+  m_EditorClassIdentifier: Assembly-CSharp::CourierBagConfig
+  SpellName: "Сумка гонца"
+  SpellDescription: "Вместительная сумка для долгой дороги."
+  StatsDescription: "Дополнительные ячейки инвентаря: {ExtraSlots}"
+  IsPassive: 1
+  CooldownTime: 0
+  SanityCost: 0
+  CastTime: 0
+  SpriteIcon: {fileID: 21300000, guid: 8adcb369c76b4d6691a4bf07047823df, type: 3}
+  ExtraSlots: 2

@@ -43,7 +43,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e73b14894a54e6646bd3a28e025344f9, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::DimLamp
+  m_EditorClassIdentifier: Assembly-CSharp::DimLampItem
   _icon: {fileID: 21300000, guid: 74e0a5f341aa40f585d95e0481695550, type: 3}
   _itemId: 7
   _rarity: 2

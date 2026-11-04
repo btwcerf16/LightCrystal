@@ -9,6 +9,9 @@ using UnityEngine.UI;
 [RequireComponent(typeof(SpellHolder), typeof(NetworkActorVitals), typeof(PlayerSlotBindings))]
 public sealed class SpellUI : NetworkBehaviour
 {
+    [SerializeField] private SpellRangePreview _rangePreviewPrefab;
+    private SpellRangePreview _rangePreview;
+    private ActorStats _stats;
     public float Width => Mathf.Max(1, GetComponent<SpellHolder>().Count) * 64f + 16f;
 
     private sealed class SlotView
@@ -18,10 +21,14 @@ public sealed class SpellUI : NetworkBehaviour
         public Text Cost;
         public Text Timer;
         public GameObject Cooldown;
+        public Image CastFill;
+        public Outline Border;
     }
 
     private readonly List<SlotView> _slots = new();
     private SpellHolder _holder;
+    private NetworkSpellHolder _networkHolder;
+    private Sprite _castSprite;
     private PlayerSlotBindings _bindings;
     private PlayerInputReader _input;
     private NetworkActorVitals _vitals;
@@ -33,7 +40,9 @@ public sealed class SpellUI : NetworkBehaviour
 
     private void Awake()
     {
+        _stats = GetComponent<ActorStats>();
         _holder = GetComponent<SpellHolder>();
+        _networkHolder = GetComponent<NetworkSpellHolder>();
         _bindings = GetComponent<PlayerSlotBindings>();
         _input = GetComponent<PlayerInputReader>();
         _vitals = GetComponent<NetworkActorVitals>();
@@ -52,17 +61,21 @@ public sealed class SpellUI : NetworkBehaviour
             return;
         CreatePanel();
         _bindings.BindingsChanged += RefreshBindings;
+        _holder.SpellsChanged += BuildSlots;
     }
 
     private void CreatePanel()
     {
         _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _castSprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f));
         if (EventSystem.current == null)
             new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
         _panel = GetComponent<PlayerHUD>().SpellPanel;
         _canvas = _panel.gameObject;
-        Image(_panel, new Color(0.025f, 0.024f, 0.022f), true);
+        Image(_panel, HudStyle.Surface, true);
         CreateTooltip();
+        _rangePreview = Instantiate(_rangePreviewPrefab, transform);
+        _rangePreview.Hide();
         BuildSlots();
     }
 
@@ -84,9 +97,9 @@ public sealed class SpellUI : NetworkBehaviour
             int index = i;
             SpellConfig config = _holder.GetConfig(i);
             RectTransform card = Rect("Spell_" + i, _panel, new Vector2(startX + i * width, -top), new Vector2(width, width));
-            Image background = Image(card, new Color(0.035f, 0.032f, 0.028f), true);
+            Image background = Image(card, HudStyle.Slot, true);
             Outline border = card.gameObject.AddComponent<Outline>();
-            border.effectColor = new Color(0.32f, 0.26f, 0.16f);
+            border.effectColor = HudStyle.Line;
             border.effectDistance = new Vector2(1f, -1f);
             Button button = card.gameObject.AddComponent<Button>();
             button.targetGraphic = background;
@@ -111,17 +124,24 @@ public sealed class SpellUI : NetworkBehaviour
             Image(cooldown, new Color(0f, 0f, 0f, 0.78f), false);
             Text timer = Label(cooldown, "Timer", "", Vector2.zero, cooldown.sizeDelta, 22);
             cooldown.gameObject.SetActive(false);
+            RectTransform casting = Rect("Casting", card, new Vector2(2f, -2f), new Vector2(width - 4f, width - 4f));
+            Image castFill = Image(casting, new Color(1f, 0.77f, 0.3f, 0.55f), false);
+            castFill.sprite = _castSprite;
+            castFill.type = UnityEngine.UI.Image.Type.Filled;
+            castFill.fillMethod = UnityEngine.UI.Image.FillMethod.Radial360;
+            castFill.fillOrigin = (int)UnityEngine.UI.Image.Origin360.Top;
+            castFill.fillClockwise = true;
+            castFill.fillAmount = 0f;
+            casting.gameObject.SetActive(false);
             bool passive = config != null && config.IsPassive;
-            RectTransform bindingBadge = Rect("BindingBadge", card, new Vector2(2f, -2f), new Vector2(22f, 17f));
-            Image(bindingBadge, new Color(0f, 0f, 0f, 0.8f), false);
-            Text binding = Label(bindingBadge, "Binding", "", Vector2.zero, bindingBadge.sizeDelta, 12);
-            bindingBadge.gameObject.SetActive(!passive);
+            Text binding = HudStyle.Binding(card, "");
+            binding.transform.parent.gameObject.SetActive(!passive);
             RectTransform costBadge = Rect("CostBadge", card, new Vector2(width - 30f, -width + 19f), new Vector2(28f, 17f));
-            Image(costBadge, new Color(0f, 0f, 0f, 0.8f), false);
+            Image(costBadge, HudStyle.Surface, false);
             Text cost = Label(costBadge, "Cost", "", Vector2.zero, costBadge.sizeDelta, 12);
             cost.text = config != null && !passive ? config.SanityCost.ToString("0.#") : "";
             costBadge.gameObject.SetActive(config != null && !passive);
-            _slots.Add(new SlotView { Button = button, Binding = binding, Cost = cost, Timer = timer, Cooldown = cooldown.gameObject });
+            _slots.Add(new SlotView { Button = button, Binding = binding, Cost = cost, Timer = timer, Cooldown = cooldown.gameObject, CastFill = castFill, Border = border });
         }
         RefreshBindings();
     }
@@ -131,7 +151,7 @@ public sealed class SpellUI : NetworkBehaviour
         for (int i = 0; i < _slots.Count; i++)
         {
             SpellConfig config = _holder.GetConfig(i);
-            _slots[i].Binding.text = config != null && config.IsPassive ? "" : _bindings.GetBindingLabel(ESlotBindingType.Spell, i);
+            HudStyle.SetBinding(_slots[i].Binding, config != null && config.IsPassive ? "" : _bindings.GetBindingLabel(ESlotBindingType.Spell, i));
         }
     }
 
@@ -141,7 +161,7 @@ public sealed class SpellUI : NetworkBehaviour
             return;
         if (_slots.Count != _holder.Spells.Count)
             BuildSlots();
-        if (_input.IsMenuOpen || Pointer.current == null)
+        if (_input.IsMenuOpen || _input.IsStatsOpen || Pointer.current == null)
             HideTooltip();
         else if (_hoveredIndex >= 0)
             ShowTooltip(_hoveredIndex);
@@ -151,15 +171,31 @@ public sealed class SpellUI : NetworkBehaviour
             if (spell == null)
             {
                 _slots[i].Button.interactable = false;
+                _slots[i].CastFill.gameObject.SetActive(false);
+                _slots[i].Cooldown.SetActive(false);
                 continue;
             }
             bool passive = spell.SpellData.IsPassive;
+            bool toggled = spell.IsToggled;
+            if (spell.SpellData is ToggleSpellConfig toggle)
+            {
+                NetworkEffectHandler effects = GetComponent<NetworkEffectHandler>();
+                for (int j = 0; j < effects.Count; j++)
+                    if (effects.GetData(effects.GetEffect(j).EffectIndex) == toggle.Effect)
+                        toggled = true;
+            }
+            _slots[i].Border.effectColor = toggled ? new Color(0.4f, 0.9f, 0.5f) : HudStyle.Line;
             float remaining = passive ? 0f : spell.CooldownRemaining;
-            bool affordable = _vitals.State.z >= spell.SpellData.SanityCost;
-            _slots[i].Cooldown.SetActive(remaining > 0f);
+            float progress = _networkHolder != null ? _networkHolder.GetCastProgress(i) : spell.CastProgress;
+            bool casting = !passive && progress >= 0f;
+            _slots[i].CastFill.gameObject.SetActive(casting);
+            _slots[i].CastFill.fillAmount = Mathf.Clamp01(progress);
+            _slots[i].Cost.text = passive ? "" : spell.SanityCost.ToString("0.#");
+            bool affordable = toggled || _vitals.State.z >= spell.SanityCost;
+            _slots[i].Cooldown.SetActive(!casting && remaining > 0f);
             _slots[i].Timer.text = remaining >= 1f ? Mathf.CeilToInt(remaining).ToString() : remaining.ToString("0.0");
             _slots[i].Cost.color = affordable ? new Color(0.9f, 0.57f, 0.23f) : new Color(0.95f, 0.3f, 0.25f);
-            _slots[i].Button.interactable = !passive && remaining <= 0f && affordable && _vitals.State.x > 0f && !_input.IsMenuOpen && !_input.IsStatsOpen;
+            _slots[i].Button.interactable = !passive && !casting && remaining <= 0f && affordable && _vitals.State.x > 0f && !_input.IsMenuOpen && !_input.IsStatsOpen;
         }
     }
 
@@ -167,6 +203,7 @@ public sealed class SpellUI : NetworkBehaviour
     {
         if (_bindings != null)
             _bindings.BindingsChanged -= RefreshBindings;
+        _holder.SpellsChanged -= BuildSlots;
         if (_canvas != null)
         {
             _canvas.SetActive(false);
@@ -174,7 +211,17 @@ public sealed class SpellUI : NetworkBehaviour
             _canvas = null;
         }
         _slots.Clear();
+        if (_castSprite != null)
+        {
+            Destroy(_castSprite);
+            _castSprite = null;
+        }
         HideTooltip();
+        if (_rangePreview != null)
+        {
+            Destroy(_rangePreview.gameObject);
+            _rangePreview = null;
+        }
         if (_tooltip != null)
         {
             _tooltip.gameObject.SetActive(false);
@@ -190,12 +237,13 @@ public sealed class SpellUI : NetworkBehaviour
 
     private void ShowTooltip(int index)
     {
-        if (_input.IsMenuOpen)
+        if (_input.IsMenuOpen || _input.IsStatsOpen)
             return;
         SpellConfig config = _holder.GetConfig(index);
         if (config == null)
             return;
         _hoveredIndex = index;
+        _rangePreview.Show(config.GetRange(_stats));
         Spell spell = index < _holder.Spells.Count ? _holder.Spells[index] : null;
         string description = spell != null ? spell.Description : config.Description;
         string stats = spell != null ? spell.StatsDescription : config.Stats;
@@ -206,7 +254,9 @@ public sealed class SpellUI : NetworkBehaviour
         else
         {
             float cooldown = spell != null ? spell.CooldownTime : config.CooldownTime;
-            description += $"\n\nРассудок: {config.SanityCost:0.#}\nКулдаун: {cooldown:0.#} с";
+            if (spell != null && spell.CastTime > 0f)
+                description += $"\nВремя чтения: {spell.CastTime:0.##} с";
+            description += $"\n\nРассудок: {(spell != null ? spell.SanityCost : config.SanityCost):0.#}\nКулдаун: {cooldown:0.#} с";
         }
 
         if (Pointer.current != null)
@@ -216,6 +266,7 @@ public sealed class SpellUI : NetworkBehaviour
     private void HideTooltip()
     {
         _hoveredIndex = -1;
+        if (_rangePreview != null) _rangePreview.Hide();
         if (_tooltip != null)
             _tooltip.Hide();
     }
@@ -247,7 +298,7 @@ public sealed class SpellUI : NetworkBehaviour
         label.fontSize = fontSize;
         label.text = text;
         label.alignment = TextAnchor.MiddleCenter;
-        label.color = new Color(0.87f, 0.83f, 0.74f);
+        label.color = HudStyle.Text;
         label.raycastTarget = false;
         return label;
     }

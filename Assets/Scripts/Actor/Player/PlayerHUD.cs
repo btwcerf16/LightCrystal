@@ -33,7 +33,7 @@ public sealed class PlayerHUD : NetworkBehaviour
     private float ArsenalWidth => GetComponent<ArsenalUI>().Width;
     private float CenterWidth => GetComponent<PlayerVitalsUI>().Width;
     private float InventoryWidth => GetComponent<InventoryUI>().Width;
-    private float Height => Mathf.Max(176f, GetComponent<InventoryUI>().Height, GetComponent<ArsenalUI>().Height);
+    private float Height => Mathf.Max(160f, GetComponent<InventoryUI>().Height, GetComponent<ArsenalUI>().Height);
 
     public RectTransform ArsenalPanel => Section("ArsenalPanel", Vector2.zero, new Vector2(ArsenalWidth, Height));
     public RectTransform VitalsPanel => Section("VitalsPanel", new Vector2(ArsenalWidth, 0f), new Vector2(CenterWidth, 68f));
@@ -81,7 +81,7 @@ public sealed class PlayerHUD : NetworkBehaviour
             return;
         _shownSeconds = seconds;
         _waveTimerText.text = $"{seconds / 60:00}:{seconds % 60:00}";
-        _waveTimerText.color = seconds <= 5 ? new Color(1f, 0.48f, 0.3f) : new Color(0.95f, 0.88f, 0.7f);
+        _waveTimerText.color = seconds <= 5 ? new Color(1f, 0.48f, 0.3f) : HudStyle.Text;
     }
 
     private RectTransform Section(string name, Vector2 position, Vector2 size)
@@ -102,10 +102,12 @@ public sealed class PlayerHUD : NetworkBehaviour
         if (_root == null)
             return;
         _root.sizeDelta = new Vector2(ArsenalWidth + CenterWidth + InventoryWidth, Height);
+        Section("ArsenalPanel", Vector2.zero, new Vector2(ArsenalWidth, Height));
         Section("VitalsPanel", new Vector2(ArsenalWidth, 0f), new Vector2(CenterWidth, 68f));
         Section("Spells", new Vector2(ArsenalWidth, 68f), new Vector2(CenterWidth, Height - 68f));
         Section("InventoryPanel", new Vector2(ArsenalWidth + CenterWidth, 0f), new Vector2(InventoryWidth, Height));
-        Section("Currency", new Vector2(ArsenalWidth + CenterWidth, Height), new Vector2(InventoryWidth, 32f));
+        RectTransform currency = Section("Currency", new Vector2(ArsenalWidth + CenterWidth, Height - 24f), new Vector2(InventoryWidth, 24f));
+        currency.SetAsLastSibling();
     }
 
     private void CreateRoot()
@@ -126,13 +128,22 @@ public sealed class PlayerHUD : NetworkBehaviour
         _root.anchorMin = _root.anchorMax = new Vector2(0.5f, 0f);
         _root.pivot = new Vector2(0.5f, 0f);
         _root.sizeDelta = new Vector2(ArsenalWidth + CenterWidth + InventoryWidth, Height);
-        _root.GetComponent<Image>().color = new Color(0.025f, 0.024f, 0.022f);
+        _root.anchoredPosition = new Vector2(0f, 16f);
+        _root.GetComponent<Image>().color = HudStyle.Surface;
         Outline border = _root.GetComponent<Outline>();
-        border.effectColor = new Color(0.32f, 0.26f, 0.16f);
-        border.effectDistance = new Vector2(2f, -2f);
+        border.effectColor = HudStyle.Line;
+        border.effectDistance = new Vector2(1f, -1f);
         CreateWalletUI();
         CreateWaveTimer();
         CreateComboUI();
+        ShopSpawnArea area = FindFirstObjectByType<ShopSpawnArea>();
+        Crystal crystal = FindFirstObjectByType<Crystal>();
+        if (IsClient && IsOwner && area != null && area.Ground != null && crystal != null)
+        {
+            GameObject minimap = new GameObject("Minimap", typeof(RectTransform));
+            minimap.transform.SetParent(_canvas.transform, false);
+            minimap.AddComponent<PlayerMinimapUI>().Initialize(transform, area.Ground, crystal.transform);
+        }
     }
 
     private void CreateComboUI()
@@ -178,17 +189,17 @@ public sealed class PlayerHUD : NetworkBehaviour
         _waveTimer = new GameObject("WaveTimer", typeof(RectTransform), typeof(Image), typeof(Outline)).GetComponent<RectTransform>();
         _waveTimer.SetParent(_canvas.transform, false);
         _waveTimer.anchorMin = _waveTimer.anchorMax = _waveTimer.pivot = new Vector2(0.5f, 1f);
-        _waveTimer.anchoredPosition = new Vector2(0f, -20f);
-        _waveTimer.sizeDelta = new Vector2(220f, 76f);
+        _waveTimer.anchoredPosition = new Vector2(0f, -24f);
+        _waveTimer.sizeDelta = new Vector2(176f, 64f);
         Image background = _waveTimer.GetComponent<Image>();
-        background.color = new Color(0.025f, 0.024f, 0.022f, 0.94f);
+        background.color = HudStyle.Surface;
         background.raycastTarget = false;
         Outline border = _waveTimer.GetComponent<Outline>();
-        border.effectColor = new Color(0.32f, 0.26f, 0.16f);
+        border.effectColor = HudStyle.Line;
         border.effectDistance = new Vector2(1f, -1f);
 
-        Text title = CreateLabel(_waveTimer, "Title", new Color(0.65f, 0.6f, 0.48f));
-        title.text = "ДО НАЧАЛА ВОЛНЫ";
+        Text title = CreateLabel(_waveTimer, "Title", HudStyle.Muted);
+        title.text = "До следующей волны";
         title.fontSize = 12;
         title.rectTransform.anchorMin = new Vector2(0f, 1f);
         title.rectTransform.anchorMax = Vector2.one;
@@ -209,22 +220,23 @@ public sealed class PlayerHUD : NetworkBehaviour
     {
         _wallet = GetComponent<ActorWallet>();
         _networkWallet = GetComponent<NetworkPlayerWallet>();
-        RectTransform panel = Section("Currency", new Vector2(ArsenalWidth + CenterWidth, Height), new Vector2(InventoryWidth, 32f));
-        panel.gameObject.AddComponent<Image>().color = new Color(0.065f, 0.055f, 0.025f);
+        RectTransform panel = Section("Currency", new Vector2(ArsenalWidth + CenterWidth, Height - 24f), new Vector2(InventoryWidth, 24f));
+        panel.gameObject.AddComponent<Image>().color = HudStyle.Surface;
         var border = panel.gameObject.AddComponent<Outline>();
-        border.effectColor = new Color(0.32f, 0.26f, 0.16f);
+        border.effectColor = HudStyle.Line;
         border.effectDistance = new Vector2(1f, -1f);
 
         RectTransform coin = new GameObject("Coin", typeof(RectTransform), typeof(Image)).GetComponent<RectTransform>();
         coin.SetParent(panel, false);
         coin.anchorMin = coin.anchorMax = new Vector2(0f, 0.5f);
-        coin.anchoredPosition = new Vector2(20f, 0f);
-        coin.sizeDelta = new Vector2(24f, 24f);
+        coin.anchoredPosition = new Vector2(16f, 0f);
+        coin.sizeDelta = new Vector2(16f, 16f);
         coin.GetComponent<Image>().sprite = _currencyIcon;
         coin.GetComponent<Image>().raycastTarget = false;
         _currencyText = CreateLabel(panel, "CurrencyValue", new Color(0.95f, 0.79f, 0.33f));
         _currencyText.alignment = TextAnchor.MiddleLeft;
-        _currencyText.rectTransform.offsetMin = new Vector2(40f, 0f);
+        _currencyText.fontSize = 14;
+        _currencyText.rectTransform.offsetMin = new Vector2(32f, 0f);
         _wallet.CurrencyChanged += UpdateCurrency;
         _networkWallet.HintRequested += ShowHint;
         UpdateCurrency(_wallet.Currency);

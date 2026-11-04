@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c24227c766e4a648c8af2615ee89b27, type: 3}
   m_Name: KnightHeal
   m_EditorClassIdentifier: Assembly-CSharp::KnightHealConfig
-  SpellName: Второе дыхание
-  SpellDescription: Восстанавливает здоровье рыцаря. При полном здоровье не расходует рассудок.
-  StatsDescription: "Лечение: {Healing:0.#}"
+  SpellName: "Второе дыхание"
+  SpellDescription: "Снимает развеиваемые негативные эффекты. За каждый снятый эффект восстанавливает рассудок."
+  StatsDescription: "Рассудок за эффект: {SanityPerDebuff}"
   IsPassive: 0
-  CooldownTime: 8
-  SanityCost: 15
-  SpriteIcon: {fileID: 21300000, guid: 4120d9bdf38843baa7e11480d98a6234, type: 3}
-  Healing: 20
+  CooldownTime: 10
+  SanityCost: 10
+  CastTime: 0
+  SpriteIcon: {fileID: 21300000, guid: 5407197781bb494fb55b96c3dd1ba734, type: 3}
+  SanityPerDebuff: 8

@@ -20,6 +20,18 @@ public sealed class ActorStatsConfig : ScriptableObject
     [field: SerializeField, Min(0f)] public float AttackSpeed { get; private set; } = 1f;
     [field: SerializeField, Range(0f, 0.9f)] public float CooldownReduction { get; private set; }
 
+    [Header("Additional combat stats")]
+    [field: SerializeField, Range(0f, 360f)] public float Stability { get; private set; } = 0f;
+    [field: SerializeField, Min(0.1f)] public float CameraDistance { get; private set; } = 1f;
+    [field: SerializeField, Min(0.01f)] public float CastSpeed { get; private set; } = 1f;
+    [field: SerializeField, Min(0f)] public float ProjectileSpeed { get; private set; } = 0f;
+    [field: SerializeField, Min(0f)] public float ProjectileSpeedMultiplier { get; private set; } = 1f;
+    [field: SerializeField, Min(0f)] public float ProjectileRange { get; private set; } = 0f;
+    [field: SerializeField, Min(0f)] public float ProjectilePiercing { get; private set; } = 0f;
+    [field: SerializeField, Range(0f, 1f)] public float SanityCostReduction { get; private set; } = 0f;
+    [field: SerializeField, Range(0f, 1f)] public float CriticalChance { get; private set; } = 0f;
+    [field: SerializeField, Min(1f)] public float CriticalDamageMultiplier { get; private set; } = 1.3f;
+
     [Header("Damage")]
     [field: SerializeField, Min(0f)] public float PhysicalDamage { get; private set; }
 

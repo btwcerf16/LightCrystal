@@ -17,6 +17,19 @@ public class ActorVision : MonoBehaviour
     private float _currentAngle;
     private float _turnVelocity;
 
+    public float Radius => _visionLight.pointLightOuterRadius;
+    public float Angle => _visionLight.pointLightOuterAngle;
+    public Vector2 Direction => transform.up;
+
+    public bool CanSee(Vector3 position)
+    {
+        if (!isActiveAndEnabled || Radius <= 0f || Angle <= 0f)
+            return false;
+        Vector2 offset = position - transform.position;
+        return offset.sqrMagnitude <= Radius * Radius
+            && (Angle >= 360f || Vector2.Angle(Direction, offset) <= Angle * 0.5f);
+    }
+
     private void Awake()
     {
         _stats = GetComponentInParent<ActorStats>();

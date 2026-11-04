@@ -60,7 +60,7 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
         scaler.matchWidthOrHeight = 0.5f;
 
         _viewport = Rect("Effects", _canvasRect, new Vector2(600f, 58f));
-        _viewport.anchoredPosition = new Vector2(-16f, -16f);
+        _viewport.anchoredPosition = new Vector2(-24f, -24f);
         Background(_viewport, Color.clear, true);
         _viewport.gameObject.AddComponent<RectMask2D>();
         _row = Rect("Row", _viewport, _viewport.sizeDelta);
@@ -99,7 +99,7 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
             if (view.IsPresent)
             {
                 float remaining = Mathf.Max(0f, (float)(view.EndsAt - NetworkManager.ServerTime.Time));
-                view.Timer.text = Mathf.CeilToInt(remaining).ToString();
+                view.Timer.text = view.Data.IsPermanent ? "" : Mathf.CeilToInt(remaining).ToString();
             }
         }
         _viewport.gameObject.SetActive(_views.Count > 0);
@@ -175,7 +175,7 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
     private EffectView CreateView(int instanceId, EffectData data)
     {
         RectTransform rect = Rect("Effect_" + instanceId, _row, new Vector2(48f, 56f));
-        Background(rect, new Color(0.04f, 0.038f, 0.032f, 0.96f), true);
+        Background(rect, HudStyle.Surface, true);
         Outline border = rect.gameObject.AddComponent<Outline>();
         border.effectColor = GetBorderColor(data);
         border.effectDistance = new Vector2(2f, -2f);
@@ -270,7 +270,7 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
         Text label = Rect(name, parent, size).gameObject.AddComponent<Text>();
         label.font = _font;
         label.fontSize = fontSize;
-        label.color = new Color(0.84f, 0.8f, 0.72f);
+        label.color = HudStyle.Text;
         label.alignment = TextAnchor.UpperLeft;
         label.supportRichText = false;
         label.raycastTarget = false;

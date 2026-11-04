@@ -9,7 +9,15 @@ public abstract class Weapon : Item
     [SerializeField] protected Transform _attackPoint;
     [SerializeField] protected Animator _animator;
     [SerializeField, Min(1)] private int _maxTargets = 1;
+    [SerializeField, Min(0f)] private float _aimSwayAngle;
     private Stat _attackSpeed;
+
+    public Vector2 GetProjectileDirection(Vector2 direction)
+    {
+        float stability = OwnerStats != null ? OwnerStats.Stability.Value : 0f;
+        float angle = Mathf.Max(0f, _aimSwayAngle - stability) * Mathf.Sin(Time.time * 3f);
+        return Quaternion.Euler(0f, 0f, angle) * direction;
+    }
     public bool IsAvailable { get; private set; } = true;
     public int TargetLimit
     {
@@ -149,6 +157,13 @@ public abstract class Weapon : Item
             Second = _enchantDefinitions.Length > 1 ? _enchantDefinitions[1].Id : 0,
             Third = _enchantDefinitions.Length > 2 ? _enchantDefinitions[2].Id : 0
         };
+    }
+
+    public void NotifyMeleeHit(IDamageable target)
+    {
+        NotifyHit(target);
+        if (IsServer)
+            OwnerStats.GetComponent<ActorArsenal>()?.NotifyMeleeHit(target);
     }
 
     public void NotifyHit(IDamageable target)

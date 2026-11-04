@@ -9,6 +9,19 @@ public class Inventory : MonoBehaviour
     public Item GetItem(int index) => index >= 0 && index < _items.Length ? _items[index] : null;
 
     public event Action ContentsChanged;
+    public event Action SizeChanged;
+
+    public void SetSize(int size)
+    {
+        if (size < 1 || size == Size)
+            return;
+        for (int i = size; i < Size; i++)
+            if (_items[i] != null)
+                return;
+        Array.Resize(ref _items, size);
+        SizeChanged?.Invoke();
+        ContentsChanged?.Invoke();
+    }
     public event Action<int, int> SlotChangeRequested;
     public event Action<int> ItemDropRequested;
     public event Action<int> ItemUseRequested;
@@ -81,7 +94,7 @@ public class Inventory : MonoBehaviour
             }
         }
 
-        if (_items[index] == item)
+        if (ReferenceEquals(_items[index], item))
             return;
 
         if (_items[index] != null && _items[index].transform.IsChildOf(transform))
@@ -109,7 +122,7 @@ public class Inventory : MonoBehaviour
             float reduction = 0f;
             foreach (Item item in _items)
             {
-                OctarineCore core = item as OctarineCore;
+                OctarineCoreItem core = item as OctarineCoreItem;
                 if (core != null && core.IsEquipped)
                     reduction += core.SpellCooldownReduction;
             }

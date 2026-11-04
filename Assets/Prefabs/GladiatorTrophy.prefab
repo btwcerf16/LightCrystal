@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6342692930379493249
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7018224541870668582}
+  - component: {fileID: 1332558693726375035}
+  m_Layer: 0
+  m_Name: GladiatorTrophy
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7018224541870668582
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6342692930379493249}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1332558693726375035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6342692930379493249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfdd1d3fc45f4129baf8dce2f1e6b2dc, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GladiatorTrophyItem
+  _icon: {fileID: 21300000, guid: 760a65bbfea1466e897a229ef049debe, type: 3}
+  _worldIcon: {fileID: 21300000, guid: e0e38cc6e2154f95867022be824e663e, type: 3}
+  _itemId: 27
+  _rarity: 2
+  _price: 0
+  _cooldown: 0
+  _description: "Когда-то высшая почесть гладиатора. Теперь потемневший кубок напоминает старое ведро."
+  _statsDescription: "Физическая защита: +{Resistance:P0}\nОбзор: −{ViewPenalty:P0}\nСкорость снарядов: −{ProjectileSpeedPenalty:P0}\nЗа каждые {GoldPerStep} золота: +{ResistancePerStep:P0} физической защиты\nНе более +{MaximumGoldResistance:P0} защиты от золота"
+

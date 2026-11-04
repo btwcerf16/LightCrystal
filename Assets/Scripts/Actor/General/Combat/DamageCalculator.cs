@@ -3,6 +3,13 @@ using UnityEngine;
 
 public static class DamageCalculator
 {
+    public static float RollCriticalDamage(float damage, ActorStats attacker)
+    {
+        if (attacker != null && UnityEngine.Random.value < attacker.CriticalChance.Value)
+            return damage * attacker.CriticalDamageMultiplier.Value;
+        return damage;
+    }
+
     public static float CalculateDamage(float damage, EDamageType damageType, ActorStats attacker, ActorStats target)
     {
         damage = Mathf.Max(0f, damage);

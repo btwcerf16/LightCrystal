@@ -5,6 +5,7 @@ using UnityEngine;
 public class WaveDirector : MonoBehaviour
 {
     [SerializeField] private EnemyDatabase _enemyDatabase;
+    [SerializeField] private NightmareGrowthData _waveEffect;
     [SerializeField] private Transform _mainTarget;
     [SerializeField] private ShopSpawnArea _spawnArea;
     [SerializeField, Min(0f)] private float _minimumCrystalDistance = 20f;
@@ -118,8 +119,22 @@ public class WaveDirector : MonoBehaviour
     {
         enemy.gameObject.SetActive(true);
         EnemyActivated?.Invoke(enemy);
+        StrengthenEnemy(enemy);
         enemy.enabled = true;
         enemy.Initialize(_mainTarget);
+    }
+
+    private void StrengthenEnemy(Enemy enemy)
+    {
+        if (_waveEffect == null || WaveCount == 0)
+            return;
+        EffectHandler effects = enemy.GetComponent<EffectHandler>();
+        int stacks = 0;
+        foreach (Effect effect in effects.ActiveEffects)
+            if (effect.EffectData == _waveEffect)
+                stacks++;
+        for (int i = stacks; i < WaveCount; i++)
+            effects.AddEffect(_waveEffect);
     }
 
     private void RemoveEnemy(Enemy enemy)
@@ -159,6 +174,8 @@ public class WaveDirector : MonoBehaviour
             ActiveEnemies.Add(enemy);
         }
         CalmEnemies.Clear();
+        foreach (Enemy enemy in ActiveEnemies)
+            StrengthenEnemy(enemy);
         WaveStarted?.Invoke();
     }
 

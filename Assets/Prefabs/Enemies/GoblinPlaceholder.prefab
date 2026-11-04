@@ -23,6 +23,7 @@ GameObject:
   - component: {fileID: 1143}
   - component: {fileID: 3407005731739354805}
   - component: {fileID: 9183460220976921653}
+  - component: {fileID: 3481929496263523788}
   m_Layer: 8
   m_Name: GoblinPlaceholder
   m_TagString: Enemy
@@ -10479,3 +10480,23 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 5c12adf68d976264e867ba4942d5d33b, type: 2}
   - {fileID: 11400000, guid: 801729d0ef23eb74186e2ed9e5cc9f69, type: 2}
   - {fileID: 11400000, guid: 6ed531e5fdd340947afce7de8226555c, type: 2}
+  - {fileID: 11400000, guid: 0fb0cdfaaf888ab4988aea70d9f64603, type: 2}
+  - {fileID: 11400000, guid: 52e96962b582479a9098113ed1ce2962, type: 2}
+  - {fileID: 11400000, guid: 6f746dcefd044446a65043273cf29492, type: 2}
+  - {fileID: 11400000, guid: e786af5392c045a795c6010bbcde712d, type: 2}
+  - {fileID: 11400000, guid: 5c1b07d509944655aeb48f9b7384ebb4, type: 2}
+  - {fileID: 11400000, guid: 3253a5084dac41a1994375a8f50cc960, type: 2}
+--- !u!114 &3481929496263523788
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 003a5ce413e69714689dcf5c8028252e, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyBloodlust
+  _chaseDelay: 10
+  _effect: {fileID: 11400000, guid: 0fb0cdfaaf888ab4988aea70d9f64603, type: 2}

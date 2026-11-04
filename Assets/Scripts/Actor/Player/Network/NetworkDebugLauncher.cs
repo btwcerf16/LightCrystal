@@ -1,14 +1,17 @@
 using Unity.Netcode;
+using Unity.Netcode.Transports.UTP;
 using UnityEngine;
 
 [RequireComponent(typeof(NetworkManager))]
 public sealed class NetworkDebugLauncher : MonoBehaviour
 {
     private NetworkManager _networkManager;
+    private LobbyConnection _connection;
 
     private void Awake()
     {
         _networkManager = GetComponent<NetworkManager>();
+        _connection = GetComponent<LobbyConnection>();
     }
 
     private void OnGUI()
@@ -18,10 +21,16 @@ public sealed class NetworkDebugLauncher : MonoBehaviour
         if (!_networkManager.IsListening)
         {
             if (GUILayout.Button("Start Host"))
-                _networkManager.StartHost();
+            {
+                if (_connection != null) _connection.CreateLobby();
+                else _networkManager.StartHost();
+            }
 
             if (GUILayout.Button("Start Client"))
-                _networkManager.StartClient();
+            {
+                if (_connection != null) _connection.Connect(GetComponent<UnityTransport>().ConnectionData.Address);
+                else _networkManager.StartClient();
+            }
         }
         else
         {

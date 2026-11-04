@@ -82,8 +82,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 6341813858782932540, guid: 7d713706367d33742bb2e9d98e2ec6b2, type: 3}
-  m_Color: {r: 0.6226415, g: 0.6226415, b: 0.6226415, a: 1}
+  m_Sprite: {fileID: 21300000, guid: 3660a897f4d14945baec6239e9f97381, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -1337,7 +1337,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0885878896db42ca98c2bf5e5079ff64, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::RustySword
+  m_EditorClassIdentifier: Assembly-CSharp::RustySwordWeapon
   _icon: {fileID: 21300000, guid: b55e93f8adf8c814aa62f93a9fae300d, type: 3}
   _itemId: 1
   _rarity: 0
@@ -1453,6 +1453,22 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 801729d0ef23eb74186e2ed9e5cc9f69, type: 2}
   - {fileID: 11400000, guid: 6ed531e5fdd340947afce7de8226555c, type: 2}
   - {fileID: 11400000, guid: 4df0339bda54085419e4fd6db7983017, type: 2}
+  - {fileID: 11400000, guid: 82238d6a4f8fb0e4e8a395472c9457c9, type: 2}
+  - {fileID: 11400000, guid: c0cac5c104a40d948a2cd84f069a57de, type: 2}
+  - {fileID: 11400000, guid: 52e96962b582479a9098113ed1ce2962, type: 2}
+  - {fileID: 11400000, guid: eb0b2f93a66844cc92cebd5f4f6e073c, type: 2}
+  - {fileID: 11400000, guid: 93d0036fdb5c42808253d9f0a8dff478, type: 2}
+  - {fileID: 11400000, guid: 60010c3f545241a79af4393f30c3beec, type: 2}
+  - {fileID: 11400000, guid: 4c79205c2a974dd199a79e8126860caa, type: 2}
+  - {fileID: 11400000, guid: 55b39694bbf14ae0a47534f0626e511a, type: 2}
+  - {fileID: 11400000, guid: 8e46cef495e6430698ca82ebea584598, type: 2}
+  - {fileID: 11400000, guid: 217c75c7ba6e45eda0a9184c6409fede, type: 2}
+  - {fileID: 11400000, guid: 6008faae7dbe46e1a273fcaf1c3d8ca8, type: 2}
+  - {fileID: 11400000, guid: acccd76b0c6e4bcc8aecdb7a1d669044, type: 2}
+  - {fileID: 11400000, guid: fb7203a82d674244ac4cbcbba75c2f55, type: 2}
+  - {fileID: 11400000, guid: f867183055534377a3f8581476c31456, type: 2}
+  - {fileID: 11400000, guid: 07813995288b496682cd4c6477f6e2c4, type: 2}
+  - {fileID: 11400000, guid: 99e2defc61bc466f9c2a25463f100890, type: 2}
 --- !u!114 &8123400010000000022
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1516,10 +1532,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5600a50b89ef4a0aa877d33cc6101867, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::SpellHolder
-  _spellConfigs:
-  - {fileID: 11400000, guid: bb12619a70dc4f669eba6a5880f7fd0f, type: 2}
-  - {fileID: 11400000, guid: 703a7b54291a4661b693cf38a3fc57df, type: 2}
-  - {fileID: 11400000, guid: cf618238fe224c739d693bc9140790cb, type: 2}
+  _spellConfigs: []
 --- !u!114 &8123400010000000027
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1532,6 +1545,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 73059f3475e44442b13740c1a9c162f2, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkSpellHolder
+  _bodyRenderer: {fileID: 2520797166062340064}
   ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &8123400010000000028
 MonoBehaviour:
@@ -1545,6 +1559,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ab9f1bf599e4491ac62ca71aac11006, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::SpellUI
+  _rangePreviewPrefab: {fileID: 6010366792466824571, guid: 8c62ade233726a145a4d92e9e9048d17, type: 3}
   ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &8123400010000000029
 MonoBehaviour:

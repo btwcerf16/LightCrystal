@@ -67,7 +67,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 35afc1df0df9bde4ba9b8d01429fe3b5, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::FirstDawnSword
+  m_EditorClassIdentifier: Assembly-CSharp::FirstDawnSwordWeapon
   _icon: {fileID: 21300000, guid: 40e1bd1630694538b144c960b31d72f4, type: 3}
   _itemId: 6
   _rarity: 4

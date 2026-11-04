@@ -191,7 +191,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 46a795c3ad9441049ff51848515a1ec9, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::BellkeeperHammer
+  m_EditorClassIdentifier: Assembly-CSharp::BellkeeperHammerWeapon
   _icon: {fileID: 21300000, guid: 3dd6c19f6e7a433098c0622c80ecb582, type: 3}
   _itemId: 5
   _rarity: 2

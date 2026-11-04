@@ -37,10 +37,10 @@ public sealed class HoverTooltipUI : MonoBehaviour
         view._panel = Rect(panelName, view._area, new Vector2(340f, 160f));
         view._panel.anchorMin = view._panel.anchorMax = new Vector2(0.5f, 0.5f);
         Image background = view._panel.gameObject.AddComponent<Image>();
-        background.color = new Color(0.025f, 0.024f, 0.022f, 0.98f);
+        background.color = HudStyle.Surface;
         background.raycastTarget = false;
         view._border = view._panel.gameObject.AddComponent<Outline>();
-        view._border.effectColor = new Color(0.4f, 0.32f, 0.19f);
+        view._border.effectColor = HudStyle.Line;
         view._border.effectDistance = new Vector2(2f, -2f);
         view._title = view.Label("Title", 18, new Vector2(14f, -12f));
         view._body = view.Label("Description", 14, new Vector2(14f, -48f));
@@ -104,7 +104,7 @@ public sealed class HoverTooltipUI : MonoBehaviour
             {
                 RectTransform panel = Rect("Enchant_" + _enchantCount, _panel, Vector2.zero);
                 Image background = panel.gameObject.AddComponent<Image>();
-                background.color = new Color(0.045f, 0.038f, 0.028f, 0.98f);
+                background.color = HudStyle.Slot;
                 background.raycastTarget = false;
                 Outline border = panel.gameObject.AddComponent<Outline>();
                 border.effectDistance = new Vector2(1f, -1f);
@@ -204,7 +204,7 @@ public sealed class HoverTooltipUI : MonoBehaviour
         label.rectTransform.anchoredPosition = position;
         label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         label.fontSize = size;
-        label.color = new Color(0.87f, 0.83f, 0.74f);
+        label.color = HudStyle.Text;
         label.alignment = TextAnchor.UpperLeft;
         label.supportRichText = false;
         label.raycastTarget = false;

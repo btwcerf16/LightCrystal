@@ -7,12 +7,14 @@ public sealed class LocalPlayerSettings : ScriptableObject
     [SerializeField] private string[] _inventoryBindings = new string[0];
     [SerializeField] private string[] _arsenalBindings = new string[0];
     [SerializeField] private string[] _spellBindings = new string[0];
+    [SerializeField] private string[] _cancelCastBindings = new string[0];
 
     public void Load(int inventorySize, int arsenalSize, int spellSize = 0)
     {
         LoadBindings(ref _inventoryBindings, ESlotBindingType.Inventory, inventorySize);
         LoadBindings(ref _arsenalBindings, ESlotBindingType.Arsenal, arsenalSize);
         LoadBindings(ref _spellBindings, ESlotBindingType.Spell, spellSize);
+        LoadBindings(ref _cancelCastBindings, ESlotBindingType.CancelCast, 1);
     }
 
     private void LoadBindings(ref string[] bindings, ESlotBindingType type, int size)
@@ -62,6 +64,7 @@ public sealed class LocalPlayerSettings : ScriptableObject
         ResetBindings(_inventoryBindings, ESlotBindingType.Inventory);
         ResetBindings(_arsenalBindings, ESlotBindingType.Arsenal);
         ResetBindings(_spellBindings, ESlotBindingType.Spell);
+        ResetBindings(_cancelCastBindings, ESlotBindingType.CancelCast);
         PlayerPrefs.Save();
     }
 
@@ -80,12 +83,15 @@ public sealed class LocalPlayerSettings : ScriptableObject
         {
             case ESlotBindingType.Inventory: return _inventoryBindings;
             case ESlotBindingType.Arsenal: return _arsenalBindings;
+            case ESlotBindingType.CancelCast: return _cancelCastBindings;
             default: return _spellBindings;
         }
     }
 
     private string GetDefaultBinding(ESlotBindingType type, int index)
     {
+        if (type == ESlotBindingType.CancelCast)
+            return "<Keyboard>/capsLock";
         if (type == ESlotBindingType.Spell)
         {
             string[] keys = { "r", "f", "c", "v" };

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Unity.Netcode;
 
 [CreateAssetMenu(menuName = "Enemies/Enemy Database")]
 public sealed class EnemyDatabase : ScriptableObject
@@ -15,6 +16,20 @@ public sealed class EnemyDatabase : ScriptableObject
     [SerializeField] private Entry[] _enemies = new Entry[0];
 
     public Entry[] Enemies => _enemies;
+
+    public int GetWeight(Enemy enemy)
+    {
+        if (enemy == null || !enemy.TryGetComponent(out NetworkObject instance))
+            return 0;
+        foreach (Entry entry in _enemies)
+        {
+            if (entry != null && entry.Prefab != null
+                && entry.Prefab.TryGetComponent(out NetworkObject prefab)
+                && prefab.PrefabIdHash == instance.PrefabIdHash)
+                return Mathf.Max(0, entry.Weight);
+        }
+        return 0;
+    }
 
     private void OnValidate()
     {

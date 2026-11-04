@@ -32,11 +32,11 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
         Outline outline = GetComponent<Outline>();
         if (outline != null)
             outline.enabled = false;
-        RectTransform icon = Child("Icon", new Vector2(0f, 0.12f), new Vector2(1f, 0.88f));
+        RectTransform icon = Child("Icon", new Vector2(0f, 0.08f), new Vector2(1f, 0.92f));
         _icon = icon.gameObject.AddComponent<Image>();
         _icon.preserveAspect = true;
         _icon.raycastTarget = false;
-        RectTransform cooldown = Child("Cooldown", new Vector2(0f, 0.12f), new Vector2(1f, 0.88f));
+        RectTransform cooldown = Child("Cooldown", new Vector2(0f, 0.08f), new Vector2(1f, 0.92f));
         _cooldownPanel = cooldown.gameObject;
         Image shade = new GameObject("Shade", typeof(RectTransform), typeof(Image)).GetComponent<Image>();
         shade.transform.SetParent(cooldown, false);
@@ -56,7 +56,7 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
         _cooldownText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
         _cooldownText.fontSize = 18;
         _cooldownText.alignment = TextAnchor.MiddleCenter;
-        _cooldownText.color = new Color(0.95f, 0.91f, 0.82f);
+        _cooldownText.color = HudStyle.Text;
         _cooldownText.raycastTarget = false;
         _ornament = ItemRarityBorder.Create(transform);
         _ornament.DrawFrame = true;
@@ -120,7 +120,7 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
     private void LateUpdate()
     {
         Item item = _getItem?.Invoke();
-        if (item != _shownItem || (item != null && item.Rarity != _shownRarity))
+        if (item != _shownItem || (item == null && _icon.enabled) || (item != null && item.Rarity != _shownRarity))
             Refresh(item);
         _icon.color = item is Weapon weapon && !weapon.IsAvailable ? new Color(0.35f, 0.35f, 0.35f) : Color.white;
         RefreshCooldown(item);
@@ -150,7 +150,7 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
         _ornament.SetRarity(_shownRarity);
         _ornament.color = item != null
             ? ItemRarityColors.Get(item.Rarity)
-            : new Color(0.16f, 0.145f, 0.12f);
+            : HudStyle.Line;
         _icon.sprite = item != null ? item.Icon : null;
         _icon.enabled = _icon.sprite != null;
     }

@@ -43,7 +43,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d82b4190d31767242bf257b54a7cdd8d, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::WarmMedallion
+  m_EditorClassIdentifier: Assembly-CSharp::WarmMedallionItem
   _icon: {fileID: 21300000, guid: 1b0ecf49fd6b43fdb4a8a765e528a976, type: 3}
   _itemId: 14
   _rarity: 0

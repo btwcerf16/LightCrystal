@@ -5071,94 +5071,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2121476093}
-  - component: {fileID: 2121476092}
   - component: {fileID: 2121476091}
-  - component: {fileID: 2121476094}
-  - component: {fileID: 2121476095}
-  - component: {fileID: 2121476096}
-  - component: {fileID: 2121476097}
-  - component: {fileID: 2121476098}
-  - component: {fileID: 2121476099}
-  - component: {fileID: 2121476100}
   m_Layer: 0
-  m_Name: NetworkManager
+  m_Name: GameBootstrap
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &2121476091
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2121476090}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6960e84d07fb87f47956e7a81d71c4e6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Transports.UTP.UnityTransport
-  m_ProtocolType: 0
-  m_UseWebSockets: 0
-  m_UseEncryption: 0
-  m_MaxPacketQueueSize: 128
-  m_MaxPayloadSize: 6144
-  m_HeartbeatTimeoutMS: 500
-  m_ConnectTimeoutMS: 1000
-  m_MaxConnectAttempts: 60
-  m_DisconnectTimeoutMS: 30000
-  ConnectionData:
-    Address: 127.0.0.1
-    Port: 7777
-    ServerListenAddress: 127.0.0.1
-    ClientBindPort: 0
-  DebugSimulator:
-    PacketDelayMS: 0
-    PacketJitterMS: 0
-    PacketDropRate: 0
---- !u!114 &2121476092
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2121476090}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 593a2fe42fa9d37498c96f9a383b6521, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkManager
-  NetworkManagerExpanded: 0
-  NetworkConfig:
-    ProtocolVersion: 0
-    NetworkTransport: {fileID: 2121476091}
-    PlayerPrefab: {fileID: 8496232388664145000, guid: 52671da2c5a17d44babb16e9f72faa55, type: 3}
-    Prefabs:
-      NetworkPrefabsLists:
-      - {fileID: 11400000, guid: 2a22a34f38e0ab44f9e458e50ce45879, type: 2}
-    TickRate: 30
-    ClientConnectionBufferTimeout: 10
-    ConnectionApproval: 0
-    ConnectionData: 
-    EnableTimeResync: 0
-    TimeResyncInterval: 30
-    EnsureNetworkVariableLengthSafety: 0
-    EnableSceneManagement: 1
-    ForceSamePrefabs: 1
-    RecycleNetworkIds: 1
-    NetworkIdRecycleDelay: 120
-    RpcHashSize: 0
-    LoadSceneTimeOut: 120
-    SpawnTimeout: 10
-    EnableNetworkLogs: 1
-    NetworkTopology: 0
-    UseCMBService: 0
-    AutoSpawnPlayerPrefabClientSide: 1
-    NetworkProfilingMetrics: 1
-    OldPrefabList: []
-  RunInBackground: 1
-  LogLevel: 1
 --- !u!4 &2121476093
 Transform:
   m_ObjectHideFlags: 0
@@ -5168,13 +5087,13 @@ Transform:
   m_GameObject: {fileID: 2121476090}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.77364, y: 0.33448, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2121476094
+--- !u!114 &2121476091
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -5183,101 +5102,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 2121476090}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 26ed0769851777247b41d6fbe516516a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::LocalCameraController
-  _worldCamera: {fileID: 519420031}
-  _virtualCamera: {fileID: 1224515478}
-  _damageTakenIntensity: 0.16
-  _damageTakenDuration: 0.2
-  _damageDealtIntensity: 0.06
-  _damageDealtDuration: 0.12
---- !u!114 &2121476095
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2121476090}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 64c2fcdf24e295d4989547cd87450ee9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkDebugLauncher
---- !u!114 &2121476096
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2121476090}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5d6a10d0ea5b4bdd93aaf3ae4ea3bb10, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ItemUidGenerator
---- !u!114 &2121476097
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2121476090}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 658bb412c185433383872ed625ec0582, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ItemFactory
-  _itemDatabase: {fileID: 11400000, guid: 9a9431e9f0574b108ea8a4e14ceedeb3, type: 2}
-  _enchantDatabase: {fileID: 11400000, guid: d96ea67d00bbb914784dae4b7c8c0875, type: 2}
---- !u!114 &2121476098
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2121476090}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: cc7401b34cf7ccc459926a3af43d502d, type: 3}
+  m_Script: {fileID: 11500000, guid: 1afe4ecfeedd4145abaadcf3f257d9d5, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::WaveDirector
-  _enemyDatabase: {fileID: 11400000, guid: 2db1efbd41b741489d75aad158b563e3, type: 2}
-  _mainTarget: {fileID: 0}
-  _spawnArea: {fileID: 0}
-  _minimumCrystalDistance: 20
-  _waveBudget: 10
-  _budgetPerWave: 5
-  _calmBudget: 4
-  _enemiesPerSubwave: 3
-  _initialCalmDuration: 20
-  _calmDurationPerWave: 5
---- !u!114 &2121476099
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2121476090}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 195ca37095bd4a82b917c5f86cac481e, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkWaveDirector
-  _shopZonePrefab: {fileID: 8618744320305533015, guid: 52f10192a4d847048bce715a46d5e215, type: 3}
-  _zoneMinimumCrystalDistance: 30
---- !u!114 &2121476100
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2121476090}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0067d32b51fb41b5ab5939e7e8b0dbaf, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkObjectPool
+  m_EditorClassIdentifier: Assembly-CSharp::GameBootstrap
+  _networkPrefab: {fileID: 2121476092, guid: 43a5d81d9a844981be20f6cf33e58b56, type: 3}
+  _transitionPrefab: {fileID: 5137485304913852156, guid: 6acc6092269b48bc947e5ab2e8611367, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

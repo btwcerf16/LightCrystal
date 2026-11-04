@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 881338c6cfdd492cab2dbf5097165bf4, type: 3}
+  m_Name: Knight
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterConfig
+  DisplayName: "Рыцарь"
+  Description: "Выносливый боец. Критические удары, адаптивная стойка и владение простым оружием."
+  Preview: {fileID: 21300000, guid: 8456833c0a004af0a3eacf4ccc0a8e1c, type: 3}
+  BodySprite: {fileID: 21300000, guid: 3660a897f4d14945baec6239e9f97381, type: 3}
+  Stats: {fileID: 11400000, guid: 1f9be70c6dba4ffe813a0002f7786af4, type: 2}
+  Spells:
+  - {fileID: 11400000, guid: 0ec7382174664f6fb595f960cbca4c69, type: 2}
+  - {fileID: 11400000, guid: 703a7b54291a4661b693cf38a3fc57df, type: 2}
+  - {fileID: 11400000, guid: 7c3b7c7e5c2042d882da9fdd8b336010, type: 2}
+  - {fileID: 11400000, guid: 22a855792a004074864c15ca34060030, type: 2}
+  PlayerPrefab: {fileID: 247892929754694301, guid: 52671da2c5a17d44babb16e9f72faa55, type: 3}

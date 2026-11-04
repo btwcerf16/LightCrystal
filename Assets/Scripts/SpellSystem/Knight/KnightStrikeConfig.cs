@@ -8,6 +8,6 @@ public sealed class KnightStrikeConfig : SpellConfig
 
     public override Spell AddSpell(GameObject owner)
     {
-        return owner.AddComponent<KnightStrike>();
+        return owner.AddComponent<KnightStrikeSpell>();
     }
 }

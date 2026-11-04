@@ -7,20 +7,24 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
 {
     [SerializeField] private LayerMask _damageSourceMask = ~0;
     private ActorStats _stats;
+    private EffectHandler _effects;
 
     public event Action<float, float> HealthChanged;
     public event Action<float> DamageTaken;
     public event Action<float> DamageDealt;
     public event Action Died;
     public event Action<ActorHealth> EnemyKilled;
+    public event Action<ActorHealth> EnemyHit;
 
     public float CurrentHealth { get; private set; }
     public float MaxHealth => _stats.MaxHealth.Value;
     public bool IsDead { get; private set; }
+    public SanityShield Shield { get; internal set; }
 
     private void Awake()
     {
         _stats = GetComponent<ActorStats>();
+        _effects = GetComponent<EffectHandler>();
         CurrentHealth = MaxHealth;
     }
 
@@ -36,7 +40,7 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
 
     public float TakeDamage(float amount, EDamageType damageType, ActorStats attacker = null)
     {
-        if (amount <= 0f || IsDead)
+        if (amount <= 0f || IsDead || (_effects != null && (_effects.Status & EActorStatus.Invulnerable) != 0))
             return 0f;
         if (_damageSourceMask.value != -1 && (attacker == null
             || (_damageSourceMask.value & (1 << attacker.gameObject.layer)) == 0))
@@ -46,9 +50,13 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
         if (amount <= 0f)
             return 0f;
 
+        float incomingDamage = amount;
+        if (Shield != null)
+            amount = Shield.AbsorbDamage(amount);
+        float absorbedDamage = incomingDamage - amount;
         float previousHealth = CurrentHealth;
         CurrentHealth = Mathf.Max(CurrentHealth - amount, 0f);
-        float dealtDamage = previousHealth - CurrentHealth;
+        float dealtDamage = previousHealth - CurrentHealth + absorbedDamage;
 
         HealthChanged?.Invoke(CurrentHealth, MaxHealth);
         DamageTaken?.Invoke(dealtDamage);
@@ -62,14 +70,18 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
         if (CurrentHealth <= 0f)
         {
             Kill();
-            if (attacker != null && attacker.gameObject != gameObject && GetComponent<Enemy>() != null)
+            Enemy enemy = GetComponent<Enemy>();
+            if (attacker != null && attacker.gameObject != gameObject && enemy != null)
             {
+                enemy.GiveGold(attacker.GetComponent<ActorWallet>());
                 ActorHealth killer = attacker.GetComponent<ActorHealth>();
                 if (killer != null)
                     killer.EnemyKilled?.Invoke(this);
             }
         }
 
+        if (attacker != null && attacker.gameObject != gameObject && GetComponent<Enemy>() != null)
+            attacker.GetComponent<ActorHealth>()?.EnemyHit?.Invoke(this);
         return dealtDamage;
     }
 

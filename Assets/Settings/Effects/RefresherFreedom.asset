@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5a41a0f5e1b48ccbc4ddd26a64ff45a, type: 3}
+  m_Name: RefresherFreedom
+  m_EditorClassIdentifier: Assembly-CSharp::ItemBuffData
+  EffectName: "Безумное озарение"
+  EffectDuration: 8
+  EffectDescription: "Безумное озарение"
+  EffectStats: "Перезарядка способностей: 0 с\nСопротивление потере рассудка: +{MadnessResistancePercent:0.#}%\nДлительность: {EffectDuration:0.#} с"
+  SpriteIcon: {fileID: 21300000, guid: 97a10c0affd44279b547d925eca54d90, type: 3}
+  EffectColor: {r: 0.6, g: 0.75, b: 1, a: 1}
+  IsBuff: 1
+  Status: 0
+  CanPurged: 1
+  Stackable: 0
+  RestartOnReapply: 1
+  TintActor: 0
+  ActorTintStrength: 0.3
+  MadnessResistance: 0.5
+  FreeSpellCooldowns: 1

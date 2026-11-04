@@ -43,7 +43,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 0103a59545b705c40b08c924dcfa65ce, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::ThornRing
+  m_EditorClassIdentifier: Assembly-CSharp::ThornRingItem
   _icon: {fileID: 21300000, guid: 60664a87e0c94d33b13774a0d71fac73, type: 3}
   _itemId: 15
   _rarity: 0

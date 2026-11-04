@@ -3,14 +3,14 @@ using UnityEngine;
 
 public sealed class SpearProjectile : Projectile
 {
-    private Spear _source;
+    private SpearWeapon _source;
     private int _targetLimit;
     private Vector2 _origin;
     private float _hitDistance;
     private bool _cooldownStarted;
     private readonly HashSet<IDamageable> _hitTargets = new();
 
-    public void SetSource(Spear source)
+    public void SetSource(SpearWeapon source)
     {
         _source = source;
         _targetLimit = source.TargetLimit;
@@ -39,9 +39,9 @@ public sealed class SpearProjectile : Projectile
         if (!_hitTargets.Add(target))
             return;
         _hitDistance = Vector2.Distance(_origin, collider.ClosestPoint(_origin));
-        if (target.TakeDamage(Data.Damage, Data.DamageType, Data.Attacker) > 0f && _source != null)
+        if (target.TakeDamage(DamageCalculator.RollCriticalDamage(Data.Damage, Data.Attacker), Data.DamageType, Data.Attacker) > 0f && _source != null)
             _source.NotifyHit(target);
-        if (_hitTargets.Count >= _targetLimit)
+        if (_hitTargets.Count >= _targetLimit + ExtraPiercing)
             ReturnToOwner();
     }
 

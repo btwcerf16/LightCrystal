@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b4bad0d09994c4cb8cbf552fd099005, type: 3}
+  m_Name: MockingWhistle
+  m_EditorClassIdentifier: Assembly-CSharp::CourierWhistleConfig
+  SpellName: "Насмешливый свист"
+  SpellDescription: "Привлекает внимание ближайших врагов. Переключает на гонца даже тех, кто атакует кристалл."
+  StatsDescription: "Радиус: {Radius}"
+  IsPassive: 0
+  CooldownTime: 10
+  SanityCost: 10
+  CastTime: 0
+  SpriteIcon: {fileID: 21300000, guid: 8f510eaad9f149e18de3bb328a51e926, type: 3}
+  Radius: 10

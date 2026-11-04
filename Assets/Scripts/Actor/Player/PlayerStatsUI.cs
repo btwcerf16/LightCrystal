@@ -83,8 +83,19 @@ public sealed class PlayerStatsUI : NetworkBehaviour
             ("Физический вампиризм", stats.PhysicalLifeSteal, true),
             ("Магический вампиризм", stats.MagicLifeSteal, true),
             ("Дальность обзора", stats.ViewDistance, false),
-            ("Угол обзора", stats.ViewAngle, false)
+            ("Угол обзора", stats.ViewAngle, false),
+            ("Стабилизация, градусы", stats.Stability, false),
+            ("Отдаление камеры", stats.CameraDistance, false),
+            ("Скорость каста", stats.CastSpeed, false),
+            ("Бонус скорости снаряда", stats.ProjectileSpeed, false),
+            ("Множитель скорости снаряда", stats.ProjectileSpeedMultiplier, false),
+            ("Бонус дальности снаряда", stats.ProjectileRange, false),
+            ("Пронзания снаряда", stats.ProjectilePiercing, false),
+            ("Снижение затрат рассудка", stats.SanityCostReduction, true),
+            ("Шанс крита", stats.CriticalChance, true),
+            ("Критический урон", stats.CriticalDamageMultiplier, true)
         };
+        _panel.sizeDelta = new Vector2(660f, 170f + rows.Length * 27f);
         for (int i = 0; i < rows.Length; i++)
         {
             var row = rows[i];
@@ -105,7 +116,7 @@ public sealed class PlayerStatsUI : NetworkBehaviour
             _subscriptions.Add((row.Stat, handler));
             handler(row.Stat.Value);
         }
-        Label(_panel, "Footer", "Белое — базовое значение, зелёное — бонус", 20f, 622f, 620f, 20f, TextAnchor.MiddleLeft).fontSize = 12;
+        Label(_panel, "Footer", "Белое — базовое значение, зелёное — бонус", 20f, _panel.sizeDelta.y - 30f, 620f, 20f, TextAnchor.MiddleLeft).fontSize = 12;
         _vitals.Changed += UpdateResources;
         UpdateResources(_vitals.State);
         _input.StatsToggled += Toggle;
@@ -130,7 +141,7 @@ public sealed class PlayerStatsUI : NetworkBehaviour
         if (_canvas == null || !_canvas.activeSelf)
             return;
         Rect area = ((RectTransform)_canvas.transform).rect;
-        float scale = Mathf.Min(1f, (area.width - 32f) / 660f, (area.height - 32f) / 656f);
+        float scale = Mathf.Min(1f, (area.width - 32f) / 660f, (area.height - 32f) / _panel.sizeDelta.y);
         _panel.localScale = Vector3.one * Mathf.Max(0.1f, scale);
     }
 

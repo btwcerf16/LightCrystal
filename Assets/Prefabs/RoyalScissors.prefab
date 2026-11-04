@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &6342692930379493249
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7018224541870668582}
+  - component: {fileID: 1332558693726375035}
+  m_Layer: 0
+  m_Name: RoyalScissors
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7018224541870668582
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6342692930379493249}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1332558693726375035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6342692930379493249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33303614a96a40e1bd9e17e5e6a539d3, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::RoyalScissorsItem
+  _icon: {fileID: 21300000, guid: 211172d359024ec4a862cbc3d427bb68, type: 3}
+  _worldIcon: {fileID: 21300000, guid: efd0bd6cfc4045f19163250e33f58c5a, type: 3}
+  _itemId: 30
+  _rarity: 4
+  _price: 0
+  _cooldown: 0
+  _description: "Безупречные ножницы королевского портного. Когда-то резали самые дорогие ткани, а однажды ночью — глотки всей королевской семьи. Применение казнит ближайшего врага перед владельцем в радиусе 2."
+  _statsDescription: "Пассивная казнь: здоровье цели не выше 3%\nКаждая активная казнь повышает порог на 0.5 п.п., до 8%\nЗа активную казнь: −10% максимального рассудка на 15 с\nДухи складываются\nПерезарядка: 20 с"
+  _executionThreshold: 0.03
+  _thresholdPerExecution: 0.005
+  _maximumThreshold: 0.08
+  _range: 2
+  _activeCooldown: 20
+  _hauntingSpirit: {fileID: 11400000, guid: 99e2defc61bc466f9c2a25463f100890, type: 2}

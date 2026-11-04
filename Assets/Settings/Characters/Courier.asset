@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 881338c6cfdd492cab2dbf5097165bf4, type: 3}
+  m_Name: Courier
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterConfig
+  DisplayName: "Гонец"
+  Description: "Быстрый помощник. Уклоняется от урона, отвлекает врагов и носит больше предметов."
+  Preview: {fileID: 21300000, guid: 466aa9a74a534e01ab6416abecdc0a1c, type: 3}
+  BodySprite: {fileID: 21300000, guid: fa7030e772854995a8b767291af242a9, type: 3}
+  Stats: {fileID: 11400000, guid: f283f57b12ad4e909d99c42c5d6252da, type: 2}
+  Spells:
+  - {fileID: 11400000, guid: 5501f6c3ceec4bd5b9744179fa8bb2bf, type: 2}
+  - {fileID: 11400000, guid: 222fd11003aa48ccb59b6ba5d26d6650, type: 2}
+  - {fileID: 11400000, guid: 8e129c96e2654fc4a8fa2bf8e0d66b74, type: 2}
+  - {fileID: 11400000, guid: 061fffa6416f45148468cdc2d53c24e4, type: 2}
+  PlayerPrefab: {fileID: 247892929754694301, guid: 52671da2c5a17d44babb16e9f72faa55, type: 3}

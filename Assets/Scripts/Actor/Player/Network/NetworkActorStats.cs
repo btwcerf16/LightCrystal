@@ -57,7 +57,17 @@ public class NetworkActorStats : NetworkBehaviour
             _stats.MagicResistance,
             _stats.ForceResistance,
             _stats.MadnessResistance,
-            _stats.EffectResistance
+            _stats.EffectResistance,
+            _stats.Stability,
+            _stats.CameraDistance,
+            _stats.CastSpeed,
+            _stats.ProjectileSpeed,
+            _stats.ProjectileSpeedMultiplier,
+            _stats.ProjectileRange,
+            _stats.ProjectilePiercing,
+            _stats.SanityCostReduction,
+            _stats.CriticalChance,
+            _stats.CriticalDamageMultiplier
         };
         if (IsServer)
         {
@@ -122,6 +132,16 @@ public class NetworkActorStats : NetworkBehaviour
         _stats.ForceResistance.SetReplicatedValues(snapshot.ForceResistance.BaseValue, snapshot.ForceResistance.Value);
         _stats.MadnessResistance.SetReplicatedValues(snapshot.MadnessResistance.BaseValue, snapshot.MadnessResistance.Value);
         _stats.EffectResistance.SetReplicatedValues(snapshot.EffectResistance.BaseValue, snapshot.EffectResistance.Value);
+        _stats.Stability.SetReplicatedValues(snapshot.Stability.BaseValue, snapshot.Stability.Value);
+        _stats.CameraDistance.SetReplicatedValues(snapshot.CameraDistance.BaseValue, snapshot.CameraDistance.Value);
+        _stats.CastSpeed.SetReplicatedValues(snapshot.CastSpeed.BaseValue, snapshot.CastSpeed.Value);
+        _stats.ProjectileSpeed.SetReplicatedValues(snapshot.ProjectileSpeed.BaseValue, snapshot.ProjectileSpeed.Value);
+        _stats.ProjectileSpeedMultiplier.SetReplicatedValues(snapshot.ProjectileSpeedMultiplier.BaseValue, snapshot.ProjectileSpeedMultiplier.Value);
+        _stats.ProjectileRange.SetReplicatedValues(snapshot.ProjectileRange.BaseValue, snapshot.ProjectileRange.Value);
+        _stats.ProjectilePiercing.SetReplicatedValues(snapshot.ProjectilePiercing.BaseValue, snapshot.ProjectilePiercing.Value);
+        _stats.SanityCostReduction.SetReplicatedValues(snapshot.SanityCostReduction.BaseValue, snapshot.SanityCostReduction.Value);
+        _stats.CriticalChance.SetReplicatedValues(snapshot.CriticalChance.BaseValue, snapshot.CriticalChance.Value);
+        _stats.CriticalDamageMultiplier.SetReplicatedValues(snapshot.CriticalDamageMultiplier.BaseValue, snapshot.CriticalDamageMultiplier.Value);
         _stats.SetTargetPriority(snapshot.TargetPriority);
     }
 }

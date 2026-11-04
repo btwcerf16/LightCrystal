@@ -35,6 +35,7 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
     public Transform TemporaryTarget => _temporaryTargetHealth != null && _temporaryTargetHealth.IsDead ? null : _temporaryTarget;
     public Transform CurrentTarget => TemporaryTarget != null ? TemporaryTarget : IsWaitingForWave ? null : MainTarget;
     public State CurrentState => _stateMachine.CurrentState;
+    public bool IsChasing => _isInitialized && CurrentState == ChaseState;
 
     protected virtual void Awake()
     {
@@ -149,6 +150,17 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
         return Vector2.ClampMagnitude(direction + _separation * _separationStrength, 1f);
     }
 
+    public void GiveGold(ActorWallet killerWallet)
+    {
+        NetworkObject networkObject = GetComponent<NetworkObject>();
+        if (killerWallet == null || networkObject == null || !networkObject.IsSpawned || !networkObject.NetworkManager.IsServer)
+            return;
+        EnemyDatabase database = networkObject.NetworkManager.GetComponent<WaveDirector>()?.EnemyDatabase;
+        int weight = database != null ? database.GetWeight(this) : 0;
+        if (weight > 0 && UnityEngine.Random.value < 0.4f)
+            killerWallet.AddCurrency(weight * 3);
+    }
+
     private void OnDied()
     {
         _stateMachine.ChangeState(DeadState);
@@ -244,6 +256,9 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
 
     public abstract void Arise();
     public abstract void Chase(Transform target);
+    public event Action AttackStarted;
+    public virtual bool CanBeExecuted => true;
+    protected void NotifyAttackStarted() => AttackStarted?.Invoke();
     public abstract void Attack();
     public abstract void Death();
     public virtual void StopChase() { }
