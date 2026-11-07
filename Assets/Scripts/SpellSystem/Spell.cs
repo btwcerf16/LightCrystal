@@ -89,6 +89,8 @@ public abstract class Spell : MonoBehaviour
     {
         error = null;
         data.Caster = _owner;
+        if (_ownerEffects != null && _ownerEffects.IsDowned)
+            return false;
         if (!IsActive || !isActiveAndEnabled || SpellData.IsPassive || _isCasting || CooldownRemaining > 0f)
             return false;
 

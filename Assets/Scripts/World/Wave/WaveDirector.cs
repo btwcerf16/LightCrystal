@@ -22,6 +22,7 @@ public class WaveDirector : MonoBehaviour
     private CalmState _calmState;
     private bool _isInitialized;
 
+    public bool IsPaused { get; private set; }
     public int WaveCount { get; private set; }
     public float CalmTimeRemaining { get; private set; }
     public State CurrentState => _stateMachine.CurrentState;
@@ -32,6 +33,7 @@ public class WaveDirector : MonoBehaviour
     public event Action<Enemy> EnemyActivated;
     public event Action CalmStarted;
     public event Action WaveStarted;
+    public event Action PauseChanged;
 
     private void Awake()
     {
@@ -62,7 +64,16 @@ public class WaveDirector : MonoBehaviour
 
     private void Update()
     {
-        _stateMachine.Update();
+        if (!IsPaused)
+            _stateMachine.Update();
+    }
+
+    public void SetPaused(bool paused)
+    {
+        if (IsPaused == paused)
+            return;
+        IsPaused = paused;
+        PauseChanged?.Invoke();
     }
 
     public void CreateWaveEnemies()
@@ -159,6 +170,8 @@ public class WaveDirector : MonoBehaviour
 
     public void UpdateCalm(float deltaTime)
     {
+        if (IsPaused)
+            return;
         CalmTimeRemaining = Mathf.Max(0f, CalmTimeRemaining - Mathf.Max(0f, deltaTime));
         if (CalmTimeRemaining == 0f)
             _stateMachine.ChangeState(_waveState);
@@ -181,7 +194,7 @@ public class WaveDirector : MonoBehaviour
 
     public bool StartNextSubwave()
     {
-        if (ActiveEnemies.Count > 0)
+        if (IsPaused || ActiveEnemies.Count > 0)
             return false;
 
         int count = 0;
@@ -200,7 +213,7 @@ public class WaveDirector : MonoBehaviour
 
     public void UpdateWave()
     {
-        if (ActiveEnemies.Count == 0 && !StartNextSubwave())
+        if (!IsPaused && ActiveEnemies.Count == 0 && !StartNextSubwave())
             _stateMachine.ChangeState(_calmState);
     }
 
@@ -210,6 +223,7 @@ public class WaveDirector : MonoBehaviour
         _isInitialized = false;
         WaveCount = 0;
         CalmTimeRemaining = 0f;
+        SetPaused(false);
         foreach (var pair in _deathHandlers)
         {
             if (pair.Key == null)

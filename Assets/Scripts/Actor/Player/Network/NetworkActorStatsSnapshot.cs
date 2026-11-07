@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -9,6 +9,7 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
     public NetworkStatValue MaxHealth;
     public NetworkStatValue MaxSanity;
     public NetworkStatValue HealthRegeneration;
+    public NetworkStatValue ReviveSpeed;
     public NetworkStatValue MoveSpeed;
     public NetworkStatValue AttackSpeed;
     public NetworkStatValue CooldownReduction;
@@ -41,6 +42,7 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
         MaxHealth = new NetworkStatValue(stats.MaxHealth);
         MaxSanity = new NetworkStatValue(stats.MaxSanity);
         HealthRegeneration = new NetworkStatValue(stats.HealthRegeneration);
+        ReviveSpeed = new NetworkStatValue(stats.ReviveSpeed);
         MoveSpeed = new NetworkStatValue(stats.MoveSpeed);
         AttackSpeed = new NetworkStatValue(stats.AttackSpeed);
         CooldownReduction = new NetworkStatValue(stats.CooldownReduction);
@@ -74,6 +76,7 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
         serializer.SerializeValue(ref MaxHealth);
         serializer.SerializeValue(ref MaxSanity);
         serializer.SerializeValue(ref HealthRegeneration);
+        serializer.SerializeValue(ref ReviveSpeed);
         serializer.SerializeValue(ref MoveSpeed);
         serializer.SerializeValue(ref AttackSpeed);
         serializer.SerializeValue(ref CooldownReduction);
@@ -107,6 +110,7 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
             && MaxHealth.Equals(other.MaxHealth)
             && MaxSanity.Equals(other.MaxSanity)
             && HealthRegeneration.Equals(other.HealthRegeneration)
+            && ReviveSpeed.Equals(other.ReviveSpeed)
             && MoveSpeed.Equals(other.MoveSpeed)
             && AttackSpeed.Equals(other.AttackSpeed)
             && CooldownReduction.Equals(other.CooldownReduction)

@@ -16,6 +16,7 @@ public sealed class PlayerMenuUI : NetworkBehaviour
     private GameObject _settingsPanel;
     private RectTransform _rows;
     private Text _message;
+    private Text _wavePauseLabel;
     private Button _inventoryTab;
     private Button _arsenalTab;
     private Button _spellsTab;
@@ -59,13 +60,15 @@ public sealed class PlayerMenuUI : NetworkBehaviour
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
         Paint((RectTransform)_canvas.transform, new Color(0f, 0f, 0f, 0.78f));
 
-        RectTransform main = Panel("Menu", new Vector2(384f, 336f));
+        RectTransform main = Panel("Menu", new Vector2(384f, IsServer ? 400f : 336f));
         _mainPanel = main.gameObject;
         Label(main, "Меню", new Vector2(24f, -24f), new Vector2(336f, 32f), 24);
         Label(main, "Игра продолжается", new Vector2(24f, -64f), new Vector2(336f, 24f), 14);
         MakeButton(main, "Продолжить", new Vector2(24f, -112f), new Vector2(336f, 48f), CloseMenu);
         MakeButton(main, "Настройки", new Vector2(24f, -176f), new Vector2(336f, 48f), () => ShowSettings(ESlotBindingType.Inventory));
-        MakeButton(main, "Выйти из игры", new Vector2(24f, -240f), new Vector2(336f, 48f), QuitGame);
+        if (IsServer)
+            _wavePauseLabel = MakeButton(main, "Приостановить волны", new Vector2(24f, -240f), new Vector2(336f, 48f), ToggleWavePause).GetComponentInChildren<Text>();
+        MakeButton(main, "Выйти из игры", new Vector2(24f, IsServer ? -304f : -240f), new Vector2(336f, 48f), QuitGame);
 
         RectTransform settings = Panel("Settings", new Vector2(800f, 600f));
         _settingsPanel = settings.gameObject;
@@ -131,6 +134,19 @@ public sealed class PlayerMenuUI : NetworkBehaviour
         _bindings.CancelRebind();
         _settingsPanel.SetActive(false);
         _mainPanel.SetActive(true);
+        RefreshWavePause();
+    }
+
+    private void ToggleWavePause()
+    {
+        NetworkManager.GetComponent<NetworkWaveDirector>().PauseWaves(!NetworkManager.GetComponent<WaveDirector>().IsPaused);
+        RefreshWavePause();
+    }
+
+    private void RefreshWavePause()
+    {
+        if (_wavePauseLabel != null)
+            _wavePauseLabel.text = NetworkManager.GetComponent<WaveDirector>().IsPaused ? "Продолжить волны" : "Приостановить волны";
     }
 
     private void ShowSettings(ESlotBindingType type)
@@ -252,6 +268,7 @@ public sealed class PlayerMenuUI : NetworkBehaviour
             _canvas.SetActive(false);
             Destroy(_canvas);
             _canvas = null;
+            _wavePauseLabel = null;
         }
     }
 

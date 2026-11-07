@@ -74,9 +74,9 @@ public sealed class ActorVisuals : MonoBehaviour
         Apply();
     }
 
-    public void ShowDamage(float damage)
+    public void ShowDamage(float damage, EDamageType type = EDamageType.Physical, bool critical = false)
     {
-        FloatingDamage.Show(transform.position, damage);
+        FloatingDamage.Show(transform.position, damage, type, critical);
     }
 
     public void Explosion(float radius)

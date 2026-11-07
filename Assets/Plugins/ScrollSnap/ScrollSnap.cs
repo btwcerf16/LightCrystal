@@ -56,8 +56,10 @@ public class ScrollSnap : UIBehaviour, IDragHandler, IEndDragHandler
             if(ShouldStopLerping()) {
                 isLerping = false;
                 canvasGroup.blocksRaycasts = true;
+                if (wrapAround)
+                    WrapElementAround();
+                LayoutRebuilder.ForceRebuildLayoutImmediate(content);
                 onLerpComplete.Invoke();
-                onLerpComplete.RemoveListener(WrapElementAround);
             }
         }
     }
@@ -100,6 +102,8 @@ public class ScrollSnap : UIBehaviour, IDragHandler, IEndDragHandler
         return content.GetComponentsInChildren<LayoutElement>(false)
             .Count(e => e.transform.parent == content);
     }
+
+    public Transform CurrentItem => content.childCount > 0 ? content.GetChild(cellIndex) : null;
 
     public int CurrentIndex
     {
@@ -163,7 +167,6 @@ public class ScrollSnap : UIBehaviour, IDragHandler, IEndDragHandler
         if(wrapAround && maxIndex > 0) {
             actualIndex += newCellIndex - cellIndex;
             cellIndex = newCellIndex;
-            onLerpComplete.AddListener(WrapElementAround);
         }
         else {
             newCellIndex = Mathf.Clamp(newCellIndex, 0, maxIndex);
@@ -222,13 +225,15 @@ public class ScrollSnap : UIBehaviour, IDragHandler, IEndDragHandler
 
     void WrapElementAround()
     {
-        if(cellIndex <= 0) {
+        int maxIndex = CalculateMaxIndex();
+        if (maxIndex <= 0) return;
+        while(cellIndex <= 0) {
             var elements = content.GetComponentsInChildren<LayoutElement>();
             elements[elements.Length - 1].transform.SetAsFirstSibling();
             cellIndex += 1;
             content.anchoredPosition = new Vector2(content.anchoredPosition.x - cellSize.x, content.anchoredPosition.y);
         }
-        else if(cellIndex >= CalculateMaxIndex()) {
+        while(cellIndex >= maxIndex) {
             var element = content.GetComponentInChildren<LayoutElement>();
             element.transform.SetAsLastSibling();
             cellIndex -= 1;

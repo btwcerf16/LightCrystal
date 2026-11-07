@@ -45,6 +45,7 @@ public class NetworkActorStats : NetworkBehaviour
             _stats.MaxHealth,
             _stats.MaxSanity,
             _stats.HealthRegeneration,
+            _stats.ReviveSpeed,
             _stats.MoveSpeed,
             _stats.AttackSpeed,
             _stats.CooldownReduction,
@@ -119,6 +120,7 @@ public class NetworkActorStats : NetworkBehaviour
         _stats.MaxHealth.SetReplicatedValues(snapshot.MaxHealth.BaseValue, snapshot.MaxHealth.Value);
         _stats.MaxSanity.SetReplicatedValues(snapshot.MaxSanity.BaseValue, snapshot.MaxSanity.Value);
         _stats.HealthRegeneration.SetReplicatedValues(snapshot.HealthRegeneration.BaseValue, snapshot.HealthRegeneration.Value);
+        _stats.ReviveSpeed.SetReplicatedValues(snapshot.ReviveSpeed.BaseValue, snapshot.ReviveSpeed.Value);
         _stats.MoveSpeed.SetReplicatedValues(snapshot.MoveSpeed.BaseValue, snapshot.MoveSpeed.Value);
         _stats.AttackSpeed.SetReplicatedValues(snapshot.AttackSpeed.BaseValue, snapshot.AttackSpeed.Value);
         _stats.CooldownReduction.SetReplicatedValues(snapshot.CooldownReduction.BaseValue, snapshot.CooldownReduction.Value);

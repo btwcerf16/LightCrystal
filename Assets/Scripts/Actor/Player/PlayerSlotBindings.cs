@@ -22,6 +22,7 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
 
     private void Awake()
     {
+        _settings = Instantiate(_settings);
         _input = GetComponent<PlayerInputReader>();
         Inventory inventory = GetComponent<Inventory>();
         ActorArsenal arsenal = GetComponent<ActorArsenal>();
@@ -109,23 +110,30 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
 
     private void ResizeSpellBindings()
     {
-        if (_spellActions.Length == _spells.Count)
-            return;
         CancelRebind();
         _actions.Disable();
-        for (int i = _spells.Count; i < _spellActions.Length; i++)
-            _spellActions[i].RemoveAction();
-        int previousSize = _spellActions.Length;
-        Array.Resize(ref _spellActions, _spells.Count);
-        _settings.Load(_inventoryActions.Length, _arsenalActions.Length, _spells.Count);
-        for (int i = previousSize; i < _spellActions.Length; i++)
+        foreach (InputAction action in _spellActions)
+            action.RemoveAction();
+        _spellActions = new InputAction[_spells.Count];
+        CharacterConfig character = GetComponent<NetworkSpellHolder>().Character;
+        _settings.Load(_inventoryActions.Length, _arsenalActions.Length, _spells.Count, character != null ? character.name : "");
+        for (int i = 0; i < _inventoryActions.Length; i++)
+            _inventoryActions[i].ApplyBindingOverride(0, _settings.GetBinding(false, i));
+        for (int i = 0; i < _arsenalActions.Length; i++)
+            _arsenalActions[i].ApplyBindingOverride(0, _settings.GetBinding(true, i));
+        _cancelCastAction.ApplyBindingOverride(0, _settings.GetBinding(ESlotBindingType.CancelCast, 0));
+        for (int i = 0; i < _spellActions.Length; i++)
         {
             int index = i;
-            string path = _settings.GetBinding(ESlotBindingType.Spell, i);
-            if (IsReserved(path) || IsAssigned(path, null))
-                path = "";
-            _spellActions[i] = CreateAction(ESlotBindingType.Spell, i, path);
+            _spellActions[i] = CreateAction(ESlotBindingType.Spell, i, _settings.GetBinding(ESlotBindingType.Spell, i));
             _spellActions[i].performed += context => UseSpell(index);
+        }
+        HashSet<string> used = new(StringComparer.OrdinalIgnoreCase);
+        foreach (InputAction action in _actions)
+        {
+            string path = action.bindings[0].effectivePath;
+            if (!string.IsNullOrEmpty(path) && (IsReserved(path) || !used.Add(path)))
+                action.ApplyBindingOverride(0, "");
         }
         if (IsSpawned && IsOwner && IsClient)
             _actions.Enable();
@@ -323,6 +331,7 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
         InputSystem.onDeviceChange -= OnDeviceChanged;
         StopInput();
         _actions.Dispose();
+        Destroy(_settings);
         base.OnDestroy();
     }
 }

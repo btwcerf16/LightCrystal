@@ -1,3 +1,4 @@
+using System.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -46,6 +47,7 @@ public sealed class LobbyMenuUI : MonoBehaviour
     private int _selected;
     private bool _localReady;
     private bool _isMoving;
+    private bool _selectionSynced;
 
     private void Start()
     {
@@ -198,11 +200,12 @@ public sealed class LobbyMenuUI : MonoBehaviour
     private void CommitSelection()
     {
         _isMoving = false;
-        float nearest = float.PositiveInfinity;
         for (int i = 0; i < _cards.Length; i++)
         {
-            float distance = Mathf.Abs(_cards[i].position.x - _scroll.transform.position.x);
-            if (distance < nearest) { nearest = distance; _selected = i; }
+            if (_cards[i] != _snap.CurrentItem)
+                continue;
+            _selected = i;
+            break;
         }
         UpdateClassDescription();
         if (_lobby != null && !_localReady && !_lobby.IsStarting && _lobby.IsCharacterAvailable(_selected, NetworkManager.Singleton.LocalClientId))
@@ -280,6 +283,7 @@ public sealed class LobbyMenuUI : MonoBehaviour
         {
             ("Максимум здоровья", stats.MaxHealth, false),
             ("Восстановление HP/с", stats.HealthRegeneration, false),
+            ("Скорость помощи союзникам", stats.ReviveSpeed, false),
             ("Максимум рассудка", stats.MaxSanity, false),
             ("Физический урон", stats.PhysicalDamage, false),
             ("Множитель физ. урона", stats.PhysicalDamageMultiplier, false),
@@ -343,20 +347,10 @@ public sealed class LobbyMenuUI : MonoBehaviour
         {
             if (_lobby != null) _lobby.Changed -= RefreshRoom;
             _lobby = GameLobby.Instance;
+            _selectionSynced = false;
+            _localReady = false;
             if (_lobby != null) _lobby.Changed += RefreshRoom;
             RefreshRoom();
-            if (_lobby != null)
-            {
-                for (int i = 0; i < _lobby.Count; i++)
-                {
-                    LobbyPlayer player = _lobby.GetPlayer(i);
-                    if (player.ClientId != NetworkManager.Singleton.LocalClientId) continue;
-                    Canvas.ForceUpdateCanvases();
-                    float offset = _cards[player.CharacterIndex].position.x - _scroll.transform.position.x;
-                    if (Mathf.Abs(offset) > 1f) _snap.SnapToIndex(_cards[player.CharacterIndex].GetSiblingIndex());
-                    break;
-                }
-            }
         }
         if (_lobby == null)
         {
@@ -407,7 +401,15 @@ public sealed class LobbyMenuUI : MonoBehaviour
             string className = _characters[player.CharacterIndex].DisplayName;
             if (className.Length > 18) className = className.Substring(0, 17) + "…";
             _roster.text += "Player" + (player.ClientId + 1) + "\n" + className + " · " + state;
-            if (player.ClientId == NetworkManager.Singleton.LocalClientId) _localReady = player.IsReady;
+            if (player.ClientId == NetworkManager.Singleton.LocalClientId)
+            {
+                _localReady = player.IsReady;
+                if (!_selectionSynced)
+                {
+                    _selectionSynced = true;
+                    StartCoroutine(ShowInitialSelection());
+                }
+            }
         }
         bool canChoose = !_localReady && !_lobby.IsStarting;
         _scroll.enabled = canChoose;
@@ -416,6 +418,26 @@ public sealed class LobbyMenuUI : MonoBehaviour
         _ready.interactable = !_lobby.IsStarting && !_isMoving && available;
         _readyLabel.text = !available ? "Класс занят" : _localReady ? "Не готов" : "Готов";
         _status.text = _lobby.IsStarting ? "Все готовы. Загружаем карту…" : !available ? "Этот класс уже выбран другим игроком" : _localReady ? "Ожидание остальных игроков" : "Карта запустится, когда все будут готовы";
+    }
+
+    private IEnumerator ShowInitialSelection()
+    {
+        _isMoving = true;
+        yield return null;
+        if (_lobby == null)
+            yield break;
+        for (int i = 0; i < _lobby.Count; i++)
+        {
+            LobbyPlayer player = _lobby.GetPlayer(i);
+            if (player.ClientId != NetworkManager.Singleton.LocalClientId)
+                continue;
+            _selected = player.CharacterIndex;
+            UpdateClassDescription();
+            Canvas.ForceUpdateCanvases();
+            _snap.SnapToIndex(_cards[_selected].GetSiblingIndex());
+            yield break;
+        }
+        _isMoving = false;
     }
 
     private void OnDestroy()

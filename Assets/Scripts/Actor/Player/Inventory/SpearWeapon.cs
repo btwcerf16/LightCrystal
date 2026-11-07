@@ -137,7 +137,7 @@ public sealed class SpearWeapon : Weapon
             IDamageable target = hit.GetComponentInParent<IDamageable>();
             if (target == null || _hitTargets.Contains(target))
                 continue;
-            if (target.TakeDamage(DamageCalculator.RollCriticalDamage(CurrentDamage, OwnerStats), EDamageType.Physical, OwnerStats) > 0f)
+            if (DamageCalculator.DealCriticalDamage(target, CurrentDamage, EDamageType.Physical, OwnerStats) > 0f)
             {
                 _hitTargets.Add(target);
                 NotifyMeleeHit(target);

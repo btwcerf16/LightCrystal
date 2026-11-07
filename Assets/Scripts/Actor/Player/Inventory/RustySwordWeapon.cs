@@ -12,7 +12,7 @@ public sealed class RustySwordWeapon : Weapon
     [SerializeField, Min(0.01f)] private float _thrustPointSpacing = 0.8f;
     private ActorHand _hand;
     private ActorStats _stats;
-    private NetworkObject _ownerNetworkObject;
+    private NetworkObject _owner;
     private bool _isAttacking;
     private readonly HashSet<IDamageable> _hitTargets = new HashSet<IDamageable>();
 
@@ -28,7 +28,7 @@ public sealed class RustySwordWeapon : Weapon
     {
         _hand = GetComponentInParent<ActorHand>();
         _stats = GetComponentInParent<ActorStats>();
-        _ownerNetworkObject = GetComponentInParent<NetworkObject>();
+        _owner = GetComponentInParent<NetworkObject>();
     }
 
     public override void Use() { }
@@ -38,7 +38,7 @@ public sealed class RustySwordWeapon : Weapon
         base.Equip();
         _hand = GetComponentInParent<ActorHand>();
         _stats = GetComponentInParent<ActorStats>();
-        _ownerNetworkObject = GetComponentInParent<NetworkObject>();
+        _owner = GetComponentInParent<NetworkObject>();
         if (!_bonusApplied && _stats != null)
         {
             _stats.PhysicalDamage.AddModifier(new StatModifier(_damage, StatModifierType.Flat, this));
@@ -138,7 +138,7 @@ public sealed class RustySwordWeapon : Weapon
 
     private void Attack(Vector2 position, float damage)
     {
-        if (IsOwnerStunned || !IsEquipped || !_isAttacking || _ownerNetworkObject == null || !_ownerNetworkObject.IsSpawned || !_ownerNetworkObject.NetworkManager.IsServer)
+        if (IsOwnerStunned || !IsEquipped || !_isAttacking || _owner == null || !_owner.IsSpawned || !_owner.NetworkManager.IsServer)
             return;
 
         Collider2D[] targets = Physics2D.OverlapCircleAll(position, _attackRadius);
@@ -152,7 +152,7 @@ public sealed class RustySwordWeapon : Weapon
             IDamageable damageable = target.GetComponentInParent<IDamageable>();
             if (damageable != null && _hitTargets.Add(damageable))
             {
-                float dealt = damageable.TakeDamage(DamageCalculator.RollCriticalDamage(damage, _stats), EDamageType.Physical, _stats);
+                float dealt = DamageCalculator.DealCriticalDamage(damageable, damage, EDamageType.Physical, _stats);
                 if (dealt > 0f)
                     NotifyMeleeHit(damageable);
                 else

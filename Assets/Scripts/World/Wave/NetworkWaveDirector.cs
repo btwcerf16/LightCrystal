@@ -35,6 +35,15 @@ public sealed class NetworkWaveDirector : MonoBehaviour
         _director.Initialize();
     }
 
+    [ConsoleCommand]
+    public string PauseWaves(bool paused = true)
+    {
+        if (!_networkManager.IsServer)
+            throw new System.InvalidOperationException("Паузой волн управляет хост.");
+        _director.SetPaused(paused);
+        return paused ? "Цикл волн приостановлен." : "Цикл волн продолжен.";
+    }
+
     private void SpawnEnemy(Enemy enemy)
     {
         if (_networkManager.IsServer)

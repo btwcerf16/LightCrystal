@@ -6,10 +6,12 @@ using UnityEngine;
 public sealed class NetworkActorVitals : NetworkBehaviour
 {
     private readonly NetworkVariable<Vector4> _state = new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private readonly NetworkVariable<byte> _reviveProgress = new();
     private ActorHealth _health;
     private ActorSanity _sanity;
 
     public Vector4 State => _state.Value;
+    public float ReviveProgress => _reviveProgress.Value / 100f;
     public event Action<Vector4> Changed;
 
     private void Awake()
@@ -20,7 +22,10 @@ public sealed class NetworkActorVitals : NetworkBehaviour
 
     private void Update()
     {
-        if (IsSpawned && IsServer && _sanity != null)
+        if (!IsSpawned || !IsServer)
+            return;
+        _reviveProgress.Value = (byte)Mathf.RoundToInt(_health.ReviveProgress * 100f);
+        if (_sanity != null)
             _sanity.ProcessDarkness(Time.deltaTime);
     }
 

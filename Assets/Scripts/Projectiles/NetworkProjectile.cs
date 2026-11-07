@@ -6,6 +6,7 @@ using UnityEngine;
 public sealed class NetworkProjectile : NetworkBehaviour
 {
     [SerializeField] private MagicOrbExplosion _orbExplosionPrefab;
+    [SerializeField, Min(0f)] private float _finishExplosionRadius;
     private static ObjectPool<MagicOrbExplosion> _orbExplosions;
     private Projectile _projectile;
     private MagicOrbProjectile _orb;
@@ -54,8 +55,11 @@ public sealed class NetworkProjectile : NetworkBehaviour
 
     private void Despawn()
     {
-        if (IsSpawned && IsServer)
-            NetworkManager.GetComponent<NetworkObjectPool>().ReturnObject(NetworkObject);
+        if (!IsSpawned || !IsServer)
+            return;
+        if (_finishExplosionRadius > 0f)
+            OrbExplosionRpc(transform.position, _finishExplosionRadius);
+        NetworkManager.GetComponent<NetworkObjectPool>().ReturnObject(NetworkObject);
     }
 
     private void PlayOrbExplosion(Vector3 position, float radius) => OrbExplosionRpc(position, radius);

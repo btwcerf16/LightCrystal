@@ -7,30 +7,8 @@ using UnityEngine;
 [DefaultExecutionOrder(-50)]
 public sealed class NetworkObjectPool : MonoBehaviour
 {
-    private sealed class Handler : INetworkPrefabInstanceHandler
-    {
-        private readonly ObjectPool<NetworkObject> _pool;
-
-        public Handler(GameObject prefab)
-        {
-            _pool = new ObjectPool<NetworkObject>(() => UnityEngine.Object.Instantiate(prefab).GetComponent<NetworkObject>());
-        }
-
-        public NetworkObject Instantiate(ulong ownerClientId, Vector3 position, Quaternion rotation)
-        {
-            NetworkObject item = _pool.GetObject();
-            item.transform.SetPositionAndRotation(position, rotation);
-            if (item.TryGetComponent(out Enemy enemy))
-                enemy.ResetForSpawn();
-            return item;
-        }
-
-        public void Destroy(NetworkObject item) => _pool.ReturnObject(item);
-        public void Clear() => _pool.Clear();
-    }
-
     private NetworkManager _manager;
-    private readonly Dictionary<uint, Handler> _handlers = new();
+    private readonly Dictionary<uint, NetworkPoolHandler> _handlers = new();
 
     private void Awake()
     {
@@ -50,7 +28,7 @@ public sealed class NetworkObjectPool : MonoBehaviour
         uint hash = prefab.GetComponent<NetworkObject>().PrefabIdHash;
         if (_handlers.ContainsKey(hash))
             return;
-        Handler handler = new Handler(prefab);
+        NetworkPoolHandler handler = new NetworkPoolHandler(prefab);
         if (!_manager.PrefabHandler.AddHandler(prefab, handler))
             throw new InvalidOperationException("Network prefab already has a handler: " + prefab.name);
         _handlers.Add(hash, handler);
@@ -71,7 +49,7 @@ public sealed class NetworkObjectPool : MonoBehaviour
                 item.Despawn();
             return;
         }
-        if (_handlers.TryGetValue(item.PrefabIdHash, out Handler handler))
+        if (_handlers.TryGetValue(item.PrefabIdHash, out NetworkPoolHandler handler))
             handler.Destroy(item);
         else
             Destroy(item.gameObject);

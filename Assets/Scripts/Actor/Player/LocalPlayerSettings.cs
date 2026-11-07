@@ -9,8 +9,11 @@ public sealed class LocalPlayerSettings : ScriptableObject
     [SerializeField] private string[] _spellBindings = new string[0];
     [SerializeField] private string[] _cancelCastBindings = new string[0];
 
-    public void Load(int inventorySize, int arsenalSize, int spellSize = 0)
+    private string _character = "";
+
+    public void Load(int inventorySize, int arsenalSize, int spellSize = 0, string character = null)
     {
+        if (character != null) _character = character;
         LoadBindings(ref _inventoryBindings, ESlotBindingType.Inventory, inventorySize);
         LoadBindings(ref _arsenalBindings, ESlotBindingType.Arsenal, arsenalSize);
         LoadBindings(ref _spellBindings, ESlotBindingType.Spell, spellSize);
@@ -24,11 +27,12 @@ public sealed class LocalPlayerSettings : ScriptableObject
 
         for (int i = 0; i < size; i++)
         {
-            string defaultPath = bindings[i];
+            string defaultPath = string.IsNullOrEmpty(_character) ? bindings[i] : GetDefaultBinding(type, i);
             if (string.IsNullOrEmpty(defaultPath))
                 defaultPath = GetDefaultBinding(type, i);
 
-            bindings[i] = PlayerPrefs.GetString(PreferenceKey(type, i), defaultPath);
+            string previous = PlayerPrefs.GetString("SlotBindings." + type + "." + i, defaultPath);
+            bindings[i] = PlayerPrefs.GetString(PreferenceKey(type, i), previous);
         }
     }
 
@@ -104,6 +108,6 @@ public sealed class LocalPlayerSettings : ScriptableObject
 
     private string PreferenceKey(ESlotBindingType type, int index)
     {
-        return "SlotBindings." + type + "." + index;
+        return "SlotBindings." + (string.IsNullOrEmpty(_character) ? "" : _character + ".") + type + "." + index;
     }
 }

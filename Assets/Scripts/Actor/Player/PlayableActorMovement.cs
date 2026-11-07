@@ -3,11 +3,9 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public sealed class PlayableActorMovement : MonoBehaviour, IMovable
 {
-    [SerializeField, Min(0f)]
-    private float _moveSpeed = 5f;
-
     private Rigidbody2D _rigidbody;
     private EffectHandler _effects;
+    private ActorStats _stats;
 
     private Vector2 _moveDirection;
 
@@ -23,6 +21,7 @@ public sealed class PlayableActorMovement : MonoBehaviour, IMovable
     {
         _rigidbody = GetComponent<Rigidbody2D>();
         _effects = GetComponent<EffectHandler>();
+        _stats = GetComponent<ActorStats>();
     }
 
     private void OnDisable()
@@ -34,7 +33,7 @@ public sealed class PlayableActorMovement : MonoBehaviour, IMovable
     {
         UpdateForce();
 
-        Vector2 movementVelocity = _effects != null && _effects.IsStunned ? Vector2.zero : _moveDirection * _moveSpeed;
+        Vector2 movementVelocity = _effects != null && _effects.IsStunned ? Vector2.zero : _moveDirection * _stats.MoveSpeed.Value;
 
         _rigidbody.linearVelocity = movementVelocity + _forceVelocity;
     }

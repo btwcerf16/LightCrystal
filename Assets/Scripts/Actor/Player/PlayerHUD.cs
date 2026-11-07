@@ -17,6 +17,8 @@ public sealed class PlayerHUD : NetworkBehaviour
     private RectTransform _root;
     private RectTransform _waveTimer;
     private Text _waveTimerText;
+    private Text _waveTimerTitle;
+    private bool _shownPaused;
     private int _shownSeconds = -1;
     private WaveDirector _waveDirector;
     private ActorArsenal _arsenal;
@@ -28,6 +30,9 @@ public sealed class PlayerHUD : NetworkBehaviour
     private readonly NetworkVariable<int> _combo = new(0,
         NetworkVariableReadPermission.Owner, NetworkVariableWritePermission.Server);
     private readonly NetworkVariable<double> _waveStartsAt = new(0,
+        NetworkVariableReadPermission.Owner, NetworkVariableWritePermission.Server);
+
+    private readonly NetworkVariable<float> _pausedCalmRemaining = new(-1f,
         NetworkVariableReadPermission.Owner, NetworkVariableWritePermission.Server);
 
     private float ArsenalWidth => GetComponent<ArsenalUI>().Width;
@@ -52,11 +57,15 @@ public sealed class PlayerHUD : NetworkBehaviour
             return;
         _waveDirector.CalmStarted += PublishWaveTimer;
         _waveDirector.WaveStarted += PublishWaveTimer;
+        _waveDirector.PauseChanged += PublishWaveTimer;
         PublishWaveTimer();
     }
 
     private void PublishWaveTimer()
     {
+        if (!IsSpawned || !IsServer)
+            return;
+        _pausedCalmRemaining.Value = _waveDirector.IsPaused ? _waveDirector.CalmTimeRemaining : -1f;
         _waveStartsAt.Value = _waveDirector.CurrentState is CalmState
             ? NetworkManager.ServerTime.Time + _waveDirector.CalmTimeRemaining : 0;
     }
@@ -71,17 +80,20 @@ public sealed class PlayerHUD : NetworkBehaviour
         }
         if (!IsSpawned || !IsOwner || _waveTimer == null)
             return;
-        double remaining = _waveStartsAt.Value - NetworkManager.ServerTime.Time;
-        bool visible = _waveStartsAt.Value > 0 && remaining > 0;
+        bool paused = _pausedCalmRemaining.Value >= 0f;
+        double remaining = paused ? _pausedCalmRemaining.Value : _waveStartsAt.Value - NetworkManager.ServerTime.Time;
+        bool visible = paused || (_waveStartsAt.Value > 0 && remaining > 0);
         _waveTimer.gameObject.SetActive(visible);
         if (!visible)
             return;
         int seconds = Mathf.CeilToInt((float)remaining);
-        if (seconds == _shownSeconds)
+        if (seconds == _shownSeconds && paused == _shownPaused)
             return;
         _shownSeconds = seconds;
-        _waveTimerText.text = $"{seconds / 60:00}:{seconds % 60:00}";
-        _waveTimerText.color = seconds <= 5 ? new Color(1f, 0.48f, 0.3f) : HudStyle.Text;
+        _shownPaused = paused;
+        _waveTimerTitle.text = paused ? "Волны на паузе" : "До следующей волны";
+        _waveTimerText.text = paused && _waveStartsAt.Value == 0 ? "Пауза" : $"{seconds / 60:00}:{seconds % 60:00}";
+        _waveTimerText.color = !paused && seconds <= 5 ? new Color(1f, 0.48f, 0.3f) : HudStyle.Text;
     }
 
     private RectTransform Section(string name, Vector2 position, Vector2 size)
@@ -199,6 +211,7 @@ public sealed class PlayerHUD : NetworkBehaviour
         border.effectDistance = new Vector2(1f, -1f);
 
         Text title = CreateLabel(_waveTimer, "Title", HudStyle.Muted);
+        _waveTimerTitle = title;
         title.text = "До следующей волны";
         title.fontSize = 12;
         title.rectTransform.anchorMin = new Vector2(0f, 1f);
@@ -248,6 +261,9 @@ public sealed class PlayerHUD : NetworkBehaviour
         _hintGroup.interactable = false;
         _hintGroup.blocksRaycasts = false;
         _hintText = CreateLabel(_hintRect, "HintText", new Color(1f, 0.45f, 0.35f));
+        _hintText.horizontalOverflow = HorizontalWrapMode.Overflow;
+        _hintText.rectTransform.offsetMin = new Vector2(12f, 0f);
+        _hintText.rectTransform.offsetMax = new Vector2(-12f, 0f);
     }
 
     private Text CreateLabel(RectTransform parent, string name, Color color)
@@ -275,7 +291,9 @@ public sealed class PlayerHUD : NetworkBehaviour
         _hintAnimation?.Kill();
         _hintText.text = message;
         _hintGroup.alpha = 0f;
-        _hintRect.anchoredPosition = new Vector2(ArsenalWidth, Height + 38f);
+        float width = Mathf.Max(CenterWidth, _hintText.preferredWidth + 24f);
+        _hintRect.sizeDelta = new Vector2(width, 36f);
+        _hintRect.anchoredPosition = new Vector2(ArsenalWidth + (CenterWidth - width) * 0.5f, Height + 38f);
         _hintAnimation = DOTween.Sequence()
             .Append(_hintGroup.DOFade(1f, 0.12f))
             .Join(_hintRect.DOAnchorPosY(Height + 46f, 0.12f))
@@ -291,6 +309,7 @@ public sealed class PlayerHUD : NetworkBehaviour
         {
             _waveDirector.CalmStarted -= PublishWaveTimer;
             _waveDirector.WaveStarted -= PublishWaveTimer;
+            _waveDirector.PauseChanged -= PublishWaveTimer;
         }
         Hide();
     }

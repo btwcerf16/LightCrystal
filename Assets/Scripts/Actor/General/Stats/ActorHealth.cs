@@ -6,11 +6,13 @@ using UnityEngine;
 public sealed class ActorHealth : MonoBehaviour, IDamageable
 {
     [SerializeField] private LayerMask _damageSourceMask = ~0;
+    [SerializeField] private EffectData _downedEffect;
     private ActorStats _stats;
     private EffectHandler _effects;
 
     public event Action<float, float> HealthChanged;
     public event Action<float> DamageTaken;
+    public event Action<float, EDamageType, bool> DamageReceived;
     public event Action<float> DamageDealt;
     public event Action Died;
     public event Action<ActorHealth> EnemyKilled;
@@ -19,6 +21,7 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
     public float CurrentHealth { get; private set; }
     public float MaxHealth => _stats.MaxHealth.Value;
     public bool IsDead { get; private set; }
+    public float ReviveProgress { get; internal set; }
     public SanityShield Shield { get; internal set; }
 
     private void Awake()
@@ -40,6 +43,11 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
 
     public float TakeDamage(float amount, EDamageType damageType, ActorStats attacker = null)
     {
+        return TakeDamage(amount, damageType, attacker, false);
+    }
+
+    public float TakeDamage(float amount, EDamageType damageType, ActorStats attacker, bool critical)
+    {
         if (amount <= 0f || IsDead || (_effects != null && (_effects.Status & EActorStatus.Invulnerable) != 0))
             return 0f;
         if (_damageSourceMask.value != -1 && (attacker == null
@@ -59,6 +67,7 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
         float dealtDamage = previousHealth - CurrentHealth + absorbedDamage;
 
         HealthChanged?.Invoke(CurrentHealth, MaxHealth);
+        DamageReceived?.Invoke(dealtDamage, damageType, critical);
         DamageTaken?.Invoke(dealtDamage);
         if (attacker != null && attacker.gameObject != gameObject)
         {
@@ -85,10 +94,16 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
         return dealtDamage;
     }
 
-    public void ResetHealth()
+    public void ResetHealth() => Revive(MaxHealth);
+
+    public void Revive(float health)
     {
         IsDead = false;
-        CurrentHealth = MaxHealth;
+        CurrentHealth = Mathf.Clamp(health, 1f, MaxHealth);
+        if (_effects != null)
+            for (int i = _effects.ActiveEffects.Count - 1; i >= 0; i--)
+                if ((_effects.ActiveEffects[i].EffectData.Status & EActorStatus.Downed) != 0)
+                    _effects.RemoveEffect(_effects.ActiveEffects[i]);
         HealthChanged?.Invoke(CurrentHealth, MaxHealth);
     }
 
@@ -113,6 +128,8 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
 
         CurrentHealth = 0f;
         IsDead = true;
+        if (_downedEffect != null && _effects != null)
+            _effects.AddEffect(_downedEffect);
 
         HealthChanged?.Invoke(CurrentHealth, MaxHealth);
         Died?.Invoke();

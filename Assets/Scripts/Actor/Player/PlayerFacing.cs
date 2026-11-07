@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 public sealed class PlayerFacing : MonoBehaviour
 {
     [SerializeField] private Transform _handTransform;
@@ -9,9 +9,9 @@ public sealed class PlayerFacing : MonoBehaviour
         bool isFacingRight = _handTransform.localPosition.x >= 0f;
 
         if (isFacingRight)
-            _bodyVisual.localRotation = Quaternion.Euler(0f, 0f, 0f);
+            _bodyVisual.localRotation = Quaternion.Euler(0f, 0f, _bodyVisual.localEulerAngles.z);
         else
-            _bodyVisual.localRotation = Quaternion.Euler(0f, 180f, 0f);
+            _bodyVisual.localRotation = Quaternion.Euler(0f, 180f, _bodyVisual.localEulerAngles.z);
     }
 
 }

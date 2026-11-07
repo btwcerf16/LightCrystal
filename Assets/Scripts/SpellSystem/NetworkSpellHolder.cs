@@ -10,6 +10,7 @@ public sealed class NetworkSpellHolder : NetworkBehaviour
     [SerializeField] private SpriteRenderer _bodyRenderer;
     private readonly NetworkVariable<int> _characterIndex = new(0);
     private int _initialCharacter;
+    public CharacterConfig Character { get; private set; }
     public void SetInitialCharacter(int index) => _initialCharacter = index;
 
     [ConsoleCommand]
@@ -34,6 +35,7 @@ public sealed class NetworkSpellHolder : NetworkBehaviour
     {
         CharacterConfig character = NetworkManager.GetComponent<LobbyConnection>().Characters.Get(current);
         if (character == null) return;
+        Character = character;
         if (_bodyRenderer != null)
         {
             _bodyRenderer.sprite = character.BodySprite;

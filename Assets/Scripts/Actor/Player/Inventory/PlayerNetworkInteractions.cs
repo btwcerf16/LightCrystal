@@ -84,7 +84,7 @@ public class PlayerNetworkInteractions : NetworkBehaviour
 
     private void OnStatusChanged()
     {
-        if (_effects.IsStunned)
+        if (_effects.IsStunned || (_effects.IsDowned && _lastInputType == EInputType.Secondary))
             CancelWeaponActivities();
     }
 
@@ -125,6 +125,8 @@ public class PlayerNetworkInteractions : NetworkBehaviour
 
     private void DropItemOnServer(ulong uid, bool isWeapon)
     {
+        if (_effects != null && _effects.IsDowned)
+            return;
         if (_effects != null && _effects.IsStunned)
             return;
         if (uid == 0)
@@ -207,6 +209,8 @@ public class PlayerNetworkInteractions : NetworkBehaviour
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
     private void PickupRpc(ulong worldItemId)
     {
+        if (_effects != null && _effects.IsDowned)
+            return;
         if (_effects != null && _effects.IsStunned)
             return;
         if (!NetworkManager.SpawnManager.SpawnedObjects.TryGetValue(worldItemId, out NetworkObject networkObject))
@@ -280,6 +284,8 @@ public class PlayerNetworkInteractions : NetworkBehaviour
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
     private void SecondaryUseRpc()
     {
+        if (_effects != null && _effects.IsDowned)
+            return;
         if (_effects != null && _effects.IsStunned)
             return;
         if(_lastInputType != EInputType.None)

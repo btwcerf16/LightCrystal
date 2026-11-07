@@ -25,4 +25,4 @@ MonoBehaviour:
   _spellBindings:
   - <Keyboard>/r
   - <Keyboard>/f
-  -
+  - ""

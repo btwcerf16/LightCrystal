@@ -15,6 +15,7 @@ public sealed class ActorStats : MonoBehaviour
     public Stat MaxHealth { get; private set; }
     public Stat MaxSanity { get; private set; }
     public Stat HealthRegeneration { get; private set; }
+    public Stat ReviveSpeed { get; private set; }
 
     public Stat MoveSpeed { get; private set; }
     public Stat AttackSpeed { get; private set; }
@@ -61,6 +62,7 @@ public sealed class ActorStats : MonoBehaviour
         MaxHealth = new Stat(_config.MaxHealth, 1f);
         MaxSanity = new Stat(_config.MaxSanity, 0f);
         HealthRegeneration = new Stat(_config.HealthRegeneration, 0f);
+        ReviveSpeed = new Stat(_config.ReviveSpeed, 0f);
 
         MoveSpeed = new Stat(_config.MoveSpeed, 0f);
         AttackSpeed = new Stat(_config.AttackSpeed, 0f);
@@ -100,6 +102,7 @@ public sealed class ActorStats : MonoBehaviour
         MaxHealth.SetBaseValue(config.MaxHealth);
         MaxSanity.SetBaseValue(config.MaxSanity);
         HealthRegeneration.SetBaseValue(config.HealthRegeneration);
+        ReviveSpeed.SetBaseValue(config.ReviveSpeed);
         MoveSpeed.SetBaseValue(config.MoveSpeed);
         AttackSpeed.SetBaseValue(config.AttackSpeed);
         CooldownReduction.SetBaseValue(config.CooldownReduction);

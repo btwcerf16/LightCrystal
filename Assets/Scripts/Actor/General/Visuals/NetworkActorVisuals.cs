@@ -18,7 +18,7 @@ public sealed class NetworkActorVisuals : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         if (IsServer)
-            _health.DamageTaken += OnDamageTaken;
+            _health.DamageReceived += OnDamageTaken;
         if (_effects != null)
         {
             _effects.EffectsChanged += RefreshTint;
@@ -28,23 +28,23 @@ public sealed class NetworkActorVisuals : NetworkBehaviour
 
     public override void OnNetworkDespawn()
     {
-        _health.DamageTaken -= OnDamageTaken;
+        _health.DamageReceived -= OnDamageTaken;
         if (_effects != null)
             _effects.EffectsChanged -= RefreshTint;
         _visuals.ClearEffectTint();
         _visuals.ClearHit();
     }
 
-    private void OnDamageTaken(float damage)
+    private void OnDamageTaken(float damage, EDamageType type, bool critical)
     {
-        FlashHitRpc(damage);
+        FlashHitRpc(damage, type, critical);
     }
 
     [Rpc(SendTo.ClientsAndHost)]
-    private void FlashHitRpc(float damage)
+    private void FlashHitRpc(float damage, EDamageType type, bool critical)
     {
         _visuals.FlashHit();
-        _visuals.ShowDamage(damage);
+        _visuals.ShowDamage(damage, type, critical);
     }
 
     public void PlayExplosion(float radius)

@@ -37,7 +37,7 @@ public sealed class DawnWaveProjectile : Projectile
             return;
         }
         _hitTargets.Add(target);
-        if (target.TakeDamage(DamageCalculator.RollCriticalDamage(Data.Damage, Data.Attacker), Data.DamageType, Data.Attacker) > 0f)
+        if (DamageCalculator.DealCriticalDamage(target, Data.Damage, Data.DamageType, Data.Attacker) > 0f)
         {
             if (!target.IsDead)
                 collider.GetComponentInParent<EffectHandler>()?.AddEffect(_stun);

@@ -15,6 +15,8 @@ public sealed class ActorStatsConfig : ScriptableObject
     [field: SerializeField, Min(0f)] public float MaxSanity { get; private set; } = 100f;
     [field: SerializeField, Min(0f)] public float HealthRegeneration { get; private set; }
 
+    [field: SerializeField, Min(0f)] public float ReviveSpeed { get; private set; } = 1f;
+
     [Header("Movement and attacks")]
     [field: SerializeField, Min(0f)] public float MoveSpeed { get; private set; } = 5f;
     [field: SerializeField, Min(0f)] public float AttackSpeed { get; private set; } = 1f;

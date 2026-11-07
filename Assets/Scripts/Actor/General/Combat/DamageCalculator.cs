@@ -5,9 +5,20 @@ public static class DamageCalculator
 {
     public static float RollCriticalDamage(float damage, ActorStats attacker)
     {
-        if (attacker != null && UnityEngine.Random.value < attacker.CriticalChance.Value)
-            return damage * attacker.CriticalDamageMultiplier.Value;
-        return damage;
+        return RollCriticalDamage(damage, attacker, out _);
+    }
+
+    private static float RollCriticalDamage(float damage, ActorStats attacker, out bool critical)
+    {
+        critical = attacker != null && UnityEngine.Random.value < attacker.CriticalChance.Value;
+        return critical ? damage * attacker.CriticalDamageMultiplier.Value : damage;
+    }
+
+    public static float DealCriticalDamage(IDamageable target, float damage, EDamageType type, ActorStats attacker)
+    {
+        damage = RollCriticalDamage(damage, attacker, out bool critical);
+        return target is ActorHealth health ? health.TakeDamage(damage, type, attacker, critical)
+            : target.TakeDamage(damage, type, attacker);
     }
 
     public static float CalculateDamage(float damage, EDamageType damageType, ActorStats attacker, ActorStats target)
@@ -33,7 +44,8 @@ public static class DamageCalculator
                 break;
 
             case EDamageType.Pure:
-                return damage;
+                return attacker != null && attacker.TryGetComponent(out EffectHandler effects) && effects.IsDowned
+                    ? damage * 0.1f : damage;
 
             default:
                 throw new ArgumentOutOfRangeException(nameof(damageType));

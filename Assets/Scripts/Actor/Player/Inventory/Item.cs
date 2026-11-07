@@ -56,7 +56,7 @@ public abstract class Item : MonoBehaviour, ITooltipSource
 
     public bool TryUse()
     {
-        if (IsOwnerStunned || !IsEquipped || _ownerNetworkObject == null || !_ownerNetworkObject.IsSpawned ||
+        if ((_ownerEffects != null && _ownerEffects.IsDowned) || IsOwnerStunned || !IsEquipped || _ownerNetworkObject == null || !_ownerNetworkObject.IsSpawned ||
             !_ownerNetworkObject.NetworkManager.IsServer || CooldownRemaining > 0f || !CanUse())
             return false;
 

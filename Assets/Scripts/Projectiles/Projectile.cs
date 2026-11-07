@@ -38,13 +38,19 @@ public abstract class Projectile : MonoBehaviour
         }
         data.StatsApplied = true;
         Data = data;
-        _direction = data.Direction.normalized;
+        SetDirection(data.Direction);
         _remaining = data.LifeTime;
         _isFlying = true;
         _isFinished = false;
+
+        if (!data.IgnoreItemEffects) Launched?.Invoke(this);
+    }
+
+    protected void SetDirection(Vector2 direction)
+    {
+        _direction = direction.normalized;
         float angle = Mathf.Atan2(_direction.y, _direction.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0f, 0f, angle);
-        if (!data.IgnoreItemEffects) Launched?.Invoke(this);
     }
 
     private void FixedUpdate()
@@ -98,7 +104,7 @@ public abstract class Projectile : MonoBehaviour
         if (target != null)
         {
             _hitTargets.Add(target);
-            float damage = target.TakeDamage(DamageCalculator.RollCriticalDamage(Data.Damage, Data.Attacker), Data.DamageType, Data.Attacker);
+            float damage = DamageCalculator.DealCriticalDamage(target, Data.Damage, Data.DamageType, Data.Attacker);
             if (!Data.IgnoreItemEffects && target is ActorHealth health)
                 TargetHit?.Invoke(this, health, damage);
             if (_hitTargets.Count <= ExtraPiercing)

@@ -24,6 +24,7 @@ public class EffectHandler : MonoBehaviour
     public event Action StatusChanged;
     public EActorStatus Status { get; private set; }
     public bool IsStunned => (Status & EActorStatus.Stunned) != 0;
+    public bool IsDowned => (Status & EActorStatus.Downed) != 0;
     public bool IsSilenced => (Status & EActorStatus.Silenced) != 0;
 
     internal void SetStatus(EActorStatus status)
@@ -77,7 +78,7 @@ public class EffectHandler : MonoBehaviour
             return null;
 
         float duration = effectData.IsPermanent ? float.PositiveInfinity : effectData.EffectDuration;
-        if (!effectData.IsBuff && effectData.Status != EActorStatus.None)
+        if (!effectData.IsPermanent && !effectData.IsBuff && effectData.Status != EActorStatus.None)
             duration *= 1f - Mathf.Clamp01(_ownerStats.EffectResistance.Value);
         if (duration <= 0f)
             return null;
