@@ -9,6 +9,8 @@ public struct ProjectileData
     public LayerMask LayerMask;
     public EDamageType DamageType;
     public ActorStats Attacker;
+    public Weapon SourceWeapon;
+    public EffectData EffectOnHit;
     public bool IsArrow;
     public bool IgnoreItemEffects;
     public bool StatsApplied;

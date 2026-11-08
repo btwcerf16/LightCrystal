@@ -74,6 +74,12 @@ public sealed class LobbyConnection : MonoBehaviour
     private void OnServerStarted()
     {
         if (SceneManager.GetActiveScene().name == "MainMenu")
+            SpawnLobby();
+    }
+
+    public void SpawnLobby()
+    {
+        if (_manager.IsServer && GameLobby.Instance == null)
             Instantiate(_lobbyPrefab).GetComponent<NetworkObject>().Spawn(false);
     }
 

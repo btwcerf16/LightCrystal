@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 2121476099}
   - component: {fileID: 2121476100}
   - component: {fileID: 2121476101}
+  - component: {fileID: 4865427028173602208}
   m_Layer: 0
   m_Name: GameNetwork
   m_TagString: Untagged
@@ -220,3 +221,16 @@ MonoBehaviour:
   _lobbyPrefab: {fileID: 9000101, guid: 7dc70c1c531b484e8bb65f8403c2b515, type: 3}
   _characters: {fileID: 11400000, guid: 59f5929b41d444b39f8e26fc86fc633b, type: 2}
   _maximumPlayers: 4
+--- !u!114 &4865427028173602208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2121476090}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e54df094b31426cbc9a0fbc0467b72d, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::GameDefeatController
+  _defeatScreenDuration: 5

@@ -7,6 +7,7 @@ public sealed class NetworkPlayerSetup : NetworkBehaviour
     [SerializeField] private ActorVision _actorVision;
     [SerializeField] private GameObject _visionObject;
     [SerializeField] private Transform _cameraTarget;
+    [SerializeField] private DefeatScreen _defeatScreenPrefab;
     private ActorHealth _health;
     private LocalCameraController _cameraController;
 
@@ -17,6 +18,7 @@ public sealed class NetworkPlayerSetup : NetworkBehaviour
         {
             _health.DamageTaken += OnDamageTaken;
             _health.DamageDealt += OnDamageDealt;
+            NetworkManager.GetComponent<GameDefeatController>()?.RegisterPlayer(_health);
         }
         _inputReader.enabled = false;
         _visionObject.SetActive(false);
@@ -37,6 +39,16 @@ public sealed class NetworkPlayerSetup : NetworkBehaviour
     {
         _health.DamageTaken -= OnDamageTaken;
         _health.DamageDealt -= OnDamageDealt;
+        if (IsServer)
+            NetworkManager.GetComponent<GameDefeatController>()?.UnregisterPlayer(_health);
+    }
+
+    [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Server)]
+    public void ShowDefeatRpc(int completedWaves)
+    {
+        _inputReader.SetMenuOpen(true);
+        _inputReader.enabled = false;
+        Instantiate(_defeatScreenPrefab).Show(completedWaves);
     }
 
     private void OnDamageTaken(float damage)

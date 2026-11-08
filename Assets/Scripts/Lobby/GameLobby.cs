@@ -118,16 +118,34 @@ public sealed class GameLobby : NetworkBehaviour
         for (int i = 0; i < Count; i++) if (!_players[i].IsReady) return;
         _starting.Value = true;
         CoverClientsRpc();
-        StartCoroutine(LoadMap());
+        StartCoroutine(LoadScene(_mapScene));
+    }
+
+    public void ReturnToLobby()
+    {
+        if (!IsServer)
+            return;
+        _starting.Value = false;
+        for (int i = 0; i < Count; i++)
+        {
+            LobbyPlayer player = _players[i];
+            player.IsReady = false;
+            _players[i] = player;
+        }
+        foreach (NetworkClient client in NetworkManager.ConnectedClients.Values)
+            if (client.PlayerObject != null)
+                client.PlayerObject.Despawn();
+        CoverClientsRpc();
+        StartCoroutine(LoadScene("MainMenu"));
     }
 
     [Rpc(SendTo.NotServer, InvokePermission = RpcInvokePermission.Server)]
     private void CoverClientsRpc() => SceneTransition.Instance.StartCoroutine(SceneTransition.Instance.Cover());
 
-    private IEnumerator LoadMap()
+    private IEnumerator LoadScene(string sceneName)
     {
         yield return SceneTransition.Instance.Cover();
-        SceneEventProgressStatus status = NetworkManager.SceneManager.LoadScene(_mapScene, LoadSceneMode.Single);
+        SceneEventProgressStatus status = NetworkManager.SceneManager.LoadScene(sceneName, LoadSceneMode.Single);
         if (status == SceneEventProgressStatus.Started) yield break;
         Debug.LogError("Cannot load map: " + status, this);
         _starting.Value = false;
@@ -140,8 +158,14 @@ public sealed class GameLobby : NetworkBehaviour
 
     private void OnMapLoaded(string sceneName, LoadSceneMode mode, List<ulong> completed, List<ulong> timedOut)
     {
+        if (sceneName == "MainMenu")
+        {
+            OpenScreenRpc();
+            return;
+        }
         if (sceneName != _mapScene || !IsStarting) return;
         foreach (ulong id in timedOut) NetworkManager.DisconnectClient(id);
+        NetworkManager.GetComponent<GameDefeatController>().BeginMatch();
         Vector3 center = FindFirstObjectByType<Crystal>().transform.position;
         for (int i = 0; i < Count; i++)
         {

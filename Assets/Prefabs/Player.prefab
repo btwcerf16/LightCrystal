@@ -6000,6 +6000,7 @@ MonoBehaviour:
   _actorVision: {fileID: 3891175691467304565}
   _visionObject: {fileID: 1169456044593569600}
   _cameraTarget: {fileID: 7431646636664071333}
+  _defeatScreenPrefab: {fileID: 6090404715411841207, guid: bb354635ed5a79f4dad9e83541710fbd, type: 3}
 --- !u!114 &-3391468213733798884
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6360,6 +6361,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: f867183055534377a3f8581476c31456, type: 2}
   - {fileID: 11400000, guid: 07813995288b496682cd4c6477f6e2c4, type: 2}
   - {fileID: 11400000, guid: 99e2defc61bc466f9c2a25463f100890, type: 2}
+  - {fileID: 11400000, guid: c10899f78e064824dad03a703c252125, type: 2}
+  - {fileID: 11400000, guid: 0f79205b73a97df4d8e1f061dca88355, type: 2}
 --- !u!114 &8123400010000000022
 MonoBehaviour:
   m_ObjectHideFlags: 0

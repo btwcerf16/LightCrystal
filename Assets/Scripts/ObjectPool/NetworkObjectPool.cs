@@ -23,7 +23,7 @@ public sealed class NetworkObjectPool : MonoBehaviour
 
     private void Register(GameObject prefab)
     {
-        if (prefab == null || (!prefab.TryGetComponent<Enemy>(out _) && !prefab.TryGetComponent<Projectile>(out _)))
+        if (prefab == null || (!prefab.TryGetComponent<Enemy>(out _) && !prefab.TryGetComponent<Projectile>(out _) && !prefab.TryGetComponent<Trap>(out _)))
             return;
         uint hash = prefab.GetComponent<NetworkObject>().PrefabIdHash;
         if (_handlers.ContainsKey(hash))

@@ -1,16 +1,18 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public abstract class Projectile : MonoBehaviour
 {
-    [SerializeField, Min(0.01f)] private float _radius = 0.06f;
-    private readonly List<RaycastHit2D> _hits = new();
-    private static readonly Comparison<RaycastHit2D> HitOrder = (first, second) => first.distance.CompareTo(second.distance);
-    private Vector2 _direction;
-    private float _remaining;
+    [FormerlySerializedAs("_radius")]
+    [SerializeField, Min(0.01f)] private float _collisionRadius = 0.06f;
+    private readonly List<RaycastHit2D> _collisionHits = new();
+    private static readonly Comparison<RaycastHit2D> CompareHitsByDistance = (firstHit, secondHit) => firstHit.distance.CompareTo(secondHit.distance);
+    private Vector2 _flightDirection;
+    private float _remainingLifetime;
     private bool _isFlying;
-    private bool _isFinished;
+    private bool _hasFinishedFlight;
     protected bool IsFlying => _isFlying;
 
     protected ProjectileData Data { get; private set; }
@@ -20,93 +22,102 @@ public abstract class Projectile : MonoBehaviour
     public static event Action<Projectile> Launched;
     public static event Action<Projectile, ActorHealth, float> TargetHit;
     public ProjectileData ShotData => Data;
-    public void SetPiercing(int count) => ExtraPiercing = Mathf.Max(0, count);
+    public void SetPiercing(int piercingCount) => ExtraPiercing = Mathf.Max(0, piercingCount);
 
-    public virtual void Launch(ProjectileData data)
+    public virtual void Launch(ProjectileData projectileData)
     {
         ExtraPiercing = 0;
         _hitTargets.Clear();
-        if (data.Attacker != null && !data.StatsApplied)
+        if (projectileData.Attacker != null && !projectileData.StatsApplied)
         {
-            ActorStats stats = data.Attacker;
-            float range = Mathf.Max(0f, data.Speed * data.LifeTime + stats.ProjectileRange.Value);
-            data.Speed = Mathf.Max(0.01f, (data.Speed + stats.ProjectileSpeed.Value) * stats.ProjectileSpeedMultiplier.Value);
-            data.LifeTime = range / data.Speed;
-            if (data.DamageType == EDamageType.Physical ||
-                (data.DamageType == EDamageType.Magic && UnityEngine.Random.value < 0.2f))
-                ExtraPiercing = Mathf.Max(0, Mathf.FloorToInt(stats.ProjectilePiercing.Value));
+            ActorStats attackerStats = projectileData.Attacker;
+            float flightRange = Mathf.Max(0f, projectileData.Speed * projectileData.LifeTime + attackerStats.ProjectileRange.Value);
+            projectileData.Speed = Mathf.Max(0.01f, (projectileData.Speed + attackerStats.ProjectileSpeed.Value) * attackerStats.ProjectileSpeedMultiplier.Value);
+            projectileData.LifeTime = flightRange / projectileData.Speed;
+            if (projectileData.DamageType == EDamageType.Physical ||
+                (projectileData.DamageType == EDamageType.Magic && UnityEngine.Random.value < 0.2f))
+                ExtraPiercing = Mathf.Max(0, Mathf.FloorToInt(attackerStats.ProjectilePiercing.Value));
         }
-        data.StatsApplied = true;
-        Data = data;
-        SetDirection(data.Direction);
-        _remaining = data.LifeTime;
+        if (projectileData.SourceWeapon != null)
+            ExtraPiercing += projectileData.SourceWeapon.TargetLimit - 1;
+        projectileData.StatsApplied = true;
+        Data = projectileData;
+        SetDirection(projectileData.Direction);
+        _remainingLifetime = projectileData.LifeTime;
         _isFlying = true;
-        _isFinished = false;
+        _hasFinishedFlight = false;
 
-        if (!data.IgnoreItemEffects) Launched?.Invoke(this);
+        if (!projectileData.IgnoreItemEffects) Launched?.Invoke(this);
     }
 
-    protected void SetDirection(Vector2 direction)
+    protected void SetDirection(Vector2 flightDirection)
     {
-        _direction = direction.normalized;
-        float angle = Mathf.Atan2(_direction.y, _direction.x) * Mathf.Rad2Deg;
-        transform.rotation = Quaternion.Euler(0f, 0f, angle);
+        _flightDirection = flightDirection.normalized;
+        float flightAngle = Mathf.Atan2(_flightDirection.y, _flightDirection.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0f, 0f, flightAngle);
     }
 
     private void FixedUpdate()
     {
         if (!_isFlying)
             return;
-        float deltaTime = Mathf.Min(Time.fixedDeltaTime, _remaining);
-        if (deltaTime <= 0f)
+        float simulationDeltaTime = Mathf.Min(Time.fixedDeltaTime, _remainingLifetime);
+        if (simulationDeltaTime <= 0f)
         {
             OnLifetimeExpired();
             return;
         }
 
-        _remaining -= deltaTime;
-        float distance = Mathf.Max(0f, Data.Speed) * deltaTime;
-        ContactFilter2D filter = new ContactFilter2D();
-        filter.SetLayerMask(Data.LayerMask);
-        filter.useTriggers = true;
-        Physics2D.CircleCast(transform.position, _radius, _direction, filter, _hits, distance);
-        _hits.Sort(HitOrder);
-        Vector3 origin = transform.position;
-        foreach (RaycastHit2D hit in _hits)
+        _remainingLifetime -= simulationDeltaTime;
+        float movementDistance = Mathf.Max(0f, Data.Speed) * simulationDeltaTime;
+        ContactFilter2D collisionFilter = new ContactFilter2D();
+        collisionFilter.SetLayerMask(Data.LayerMask);
+        collisionFilter.useTriggers = true;
+        Physics2D.CircleCast(transform.position, _collisionRadius, _flightDirection, collisionFilter, _collisionHits, movementDistance);
+        _collisionHits.Sort(CompareHitsByDistance);
+        Vector3 movementStartPosition = transform.position;
+        foreach (RaycastHit2D collisionHit in _collisionHits)
         {
-            if (!CanHit(hit.collider))
+            if (!CanHit(collisionHit.collider))
                 continue;
-            transform.position = origin + (Vector3)(_direction * hit.distance);
-            OnHit(hit.collider);
+            transform.position = movementStartPosition + (Vector3)(_flightDirection * collisionHit.distance);
+            OnHit(collisionHit.collider);
             if (!_isFlying)
                 return;
         }
-        transform.position = origin + (Vector3)(_direction * distance);
-        if (_isFlying && _remaining <= 0f)
+        transform.position = movementStartPosition + (Vector3)(_flightDirection * movementDistance);
+        if (_isFlying && _remainingLifetime <= 0f)
             OnLifetimeExpired();
     }
 
-    protected virtual bool CanHit(Collider2D collider)
+    protected virtual bool CanHit(Collider2D targetCollider)
     {
-        if (collider.isTrigger && collider.GetComponentInParent<IDamageable>() == null)
+        if (targetCollider.isTrigger && targetCollider.GetComponentInParent<IDamageable>() == null)
             return false;
-        IDamageable target = collider.GetComponentInParent<IDamageable>();
-        if (target != null && (target.IsDead || _hitTargets.Contains(target)))
+        IDamageable damageableTarget = targetCollider.GetComponentInParent<IDamageable>();
+        if (damageableTarget != null && (damageableTarget.IsDead || _hitTargets.Contains(damageableTarget)))
             return false;
-        return Data.Attacker == null || collider.GetComponentInParent<ActorStats>() != Data.Attacker;
+        return Data.Attacker == null || targetCollider.GetComponentInParent<ActorStats>() != Data.Attacker;
     }
 
-    public virtual void OnHit(Collider2D collider)
+    public virtual void OnHit(Collider2D targetCollider)
     {
         if (!_isFlying)
             return;
-        IDamageable target = collider.GetComponentInParent<IDamageable>();
-        if (target != null)
+        IDamageable damageableTarget = targetCollider.GetComponentInParent<IDamageable>();
+        if (damageableTarget != null)
         {
-            _hitTargets.Add(target);
-            float damage = DamageCalculator.DealCriticalDamage(target, Data.Damage, Data.DamageType, Data.Attacker);
-            if (!Data.IgnoreItemEffects && target is ActorHealth health)
-                TargetHit?.Invoke(this, health, damage);
+            _hitTargets.Add(damageableTarget);
+            float dealtDamage = DamageCalculator.DealCriticalDamage(damageableTarget, Data.Damage, Data.DamageType, Data.Attacker);
+            if (dealtDamage > 0f)
+            {
+                if (!damageableTarget.IsDead && Data.EffectOnHit != null)
+                    targetCollider.GetComponentInParent<EffectHandler>()?.AddEffect(Data.EffectOnHit);
+                if (Data.SourceWeapon != null)
+                    Data.SourceWeapon.NotifyHit(damageableTarget);
+            }
+            if (!Data.IgnoreItemEffects && damageableTarget is ActorHealth targetHealth)
+                TargetHit?.Invoke(this, targetHealth, dealtDamage);
             if (_hitTargets.Count <= ExtraPiercing)
                 return;
         }
@@ -118,9 +129,9 @@ public abstract class Projectile : MonoBehaviour
 
     protected void Finish()
     {
-        if (_isFinished)
+        if (_hasFinishedFlight)
             return;
-        _isFinished = true;
+        _hasFinishedFlight = true;
         _isFlying = false;
         Finished?.Invoke();
     }
@@ -128,9 +139,9 @@ public abstract class Projectile : MonoBehaviour
     protected virtual void OnDisable()
     {
         _isFlying = false;
-        _direction = Vector2.zero;
-        _remaining = 0f;
-        _hits.Clear();
+        _flightDirection = Vector2.zero;
+        _remainingLifetime = 0f;
+        _collisionHits.Clear();
         _hitTargets.Clear();
         ExtraPiercing = 0;
         Data = default;

@@ -73,6 +73,8 @@ public class ActorVision : MonoBehaviour
 
     private void UpdateDirection(bool instantly = false)
     {
+        if (_worldCamera == null)
+            return;
         Vector3 screenPosition = _inputReader.AimScreenPosition;
         screenPosition.z = Mathf.Abs(_worldCamera.transform.position.z - transform.position.z);
         Vector2 worldPosition = _worldCamera.ScreenToWorldPoint(screenPosition);

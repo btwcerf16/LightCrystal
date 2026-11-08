@@ -15,6 +15,7 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
     public event Action<float, EDamageType, bool> DamageReceived;
     public event Action<float> DamageDealt;
     public event Action Died;
+    public event Action Revived;
     public event Action<ActorHealth> EnemyKilled;
     public event Action<ActorHealth> EnemyHit;
 
@@ -98,6 +99,7 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
 
     public void Revive(float health)
     {
+        bool wasDead = IsDead;
         IsDead = false;
         CurrentHealth = Mathf.Clamp(health, 1f, MaxHealth);
         if (_effects != null)
@@ -105,6 +107,8 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
                 if ((_effects.ActiveEffects[i].EffectData.Status & EActorStatus.Downed) != 0)
                     _effects.RemoveEffect(_effects.ActiveEffects[i]);
         HealthChanged?.Invoke(CurrentHealth, MaxHealth);
+        if (wasDead)
+            Revived?.Invoke();
     }
 
     public float Heal(float amount)
