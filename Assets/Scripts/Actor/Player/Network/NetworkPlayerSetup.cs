@@ -8,6 +8,9 @@ public sealed class NetworkPlayerSetup : NetworkBehaviour
     [SerializeField] private GameObject _visionObject;
     [SerializeField] private Transform _cameraTarget;
     [SerializeField] private DefeatScreen _defeatScreenPrefab;
+    [SerializeField] private RunGuideUI _runGuidePrefab;
+    private RunGuideUI _runGuide;
+    public bool IsRunGuideOpen => _runGuide != null;
     private ActorHealth _health;
     private LocalCameraController _cameraController;
 
@@ -33,6 +36,11 @@ public sealed class NetworkPlayerSetup : NetworkBehaviour
 
         _inputReader.enabled = true;
         _visionObject.SetActive(true);
+        if (_runGuidePrefab != null)
+        {
+            _runGuide = Instantiate(_runGuidePrefab, transform);
+            _runGuide.Show(_inputReader);
+        }
     }
 
     public override void OnNetworkDespawn()

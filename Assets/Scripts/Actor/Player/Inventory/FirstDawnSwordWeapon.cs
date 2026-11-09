@@ -22,6 +22,7 @@ public sealed class FirstDawnSwordWeapon : Weapon
     private bool _waveReleased;
     private readonly HashSet<IDamageable> _hitTargets = new();
 
+    public override float GetRange(ActorStats owner) => Mathf.Max(0f, _waveRange + (owner != null ? owner.ProjectileRange.Value : 0f));
     public override string DisplayName => "Осколок первого рассвета";
     private float CurrentDamage => OwnerStats != null ? OwnerStats.PhysicalDamage.Value : _damage;
     public float HitDamage => DamageCalculator.CalculateDamage(CurrentDamage, EDamageType.Physical, OwnerStats, null);
@@ -62,6 +63,7 @@ public sealed class FirstDawnSwordWeapon : Weapon
 
     private void BeginAttack(bool wave)
     {
+        SetAttackType(wave ? SecondaryAttackType : PrimaryAttackType);
         _isAttacking = true;
         _isWave = wave;
         _waveReleased = false;

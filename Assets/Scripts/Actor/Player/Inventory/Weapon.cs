@@ -10,7 +10,11 @@ public abstract class Weapon : Item
     [SerializeField] protected Animator _animator;
     [SerializeField, Min(1)] private int _maxTargets = 1;
     [SerializeField, Min(0f)] private float _aimSwayAngle;
-    private Stat _attackSpeed;
+    [SerializeField] private EAttackType _primaryAttackType;
+    [SerializeField] private EAttackType _secondaryAttackType;
+    private Stat _animationSpeedStat;
+    public EAttackType PrimaryAttackType => _primaryAttackType;
+    public EAttackType SecondaryAttackType => _secondaryAttackType;
 
     public Vector2 GetProjectileDirection(Vector2 direction)
     {
@@ -190,33 +194,42 @@ public abstract class Weapon : Item
 
     public override void Equip()
     {
-        if (_attackSpeed != null)
-            _attackSpeed.ValueChanged -= UpdateAttackSpeed;
-
         base.Equip();
         OwnerStats = GetComponentInParent<ActorStats>();
         _networkOwner = GetComponentInParent<NetworkObject>();
         EnsureEnchants();
         foreach (Enchant enchant in _enchants)
             enchant.OnEquipped();
-        _attackSpeed = GetComponentInParent<ActorStats>()?.AttackSpeed;
-        if (_attackSpeed != null)
-            _attackSpeed.ValueChanged += UpdateAttackSpeed;
-        UpdateAttackSpeed(_attackSpeed != null ? _attackSpeed.Value : 1f);
+        SetAttackType(_primaryAttackType);
     }
 
     public override void Drop()
     {
         foreach (Enchant enchant in _enchants)
             enchant.OnUnequipped();
-        if (_attackSpeed != null)
-            _attackSpeed.ValueChanged -= UpdateAttackSpeed;
-        _attackSpeed = null;
-        UpdateAttackSpeed(1f);
+        if (_animationSpeedStat != null)
+            _animationSpeedStat.ValueChanged -= UpdateAnimationSpeed;
+        _animationSpeedStat = null;
+        UpdateAnimationSpeed(1f);
         base.Drop();
     }
 
-    private void UpdateAttackSpeed(float value)
+    protected void SetAttackType(EAttackType attackType)
+    {
+        if (_animationSpeedStat != null)
+            _animationSpeedStat.ValueChanged -= UpdateAnimationSpeed;
+        _animationSpeedStat = null;
+        if (OwnerStats != null)
+        {
+            _animationSpeedStat = OwnerStats.AttackSpeed;
+            if (attackType == EAttackType.Magic)
+                _animationSpeedStat = OwnerStats.CastSpeed;
+            _animationSpeedStat.ValueChanged += UpdateAnimationSpeed;
+        }
+        UpdateAnimationSpeed(_animationSpeedStat != null ? _animationSpeedStat.Value : 1f);
+    }
+
+    private void UpdateAnimationSpeed(float value)
     {
         if (_animator != null)
             _animator.SetFloat("AttackSpeed", Mathf.Max(0f, value));
@@ -224,8 +237,8 @@ public abstract class Weapon : Item
 
     protected virtual void OnDestroy()
     {
-        if (_attackSpeed != null)
-            _attackSpeed.ValueChanged -= UpdateAttackSpeed;
+        if (_animationSpeedStat != null)
+            _animationSpeedStat.ValueChanged -= UpdateAnimationSpeed;
     }
 
     public abstract void BeginPrimaryUse();

@@ -15,7 +15,10 @@ public class NetworkShop : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         if (IsServer)
+        {
             _shop = GetComponent<Shop>();
+            PlayerHUD.NotifyPlayers(NetworkManager, "Появился торговец", new Color32(245, 205, 106, 255));
+        }
     }
 
     public void Initialize()

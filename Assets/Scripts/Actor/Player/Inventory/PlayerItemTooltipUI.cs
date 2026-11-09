@@ -10,6 +10,8 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
 {
     private readonly List<RaycastResult> _uiHits = new();
     private readonly List<Collider2D> _worldHits = new();
+    [SerializeField] private SpellRangePreview _rangePreviewPrefab;
+    private SpellRangePreview _rangePreview;
     private HoverTooltipUI _tooltip;
     private PointerEventData _pointerData;
     private PlayerInputReader _input;
@@ -35,6 +37,8 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
             new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
         _pointerData = new PointerEventData(EventSystem.current);
         _tooltip = HoverTooltipUI.Create(transform, "ItemTooltipCanvas", "ItemTooltip");
+        _rangePreview = Instantiate(_rangePreviewPrefab, transform);
+        _rangePreview.Hide();
     }
 
     private void LateUpdate()
@@ -44,6 +48,7 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
         if (Pointer.current == null || Pointer.current.press.isPressed || (_input != null && _input.IsMenuOpen))
         {
             _tooltip.Hide();
+            _rangePreview.Hide();
             return;
         }
         Vector2 pointer = Pointer.current.position.ReadValue();
@@ -51,8 +56,10 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
         if (source == null)
         {
             _tooltip.Hide();
+            _rangePreview.Hide();
             return;
         }
+        ShowRange(source);
         if (source is Item item)
             _tooltip.SetRarity(item.Rarity);
         else if (source is WorldItem worldItem)
@@ -66,6 +73,14 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
         else
             _tooltip.ClearEnchantments();
         _tooltip.Show(source, source.TooltipTitle, source.TooltipDescription, pointer, source.TooltipDelay);
+    }
+
+    private void ShowRange(ITooltipSource source)
+    {
+        Item item = source as Item;
+        if (source is WorldItem worldItem)
+            item = worldItem.ItemPrefab;
+        _rangePreview.Show(item != null ? item.GetRange(_stats) : 0f);
     }
 
     private ITooltipSource GetHoveredSource(Vector2 pointer)
@@ -112,5 +127,10 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
         _tooltip.gameObject.SetActive(false);
         Destroy(_tooltip.gameObject);
         _tooltip = null;
+        if (_rangePreview != null)
+        {
+            Destroy(_rangePreview.gameObject);
+            _rangePreview = null;
+        }
     }
 }

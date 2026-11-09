@@ -12,8 +12,7 @@ public sealed class GlassShardProjectile : Projectile
 
     protected override bool CanHit(Collider2D targetCollider)
     {
-        return base.CanHit(targetCollider) && (targetCollider.GetComponentInParent<Enemy>() != null
-            || (!targetCollider.isTrigger && targetCollider.GetComponentInParent<IDamageable>() == null));
+        return base.CanHit(targetCollider) && ((targetCollider.GetComponentInParent<Enemy>() != null || targetCollider.GetComponentInParent<EnchantRune>() != null) || (!targetCollider.isTrigger && targetCollider.GetComponentInParent<IDamageable>() == null));
     }
 
     public override void OnHit(Collider2D targetCollider)

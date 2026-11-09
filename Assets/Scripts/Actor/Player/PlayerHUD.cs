@@ -14,6 +14,7 @@ public sealed class PlayerHUD : NetworkBehaviour
     private RectTransform _hintRect;
     private Sequence _hintAnimation;
     private GameObject _canvas;
+    private EventNotificationsUI _eventNotifications;
     private RectTransform _root;
     private RectTransform _waveTimer;
     private Text _waveTimerText;
@@ -148,6 +149,8 @@ public sealed class PlayerHUD : NetworkBehaviour
         CreateWalletUI();
         CreateWaveTimer();
         CreateComboUI();
+        _eventNotifications = new GameObject("EventNotifications", typeof(RectTransform)).AddComponent<EventNotificationsUI>();
+        _eventNotifications.Initialize(_canvas.transform);
         ShopSpawnArea area = FindFirstObjectByType<ShopSpawnArea>();
         Crystal crystal = FindFirstObjectByType<Crystal>();
         if (IsClient && IsOwner && area != null && area.Ground != null && crystal != null)
@@ -158,12 +161,36 @@ public sealed class PlayerHUD : NetworkBehaviour
         }
     }
 
+    public void SetEventsMenuOpen(bool isOpen)
+    {
+        if (isOpen)
+            CreateRoot();
+        if (_eventNotifications != null)
+            _eventNotifications.SetMenuOpen(isOpen);
+    }
+
+    public static void NotifyPlayers(NetworkManager manager, string message, Color textColor)
+    {
+        if (!manager.IsServer)
+            return;
+        foreach (NetworkClient client in manager.ConnectedClientsList)
+            if (client.PlayerObject != null)
+                client.PlayerObject.GetComponent<PlayerHUD>().ShowEventRpc(message, textColor);
+    }
+
+    [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Server)]
+    private void ShowEventRpc(string message, Color textColor)
+    {
+        CreateRoot();
+        _eventNotifications.Show(message, textColor);
+    }
+
     private void CreateComboUI()
     {
         _comboRect = new GameObject("Combo", typeof(RectTransform), typeof(CanvasGroup)).GetComponent<RectTransform>();
         _comboRect.SetParent(_canvas.transform, false);
         _comboRect.anchorMin = _comboRect.anchorMax = _comboRect.pivot = new Vector2(0f, 1f);
-        _comboRect.anchoredPosition = new Vector2(80f, -90f);
+        _comboRect.anchoredPosition = new Vector2(260f, -18f);
         _comboRect.sizeDelta = new Vector2(240f, 48f);
         _comboGroup = _comboRect.GetComponent<CanvasGroup>();
         _comboGroup.alpha = 0f;

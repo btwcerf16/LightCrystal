@@ -56,6 +56,7 @@ public sealed class BellkeeperHammerWeapon : Weapon
 
     private void BeginAttack(string trigger, bool slam)
     {
+        SetAttackType(slam ? SecondaryAttackType : PrimaryAttackType);
         _isAttacking = true;
         _isSlam = slam;
         _impactPlayed = false;

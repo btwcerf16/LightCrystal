@@ -29,6 +29,7 @@ public abstract class Item : MonoBehaviour, ITooltipSource
     public int Price => _price;
     public ulong Uid { get; private set; }
     public virtual float BaseCooldown => _cooldown;
+    public virtual float GetRange(ActorStats owner) => 0f;
     public string Description => TooltipText.Format(this, _description);
     public string StatsDescription => TooltipText.Format(this, _statsDescription);
     public string TooltipTitle => DisplayName;
@@ -80,6 +81,7 @@ public abstract class Item : MonoBehaviour, ITooltipSource
         _ownerStats = GetComponentInParent<ActorStats>();
         _ownerEffects = GetComponentInParent<EffectHandler>();
         IsEquipped = true;
+        gameObject.SetActive(true);
     }
 
     public virtual void Drop()

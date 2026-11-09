@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public sealed class TeamVitalsUI : NetworkBehaviour
 {
     [SerializeField] private float _leftMargin = 18f;
+    [SerializeField] private float _topMargin = 18f;
     [SerializeField] private float _width = 220f;
     private readonly Dictionary<ulong, Row> _rows = new();
     private readonly List<NetworkActorVitals> _players = new();
@@ -50,9 +51,9 @@ public sealed class TeamVitalsUI : NetworkBehaviour
         scaler.referenceResolution = new Vector2(1920f, 1080f);
         scaler.matchWidthOrHeight = 0.5f;
         _panel = Rect("Players", _canvas.transform);
-        _panel.anchorMin = _panel.anchorMax = new Vector2(0f, 0.5f);
-        _panel.pivot = new Vector2(0f, 0.5f);
-        _panel.anchoredPosition = new Vector2(_leftMargin, 0f);
+        _panel.anchorMin = _panel.anchorMax = new Vector2(0f, 1f);
+        _panel.pivot = new Vector2(0f, 1f);
+        _panel.anchoredPosition = new Vector2(_leftMargin, -_topMargin);
         RefreshPlayers();
     }
 

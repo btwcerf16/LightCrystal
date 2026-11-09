@@ -25,6 +25,7 @@ public sealed class NetworkShopSummonZone : NetworkBehaviour
         {
             _startedAt.Value = NetworkManager.ServerTime.Time;
             _lastTick = _startedAt.Value;
+            PlayerHUD.NotifyPlayers(NetworkManager, "Появилась зона призыва торговца", new Color32(113, 210, 230, 255));
         }
     }
 

@@ -20,6 +20,7 @@ public sealed class AncientQuiverItem : Item
     public int MaximumArrows => _maximumArrows;
     public float PullRange => _pullRange;
     public float ArrowDuration => _embeddedArrow != null ? _embeddedArrow.EffectDuration : 0f;
+    public override float GetRange(ActorStats owner) => _pullRange;
     public override string DisplayName => "Древний колчан";
     public override float BaseCooldown => _activeCooldown;
 

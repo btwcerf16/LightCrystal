@@ -88,6 +88,8 @@ MonoBehaviour:
     \u0440\u0430\u0437 \u0432 0,6 \u0441 \u043F\u0440\u0438 \u0441\u043A\u043E\u0440\u043E\u0441\u0442\u0438
     \u0430\u0442\u0430\u043A\u0438 1."
   _damage: 2
+  _primaryAttackType: 0
+  _secondaryAttackType: 1
   _attackPoint: {fileID: 5608247217666110653}
   _animator: {fileID: 3123797774587916873}
   _maxTargets: 1

@@ -20,6 +20,7 @@ public sealed class SpearWeapon : Weapon
     private bool _isAttacking;
     private readonly HashSet<IDamageable> _hitTargets = new();
 
+    public override float GetRange(ActorStats owner) => Mathf.Max(0f, _throwRange + (owner != null ? owner.ProjectileRange.Value : 0f));
     public override string DisplayName => "Походное копьё";
     private float CurrentDamage => OwnerStats != null ? OwnerStats.PhysicalDamage.Value : _damage;
     public float PrimaryDamage => DamageCalculator.CalculateDamage(CurrentDamage, EDamageType.Physical, OwnerStats, null);
@@ -75,6 +76,7 @@ public sealed class SpearWeapon : Weapon
             return;
         _isAttacking = true;
         _hitTargets.Clear();
+        SetAttackType(PrimaryAttackType);
         _animator.SetTrigger("ThrustHit");
     }
     public override bool BeginSecondaryUse()
@@ -92,6 +94,7 @@ public sealed class SpearWeapon : Weapon
             }
         }
         _isAttacking = true;
+        SetAttackType(SecondaryAttackType);
         _animator.SetTrigger("Throw");
         return true;
     }

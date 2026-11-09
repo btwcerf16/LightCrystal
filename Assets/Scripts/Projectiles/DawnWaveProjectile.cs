@@ -23,7 +23,7 @@ public sealed class DawnWaveProjectile : Projectile
         IDamageable target = collider.GetComponentInParent<IDamageable>();
         if (target == null)
             return !collider.isTrigger;
-        return collider.GetComponentInParent<Enemy>() != null && !target.IsDead && !_hitTargets.Contains(target);
+        return (collider.GetComponentInParent<Enemy>() != null || collider.GetComponentInParent<EnchantRune>() != null) && !target.IsDead && !_hitTargets.Contains(target);
     }
 
     public override void OnHit(Collider2D collider)

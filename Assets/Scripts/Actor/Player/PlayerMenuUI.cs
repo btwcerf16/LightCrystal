@@ -108,11 +108,12 @@ public sealed class PlayerMenuUI : NetworkBehaviour
 
     private void OnToggleMenu(InputAction.CallbackContext context)
     {
-        if (_canvas == null || _bindings.IsRebinding || _input.IsConsoleOpen)
+        if (_canvas == null || _bindings.IsRebinding || _input.IsConsoleOpen || GetComponent<NetworkPlayerSetup>().IsRunGuideOpen)
             return;
         if (!_canvas.activeSelf)
         {
             _input.SetMenuOpen(true);
+            GetComponent<PlayerHUD>().SetEventsMenuOpen(true);
             _canvas.SetActive(true);
             ShowMain();
         }
@@ -127,6 +128,7 @@ public sealed class PlayerMenuUI : NetworkBehaviour
         _bindings.CancelRebind();
         _canvas.SetActive(false);
         _input.SetMenuOpen(false);
+        GetComponent<PlayerHUD>().SetEventsMenuOpen(false);
     }
 
     private void ShowMain()
@@ -265,6 +267,7 @@ public sealed class PlayerMenuUI : NetworkBehaviour
         if (_canvas != null)
         {
             _input.SetMenuOpen(false);
+            GetComponent<PlayerHUD>().SetEventsMenuOpen(false);
             _canvas.SetActive(false);
             Destroy(_canvas);
             _canvas = null;

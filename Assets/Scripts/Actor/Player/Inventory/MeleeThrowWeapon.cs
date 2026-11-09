@@ -20,6 +20,7 @@ public abstract class MeleeThrowWeapon : Weapon
     private ActorHand _actorHand;
     private bool _isAttacking;
     private bool _hasThrownProjectile;
+    public override float GetRange(ActorStats owner) => Mathf.Max(0f, _projectileRange + (owner != null ? owner.ProjectileRange.Value : 0f));
     public float MeleeDamage => DamageCalculator.CalculateDamage(_damage, EDamageType.Physical, OwnerStats, null);
     public float ProjectileRange => Mathf.Max(0f, _projectileRange + (OwnerStats != null ? OwnerStats.ProjectileRange.Value : 0f));
     public float ProjectileDamage => DamageCalculator.CalculateDamage(_projectileDamage, EDamageType.Physical, OwnerStats, null);
@@ -52,6 +53,7 @@ public abstract class MeleeThrowWeapon : Weapon
             return;
         _isAttacking = true;
         _meleeHitTargets.Clear();
+        SetAttackType(PrimaryAttackType);
         _animator.SetTrigger("Thrust");
     }
 
@@ -82,6 +84,7 @@ public abstract class MeleeThrowWeapon : Weapon
     {
         _isAttacking = true;
         _hasThrownProjectile = false;
+        SetAttackType(SecondaryAttackType);
         _animator.SetTrigger("Throw");
     }
 

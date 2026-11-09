@@ -8,6 +8,7 @@ public sealed class MetalShieldItem : Item
     [SerializeField] private float _pushStrength = 12f;
     [SerializeField] private float _pushDuration = 0.25f;
     private readonly HashSet<Enemy> _targets = new HashSet<Enemy>();
+    public override float GetRange(ActorStats owner) => _radius;
     public override string DisplayName => "Металлический щит";
     public float PhysicalResistancePercent => _physicalResistance * 100f;
     public float PushRadius => _radius;

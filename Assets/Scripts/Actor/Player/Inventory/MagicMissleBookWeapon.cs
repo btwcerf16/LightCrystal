@@ -20,6 +20,7 @@ public sealed class MagicMissleBookWeapon : Weapon
     private bool _secondary;
     private bool _released;
 
+    public override float GetRange(ActorStats owner) => Mathf.Max(0f, _missileRange + (owner != null ? owner.ProjectileRange.Value : 0f));
     public override string DisplayName => "Magic Missile";
     public float MissileDamage => DamageCalculator.CalculateDamage(_damage, EDamageType.Magic, OwnerStats, null);
     public float BurstMissileDamage => MissileDamage / 3f;
@@ -87,6 +88,7 @@ public sealed class MagicMissleBookWeapon : Weapon
 
     private void BeginAttack(bool secondary)
     {
+        SetAttackType(secondary ? SecondaryAttackType : PrimaryAttackType);
         _secondary = secondary;
         _released = false;
         _isAttacking = true;

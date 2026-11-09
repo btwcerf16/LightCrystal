@@ -6001,6 +6001,7 @@ MonoBehaviour:
   _visionObject: {fileID: 1169456044593569600}
   _cameraTarget: {fileID: 7431646636664071333}
   _defeatScreenPrefab: {fileID: 6090404715411841207, guid: bb354635ed5a79f4dad9e83541710fbd, type: 3}
+  _runGuidePrefab: {fileID: 228515759825601639, guid: 77346b4b7fccbb6439579a077478f9ef, type: 3}
 --- !u!114 &-3391468213733798884
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6389,6 +6390,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerItemTooltipUI
   ShowTopMostFoldoutHeaderGroup: 1
+  _rangePreviewPrefab: {fileID: 6010366792466824571, guid: 8c62ade233726a145a4d92e9e9048d17, type: 3}
 --- !u!114 &8123400010000000024
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6539,6 +6541,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ShopConsoleCommands
   _shopPrefab: {fileID: 3801610260901209035, guid: bc6ffe39c2db17b48940021ae59f0824, type: 3}
   _zonePrefab: {fileID: 8618744320305533015, guid: 52f10192a4d847048bce715a46d5e215, type: 3}
+  _enchanterPrefab: {fileID: 7065520716573070519, guid: 5e708cd8d54c400478cd8b08cf312a51, type: 3}
+  _enchantRunePrefab: {fileID: 8711626236979103756, guid: 413666d6ec0e60f428f93006d86ca373, type: 3}
 --- !u!114 &5039696420110450829
 MonoBehaviour:
   m_ObjectHideFlags: 0

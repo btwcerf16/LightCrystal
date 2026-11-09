@@ -6,6 +6,8 @@ public sealed class ShopConsoleCommands : MonoBehaviour
 {
     [SerializeField] private NetworkShop _shopPrefab;
     [SerializeField] private NetworkShopSummonZone _zonePrefab;
+    [SerializeField] private NetworkEnchanter _enchanterPrefab;
+    [SerializeField] private NetworkEnchanter _enchantRunePrefab;
 
     [ConsoleCommand]
     private string SpawnShop(float capacity)
@@ -44,6 +46,32 @@ public sealed class ShopConsoleCommands : MonoBehaviour
         NetworkShopSummonZone zone = Instantiate(_zonePrefab, position, Quaternion.identity);
         zone.NetworkObject.Spawn();
         return "Зона призыва появилась рядом с кристаллом.";
+    }
+
+    [ConsoleCommand]
+    private string SpawnEnchanter()
+    {
+        NetworkManager manager = NetworkManager.Singleton;
+        if (manager == null || !manager.IsListening || !manager.IsServer)
+            throw new InvalidOperationException("Чарователя можно создать только на запущенном сервере.");
+        if (_enchanterPrefab == null)
+            throw new InvalidOperationException("Префаб чарователя не назначен.");
+        NetworkEnchanter enchanter = Instantiate(_enchanterPrefab, transform.position + Vector3.right * 4f, Quaternion.identity);
+        enchanter.NetworkObject.Spawn();
+        return "Чарователь появился.";
+    }
+
+    [ConsoleCommand]
+    private string SpawnRune()
+    {
+        NetworkManager manager = NetworkManager.Singleton;
+        if (manager == null || !manager.IsListening || !manager.IsServer)
+            throw new InvalidOperationException("Кристалл можно создать только на запущенном сервере.");
+        if (_enchantRunePrefab == null)
+            throw new InvalidOperationException("Префаб рунического кристалла не назначен.");
+        NetworkEnchanter rune = Instantiate(_enchantRunePrefab, transform.position + Vector3.right * 2f, Quaternion.identity);
+        rune.NetworkObject.Spawn();
+        return "Рунический кристалл появился.";
     }
 
     private NetworkShop CreateShop()

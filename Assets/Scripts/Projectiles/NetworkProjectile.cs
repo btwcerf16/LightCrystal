@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Netcode;
 using Unity.Netcode.Components;
 using UnityEngine;
@@ -7,7 +8,7 @@ public sealed class NetworkProjectile : NetworkBehaviour
 {
     [SerializeField] private MagicOrbExplosion _orbExplosionPrefab;
     [SerializeField, Min(0f)] private float _finishExplosionRadius;
-    private static ObjectPool<MagicOrbExplosion> _orbExplosions;
+    private static readonly Dictionary<MagicOrbExplosion, ObjectPool<MagicOrbExplosion>> _explosionPools = new();
     private Projectile _projectile;
     private MagicOrbProjectile _orb;
     private TrailRenderer _trail;
@@ -15,8 +16,9 @@ public sealed class NetworkProjectile : NetworkBehaviour
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetEffects()
     {
-        _orbExplosions?.Clear();
-        _orbExplosions = null;
+        foreach (ObjectPool<MagicOrbExplosion> pool in _explosionPools.Values)
+            pool.Clear();
+        _explosionPools.Clear();
     }
 
     private void Awake()
@@ -67,11 +69,14 @@ public sealed class NetworkProjectile : NetworkBehaviour
     [Rpc(SendTo.ClientsAndHost, InvokePermission = RpcInvokePermission.Server)]
     private void OrbExplosionRpc(Vector3 position, float radius)
     {
-        if (_orbExplosions == null)
+        if (_orbExplosionPrefab == null)
+            return;
+        if (!_explosionPools.TryGetValue(_orbExplosionPrefab, out ObjectPool<MagicOrbExplosion> pool))
         {
             MagicOrbExplosion prefab = _orbExplosionPrefab;
-            _orbExplosions = new ObjectPool<MagicOrbExplosion>(() => Instantiate(prefab), 32);
+            pool = new ObjectPool<MagicOrbExplosion>(() => Instantiate(prefab), 32);
+            _explosionPools.Add(prefab, pool);
         }
-        _orbExplosions.GetObject().Play(_orbExplosions, position, radius);
+        pool.GetObject().Play(pool, position, radius);
     }
 }

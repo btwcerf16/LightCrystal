@@ -12,14 +12,15 @@ public sealed class MagicMissileBurstProjectile : Projectile
 
     protected override bool CanHit(Collider2D collider)
     {
-        return base.CanHit(collider) && (collider.GetComponentInParent<Enemy>() != null
-            || (!collider.isTrigger && collider.GetComponentInParent<IDamageable>() == null));
+        return base.CanHit(collider) && ((collider.GetComponentInParent<Enemy>() != null || collider.GetComponentInParent<EnchantRune>() != null) || (!collider.isTrigger && collider.GetComponentInParent<IDamageable>() == null));
     }
 
     public override void OnHit(Collider2D collider)
     {
-        if (IsFlying && CanHit(collider))
-            Burst();
+        if (!IsFlying || !CanHit(collider))
+            return;
+        collider.GetComponentInParent<EnchantRune>()?.TakeDamage(Data.Damage, Data.DamageType, Data.Attacker);
+        Burst();
     }
 
     protected override void OnLifetimeExpired() => Burst();

@@ -208,6 +208,8 @@ MonoBehaviour:
     \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B."
   _statsDescription: "Бонус физ. урона: +{Damage:0.#}"
   _damage: 4
+  _primaryAttackType: 0
+  _secondaryAttackType: 1
   _attackPoint: {fileID: 4220687173161739018}
   _animator: {fileID: 3787305803435159554}
   _maxTargets: 1

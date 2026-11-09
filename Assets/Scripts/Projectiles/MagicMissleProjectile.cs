@@ -57,8 +57,7 @@ public sealed class MagicMissleProjectile : Projectile
 
     protected override bool CanHit(Collider2D collider)
     {
-        return base.CanHit(collider) && (collider.GetComponentInParent<Enemy>() != null
-            || (!collider.isTrigger && collider.GetComponentInParent<IDamageable>() == null));
+        return base.CanHit(collider) && ((collider.GetComponentInParent<Enemy>() != null || collider.GetComponentInParent<EnchantRune>() != null) || (!collider.isTrigger && collider.GetComponentInParent<IDamageable>() == null));
     }
 
     protected override void OnDisable()

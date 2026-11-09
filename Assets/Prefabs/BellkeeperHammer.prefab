@@ -207,6 +207,8 @@ MonoBehaviour:
   _statsDescription: "\u0411\u043E\u043D\u0443\u0441 \u0444\u0438\u0437. \u0443\u0440\u043E\u043D\u0430:
     +{Damage:0.#}"
   _damage: 13
+  _primaryAttackType: 0
+  _secondaryAttackType: 0
   _attackPoint: {fileID: 3025530332767391800}
   _animator: {fileID: 2599889161909268557}
   _maxTargets: 2

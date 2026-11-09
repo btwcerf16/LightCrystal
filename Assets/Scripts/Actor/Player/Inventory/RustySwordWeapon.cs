@@ -71,6 +71,7 @@ public sealed class RustySwordWeapon : Weapon
 
         _isAttacking = true;
         _hitTargets.Clear();
+        SetAttackType(PrimaryAttackType);
         _animator.SetTrigger("ThrustHit");
     }
     public override void EndPrimaryUse() { }
@@ -81,6 +82,7 @@ public sealed class RustySwordWeapon : Weapon
 
         _isAttacking = true;
         _hitTargets.Clear();
+        SetAttackType(SecondaryAttackType);
         _animator.SetTrigger("SweepHit");
         return true;
     }

@@ -6,13 +6,13 @@ public sealed class ChurchFireProjectile : Projectile
     public void SetSource(ChurchBlacklistItem source) => _source = source;
     protected override bool CanHit(Collider2D target)
     {
-        return base.CanHit(target) && (target.GetComponentInParent<Enemy>() != null ||
-            (!target.isTrigger && target.GetComponentInParent<IDamageable>() == null));
+        return base.CanHit(target) && ((target.GetComponentInParent<Enemy>() != null || target.GetComponentInParent<EnchantRune>() != null) || (!target.isTrigger && target.GetComponentInParent<IDamageable>() == null));
     }
 
     public override void OnHit(Collider2D target)
     {
         if (!IsFlying || !CanHit(target)) return;
+        target.GetComponentInParent<EnchantRune>()?.TakeDamage(Data.Damage, Data.DamageType, Data.Attacker);
         Enemy enemy = target.GetComponentInParent<Enemy>();
         if (enemy != null)
         {

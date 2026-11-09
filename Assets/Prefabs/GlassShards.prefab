@@ -210,6 +210,8 @@ MonoBehaviour:
     \u041B\u043E\u0432\u0443\u0448\u043A\u0430 \u043E\u0441\u0442\u0430\u0451\u0442\u0441\u044F
     \u043D\u0430 10 \u0441."
   _damage: 2
+  _primaryAttackType: 0
+  _secondaryAttackType: 1
   _attackPoint: {fileID: 8532896903377786635}
   _animator: {fileID: 8582756659041787591}
   _maxTargets: 1

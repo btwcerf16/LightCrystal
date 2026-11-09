@@ -12,6 +12,7 @@ public sealed class RoyalScissorsItem : Item
     private ActorHealth _target;
     private int _executions;
     private bool _isExecuting;
+    public override float GetRange(ActorStats owner) => _range;
     public override string DisplayName => "Ножницы королевского портного";
     public override float BaseCooldown => _activeCooldown;
     public float ExecutionThreshold => Mathf.Min(_maximumThreshold, _executionThreshold + _executions * _thresholdPerExecution);
