@@ -1,0 +1,16 @@
+Third-party credits
+
+ScrollSnap by taka-oyama
+https://github.com/taka-oyama/ScrollSnap
+MIT license; see Assets/Plugins/ScrollSnap/LICENSE.txt.
+
+unslop by Damir Sokolovsky (@heydamir)
+https://github.com/heydamir/unslop
+Creative Commons Attribution 4.0 International:
+https://creativecommons.org/licenses/by/4.0/
+Used as design guidance and adapted to Unity uGUI and this game's pixel art.
+
+Tiny5 by Stefan Schmidt / Gissio
+https://github.com/Gissio/font_Tiny5
+SIL Open Font License 1.1; see Assets/Fonts/Tiny5/OFL.txt.
+The bundled font is instantiated at its default axes.

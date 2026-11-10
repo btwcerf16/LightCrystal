@@ -110,3 +110,9 @@ InitTestScene*.unity*
 /.local/
 /Assets/_Recovery/
 /Assets/_Recovery.meta
+
+# Personal explanations, devlogs, plans and art notes stay local.
+/Docs/
+/ArtNotes/
+/Assets/Scripts/**/*.md
+/Assets/Scripts/**/*.md.meta
