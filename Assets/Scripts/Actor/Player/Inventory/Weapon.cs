@@ -153,6 +153,15 @@ public abstract class Weapon : Item
         return SetEnchants(definitions);
     }
 
+    public bool RemoveLastEnchant()
+    {
+        if (_enchantDefinitions.Length == 0)
+            return false;
+        EnchantData[] definitions = new EnchantData[_enchantDefinitions.Length - 1];
+        Array.Copy(_enchantDefinitions, definitions, definitions.Length);
+        return SetEnchants(definitions);
+    }
+
     public EnchantState GetEnchantState()
     {
         return new EnchantState

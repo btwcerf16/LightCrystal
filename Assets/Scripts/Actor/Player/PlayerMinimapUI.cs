@@ -133,7 +133,7 @@ public sealed class PlayerMinimapUI : MonoBehaviour
                 color = new Color(1f, 0.2f, 0.18f);
             else if (target.GetComponent<PlayerInputReader>() != null)
                 color = new Color(0.25f, 0.55f, 1f);
-            else if (target.GetComponent<Shop>() != null || target.GetComponent<ShopSummonZone>() != null)
+            else if (target.GetComponent<Shop>() != null || target.GetComponent<SummonZone>() != null || target.GetComponent<Enchanter>() != null)
                 color = new Color(1f, 0.83f, 0.2f);
             else
                 continue;

@@ -23,3 +23,4 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 7c3b7c7e5c2042d882da9fdd8b336010, type: 2}
   - {fileID: 11400000, guid: 22a855792a004074864c15ca34060030, type: 2}
   PlayerPrefab: {fileID: 247892929754694301, guid: 52671da2c5a17d44babb16e9f72faa55, type: 3}
+  BeginningWeapon: {fileID: 8123400010000000011, guid: 4ac902ea29d44885a1a9b3fed62a6011, type: 3}

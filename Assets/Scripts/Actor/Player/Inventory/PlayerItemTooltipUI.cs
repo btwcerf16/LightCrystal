@@ -78,9 +78,7 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
     private void ShowRange(ITooltipSource source)
     {
         Item item = source as Item;
-        if (source is WorldItem worldItem)
-            item = worldItem.ItemPrefab;
-        _rangePreview.Show(item != null ? item.GetRange(_stats) : 0f);
+        _rangePreview.Show(item != null && item.transform.IsChildOf(transform) ? item.GetRange(_stats) : 0f);
     }
 
     private ITooltipSource GetHoveredSource(Vector2 pointer)

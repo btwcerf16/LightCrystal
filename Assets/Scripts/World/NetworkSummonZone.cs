@@ -1,14 +1,16 @@
 using Unity.Netcode;
 using UnityEngine;
 
-[RequireComponent(typeof(NetworkObject), typeof(ShopSummonZone))]
-public sealed class NetworkShopSummonZone : NetworkBehaviour
+[RequireComponent(typeof(NetworkObject), typeof(SummonZone))]
+public sealed class NetworkSummonZone : NetworkBehaviour
 {
     [SerializeField] private NetworkShop _shopPrefab;
+    [SerializeField] private NetworkEnchanter _enchanterPrefab;
+    [SerializeField, Range(0f, 1f)] private float _enchanterChance = 0.3f;
     [SerializeField, Min(0f)] private float _minimumCrystalDistance = 30f;
     private readonly NetworkVariable<float> _capacity = new();
     private readonly NetworkVariable<double> _startedAt = new();
-    private ShopSummonZone _zone;
+    private SummonZone _zone;
     private double _lastTick;
     private bool _waitForWave;
 
@@ -16,7 +18,7 @@ public sealed class NetworkShopSummonZone : NetworkBehaviour
 
     private void Awake()
     {
-        _zone = GetComponent<ShopSummonZone>();
+        _zone = GetComponent<SummonZone>();
     }
 
     public override void OnNetworkSpawn()
@@ -25,7 +27,7 @@ public sealed class NetworkShopSummonZone : NetworkBehaviour
         {
             _startedAt.Value = NetworkManager.ServerTime.Time;
             _lastTick = _startedAt.Value;
-            PlayerHUD.NotifyPlayers(NetworkManager, "Появилась зона призыва торговца", new Color32(113, 210, 230, 255));
+            PlayerHUD.NotifyPlayers(NetworkManager, "Появилась зона призыва", new Color32(113, 210, 230, 255));
         }
     }
 
@@ -40,7 +42,7 @@ public sealed class NetworkShopSummonZone : NetworkBehaviour
 
         ProcessZone(now);
         if (_zone.IsComplete && !_waitForWave)
-            CreateShop();
+            CreateEvent();
     }
 
     private void ProcessZone(double now)
@@ -55,12 +57,12 @@ public sealed class NetworkShopSummonZone : NetworkBehaviour
         _waitForWave = waitForWave;
     }
 
-    public void OpenShop()
+    public void SummonEvent()
     {
         if (!IsServer || !IsSpawned)
             return;
         ProcessZone(NetworkManager.ServerTime.Time);
-        CreateShop();
+        CreateEvent();
     }
 
     private bool HasPlayer()
@@ -78,22 +80,31 @@ public sealed class NetworkShopSummonZone : NetworkBehaviour
         return false;
     }
 
-    private void CreateShop()
+    private void CreateEvent()
     {
         Crystal crystal = FindFirstObjectByType<Crystal>();
         ShopSpawnArea area = FindFirstObjectByType<ShopSpawnArea>();
-        if (_shopPrefab == null || crystal == null || area == null
+        if (_shopPrefab == null || _enchanterPrefab == null || crystal == null || area == null
             || !area.TryGetPosition(crystal.transform.position, _minimumCrystalDistance, out Vector3 position))
         {
-            Debug.LogError("Не удалось найти место для магазина на карте вдали от кристалла.", this);
+            Debug.LogError("Не удалось создать событие на карте вдали от кристалла.", this);
             NetworkObject.Despawn();
             return;
         }
 
-        NetworkShop shop = Instantiate(_shopPrefab, position, Quaternion.identity);
-        shop.SetCapacity(Capacity);
-        shop.NetworkObject.Spawn();
-        shop.Initialize();
+        if (Random.value < _enchanterChance)
+        {
+            NetworkEnchanter enchanter = Instantiate(_enchanterPrefab, position, Quaternion.identity);
+            enchanter.SetCapacity(Capacity);
+            enchanter.NetworkObject.Spawn();
+        }
+        else
+        {
+            NetworkShop shop = Instantiate(_shopPrefab, position, Quaternion.identity);
+            shop.SetCapacity(Capacity);
+            shop.NetworkObject.Spawn();
+            shop.Initialize();
+        }
         NetworkObject.Despawn();
     }
 }

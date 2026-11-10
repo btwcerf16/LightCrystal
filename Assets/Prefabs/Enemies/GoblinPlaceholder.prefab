@@ -133,7 +133,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: afceb7076d22ca44b881e0859579cdf7, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActorStats
   _config: {fileID: 11400000, guid: 18c7b88f7b724e7a8a7763951afd048e, type: 2}
 --- !u!114 &1141
@@ -146,8 +146,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a3c4006554c8724489a2437b05318736, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActorHealth
+  _damageSourceMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _downedEffect: {fileID: 0}
 --- !u!95 &950
 Animator:
   serializedVersion: 7
@@ -165,7 +169,7 @@ Animator:
   m_LinearVelocityBlending: 0
   m_StabilizeFeet: 0
   m_AnimatePhysics: 0
-  m_WarningMessage:
+  m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
@@ -180,10 +184,12 @@ MonoBehaviour:
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3699544c3c5d480a829e0d37a63b33db, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Goblin
   _attackDistance: 0.95
   _mainTarget: {fileID: 0}
+  _separationRadius: 0.85
+  _separationStrength: 0.9
   _facing: {fileID: 8619770061752778475}
   _weaponAim: {fileID: 5187449474039504573}
   _attackPoint: {fileID: 3450837542122023297}
@@ -202,7 +208,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
   GlobalObjectIdHash: 452439592
   InScenePlacedSourceGlobalObjectIdHash: 0
@@ -227,7 +233,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e96cb6065543e43c4a752faaa1468eb1, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkTransform
   ShowTopMostFoldoutHeaderGroup: 1
   NetworkTransformExpanded: 0
@@ -273,7 +279,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e8d0727d5ae3244e3b569694d3912374, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.Components.NetworkAnimator
   ShowTopMostFoldoutHeaderGroup: 1
   NetworkAnimatorExpanded: 0
@@ -308,6 +314,10 @@ MonoBehaviour:
       NameHash: 646380074
       Synchronize: 1
       ParameterType: 9
+    - name: AttackSpeed
+      NameHash: -498733101
+      Synchronize: 1
+      ParameterType: 1
   AnimatorParametersExpanded: 0
 --- !u!114 &3012533523905390994
 MonoBehaviour:
@@ -319,9 +329,91 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 67c96fba589044b0b0ea9796d1b6331d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkGoblin
   ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &1142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3c7e562d9d34f679d31b85ef80f0c59, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ActorVisuals
+  _renderers:
+  - {fileID: 2120}
+  _hitParticles: {fileID: 2316422561857462713}
+  _hitColor: {r: 1, g: 0.92, b: 0.72, a: 1}
+  _hitDuration: 0.15
+--- !u!114 &1143
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38f2c6c375f14885a2b2acd003fb20d9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkActorVisuals
+  ShowTopMostFoldoutHeaderGroup: 1
+--- !u!114 &3407005731739354805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c044ff24e80944119bdc6a90732af9cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EffectHandler
+--- !u!114 &9183460220976921653
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38ae149da59442daa9aa16b7113e9f2d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkEffectHandler
+  ShowTopMostFoldoutHeaderGroup: 1
+  _effectData:
+  - {fileID: 11400000, guid: 4574ff5500224fc4c9f53fa736e316ae, type: 2}
+  - {fileID: 11400000, guid: 5c12adf68d976264e867ba4942d5d33b, type: 2}
+  - {fileID: 11400000, guid: 801729d0ef23eb74186e2ed9e5cc9f69, type: 2}
+  - {fileID: 11400000, guid: 6ed531e5fdd340947afce7de8226555c, type: 2}
+  - {fileID: 11400000, guid: 0fb0cdfaaf888ab4988aea70d9f64603, type: 2}
+  - {fileID: 11400000, guid: 52e96962b582479a9098113ed1ce2962, type: 2}
+  - {fileID: 11400000, guid: 6f746dcefd044446a65043273cf29492, type: 2}
+  - {fileID: 11400000, guid: e786af5392c045a795c6010bbcde712d, type: 2}
+  - {fileID: 11400000, guid: 5c1b07d509944655aeb48f9b7384ebb4, type: 2}
+  - {fileID: 11400000, guid: 3253a5084dac41a1994375a8f50cc960, type: 2}
+  - {fileID: 11400000, guid: c10899f78e064824dad03a703c252125, type: 2}
+  - {fileID: 11400000, guid: 0f79205b73a97df4d8e1f061dca88355, type: 2}
+--- !u!114 &3481929496263523788
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 100}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 003a5ce413e69714689dcf5c8028252e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyBloodlust
+  _chaseDelay: 10
+  _effect: {fileID: 11400000, guid: 0fb0cdfaaf888ab4988aea70d9f64603, type: 2}
 --- !u!1 &200
 GameObject:
   m_ObjectHideFlags: 0
@@ -538,98 +630,6 @@ Transform:
   - {fileID: 401}
   m_Father: {fileID: 400}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &5523897363046590663
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3450837542122023297}
-  m_Layer: 0
-  m_Name: AttackPoint
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &3450837542122023297
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5523897363046590663}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.375, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 402}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &6610221000748466553
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 5187449474039504573}
-  m_Layer: 0
-  m_Name: WeaponAim
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &5187449474039504573
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6610221000748466553}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.375, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 402}
-  m_Father: {fileID: 401}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1142
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b3c7e562d9d34f679d31b85ef80f0c59, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::ActorVisuals
-  _renderers:
-  - {fileID: 2120}
-  _hitColor: {r: 1, g: 0.92, b: 0.72, a: 1}
-  _hitDuration: 0.15
-  _hitParticles: {fileID: 2316422561857462713}
---- !u!114 &1143
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 38f2c6c375f14885a2b2acd003fb20d9, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkActorVisuals
 --- !u!1 &1508738395104738310
 GameObject:
   m_ObjectHideFlags: 0
@@ -943,7 +943,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.5, g: 0.43, b: 0.3, a: 0.65}
+      maxColor: {r: 0.5, g: 0.43, b: 0.3, a: 0.8862745}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -1059,7 +1059,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeY:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -1112,7 +1112,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startSizeZ:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 1
       minScalar: 1
       maxCurve:
@@ -1165,7 +1165,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startRotationX:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 0
       minScalar: 0
       maxCurve:
@@ -1218,7 +1218,7 @@ ParticleSystem:
         m_RotationOrder: 4
     startRotationY:
       serializedVersion: 2
-      minMaxState: 0
+      minMaxState: 3
       scalar: 0
       minScalar: 0
       maxCurve:
@@ -10450,55 +10450,66 @@ ParticleSystemRenderer:
   m_MeshWeighting1: 1
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
---- !u!114 &3407005731739354805
-MonoBehaviour:
+--- !u!1 &5523897363046590663
+GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c044ff24e80944119bdc6a90732af9cd, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::EffectHandler
---- !u!114 &9183460220976921653
-MonoBehaviour:
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3450837542122023297}
+  m_Layer: 0
+  m_Name: AttackPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3450837542122023297
+Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 38ae149da59442daa9aa16b7113e9f2d, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkEffectHandler
-  ShowTopMostFoldoutHeaderGroup: 1
-  _effectData:
-  - {fileID: 11400000, guid: 4574ff5500224fc4c9f53fa736e316ae, type: 2}
-  - {fileID: 11400000, guid: 5c12adf68d976264e867ba4942d5d33b, type: 2}
-  - {fileID: 11400000, guid: 801729d0ef23eb74186e2ed9e5cc9f69, type: 2}
-  - {fileID: 11400000, guid: 6ed531e5fdd340947afce7de8226555c, type: 2}
-  - {fileID: 11400000, guid: 0fb0cdfaaf888ab4988aea70d9f64603, type: 2}
-  - {fileID: 11400000, guid: 52e96962b582479a9098113ed1ce2962, type: 2}
-  - {fileID: 11400000, guid: 6f746dcefd044446a65043273cf29492, type: 2}
-  - {fileID: 11400000, guid: e786af5392c045a795c6010bbcde712d, type: 2}
-  - {fileID: 11400000, guid: 5c1b07d509944655aeb48f9b7384ebb4, type: 2}
-  - {fileID: 11400000, guid: 3253a5084dac41a1994375a8f50cc960, type: 2}
-  - {fileID: 11400000, guid: c10899f78e064824dad03a703c252125, type: 2}
-  - {fileID: 11400000, guid: 0f79205b73a97df4d8e1f061dca88355, type: 2}
---- !u!114 &3481929496263523788
-MonoBehaviour:
+  m_GameObject: {fileID: 5523897363046590663}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.375, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 402}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6610221000748466553
+GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 100}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 003a5ce413e69714689dcf5c8028252e, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyBloodlust
-  _chaseDelay: 10
-  _effect: {fileID: 11400000, guid: 0fb0cdfaaf888ab4988aea70d9f64603, type: 2}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5187449474039504573}
+  m_Layer: 0
+  m_Name: WeaponAim
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5187449474039504573
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6610221000748466553}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.375, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 402}
+  m_Father: {fileID: 401}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

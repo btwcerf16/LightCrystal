@@ -174,10 +174,11 @@ MonoBehaviour:
   _mainTarget: {fileID: 0}
   _spawnArea: {fileID: 0}
   _minimumCrystalDistance: 20
-  _waveBudget: 10
-  _budgetPerWave: 5
-  _calmBudget: 4
-  _enemiesPerSubwave: 3
+  _waveBudget: 30
+  _budgetPerWave: 8
+  _calmBudget: 12
+  _calmBudgetPerWave: 4
+  _subwaveCount: 2
   _initialCalmDuration: 20
   _calmDurationPerWave: 5
 --- !u!114 &2121476099
@@ -192,7 +193,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 195ca37095bd4a82b917c5f86cac481e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkWaveDirector
-  _shopZonePrefab: {fileID: 8618744320305533015, guid: 52f10192a4d847048bce715a46d5e215, type: 3}
+  _summonZonePrefab: {fileID: 8618744320305533015, guid: 52f10192a4d847048bce715a46d5e215, type: 3}
   _zoneMinimumCrystalDistance: 30
 --- !u!114 &2121476100
 MonoBehaviour:
@@ -231,6 +232,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2e54df094b31426cbc9a0fbc0467b72d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameDefeatController
   _defeatScreenDuration: 5

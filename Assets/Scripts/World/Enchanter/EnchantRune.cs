@@ -3,11 +3,18 @@ using Unity.Netcode;
 using UnityEngine;
 
 [RequireComponent(typeof(CircleCollider2D))]
-public sealed class EnchantRune : MonoBehaviour, IDamageable
+public sealed class EnchantRune : MonoBehaviour, IDamageable, ITooltipSource
 {
     [SerializeField] private SpriteRenderer _spriteRenderer;
     [SerializeField] private EnchantData _enchant;
+    [SerializeField] private bool _removesEnchant;
     private NetworkObject _networkObject;
+    private bool _singleChoice;
+    public bool RemovesEnchant => _removesEnchant;
+    public void SetSingleChoice(bool singleChoice) => _singleChoice = singleChoice;
+    public string TooltipTitle => _removesEnchant ? "Обугленная руна" : "Камень зачарования";
+    public string TooltipDescription => (_removesEnchant ? "Ударьте оружием, чтобы снять с него последний наложенный чар." : "Ударьте оружием, чтобы наложить чар «" + _enchant.DisplayName + "».") + (_singleChoice ? " Можно выбрать только один камень: второй исчезнет." : " Остальные камни останутся.");
+    public float TooltipDelay => 0f;
     public Sprite Sprite => _spriteRenderer.sprite;
     public EnchantData Enchant => _enchant;
     public float CurrentHealth => IsDead ? 0f : 1f;
@@ -35,11 +42,24 @@ public sealed class EnchantRune : MonoBehaviour, IDamageable
             attacker.GetComponent<NetworkPlayerWallet>()?.ShowHint("Возьмите оружие в руки");
             return 0f;
         }
-        if (!weapon.AddEnchant(_enchant))
+        if (_removesEnchant)
         {
-            string message = weapon.GetEnchantState().GetId(weapon.EnchantCapacity - 1) != 0 ? "На оружии нет места для зачарования" : "Это зачарование нельзя повторить";
-            attacker.GetComponent<NetworkPlayerWallet>()?.ShowHint(message);
-            return 0f;
+            if (!weapon.RemoveLastEnchant())
+            {
+                attacker.GetComponent<NetworkPlayerWallet>()?.ShowHint("На оружии нет зачарований");
+                return 0f;
+            }
+        }
+        else
+        {
+            if (_enchant == null || _enchant.Id <= 0)
+                return 0f;
+            if (!weapon.AddEnchant(_enchant))
+            {
+                string message = weapon.GetEnchantState().GetId(weapon.EnchantCapacity - 1) != 0 ? "На оружии нет места для зачарования" : "Это зачарование нельзя повторить";
+                attacker.GetComponent<NetworkPlayerWallet>()?.ShowHint(message);
+                return 0f;
+            }
         }
         Kill();
         return 1f;

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public sealed class ShopSummonZone : MonoBehaviour
+public sealed class SummonZone : MonoBehaviour
 {
     [SerializeField, Min(0.1f)] private float _radius = 4f;
     [SerializeField, Min(0.1f)] private float _fillDuration = 20f;

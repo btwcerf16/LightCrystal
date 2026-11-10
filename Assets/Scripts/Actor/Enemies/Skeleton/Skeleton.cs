@@ -10,9 +10,6 @@ public sealed class Skeleton : Enemy
     [SerializeField] private Transform _muzzle;
     [SerializeField] private Collider2D _bodyCollider;
     [SerializeField] private SkeletonArrowProjectile _arrowPrefab;
-    [SerializeField, Min(0f)] private float _arrowSpeed = 12f;
-    [SerializeField, Min(0.1f)] private float _arrowLifetime = 4f;
-    [SerializeField] private LayerMask _arrowHitMask = ~0;
     [SerializeField] private LayerMask _targetMask = ~0;
 
     private Rigidbody2D _body;
@@ -165,14 +162,13 @@ public sealed class Skeleton : Enemy
         _isShooting = false;
         SkeletonArrowProjectile arrow = GetComponent<NetworkObject>().NetworkManager.GetComponent<NetworkObjectPool>()
             .GetObject(_arrowPrefab, _muzzle.position, Quaternion.identity);
+        // Скорость, дальность и пронзание применяет Projectile.Launch из статов владельца.
         ProjectileData data = new ProjectileData
         {
             Direction = _shotDirection,
             IsArrow = true,
-            Speed = _arrowSpeed,
             Damage = Stats.PhysicalDamage.Value,
-            LifeTime = _arrowLifetime,
-            LayerMask = _arrowHitMask,
+            LayerMask = _targetMask,
             DamageType = EDamageType.Physical,
             Attacker = Stats
         };

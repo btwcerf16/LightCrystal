@@ -31,3 +31,9 @@ MonoBehaviour:
   <ForceResistance>k__BackingField: 0
   <MadnessResistance>k__BackingField: 0
   <EffectResistance>k__BackingField: 0
+  <CriticalChance>k__BackingField: 0
+  <CriticalDamageMultiplier>k__BackingField: 1.3
+  <ProjectileSpeed>k__BackingField: 12
+  <ProjectileSpeedMultiplier>k__BackingField: 1
+  <ProjectileRange>k__BackingField: 48
+  <ProjectilePiercing>k__BackingField: 0

@@ -4,9 +4,9 @@ using UnityEngine;
 [RequireComponent(typeof(NetworkManager), typeof(WaveDirector))]
 public sealed class NetworkWaveDirector : MonoBehaviour
 {
-    [SerializeField] private NetworkShopSummonZone _shopZonePrefab;
+    [SerializeField] private NetworkSummonZone _summonZonePrefab;
     [SerializeField, Min(0f)] private float _zoneMinimumCrystalDistance = 30f;
-    private NetworkShopSummonZone _shopZone;
+    private NetworkSummonZone _summonZone;
     private NetworkManager _networkManager;
     private WaveDirector _director;
 
@@ -18,8 +18,8 @@ public sealed class NetworkWaveDirector : MonoBehaviour
         _networkManager.OnServerStarted += StartCycle;
         _networkManager.OnServerStopped += StopCycle;
         _director.EnemyActivated += SpawnEnemy;
-        _director.CalmStarted += SpawnShopZone;
-        _director.WaveStarted += OpenShop;
+        _director.CalmStarted += SpawnSummonZone;
+        _director.WaveStarted += SummonEvent;
     }
 
     private void Start()
@@ -50,35 +50,35 @@ public sealed class NetworkWaveDirector : MonoBehaviour
             enemy.GetComponent<NetworkObject>().Spawn();
     }
 
-    private void SpawnShopZone()
+    private void SpawnSummonZone()
     {
         Crystal crystal = FindFirstObjectByType<Crystal>();
         ShopSpawnArea area = FindFirstObjectByType<ShopSpawnArea>();
-        if (!_networkManager.IsServer || _shopZonePrefab == null || crystal == null || area == null)
+        if (!_networkManager.IsServer || _summonZonePrefab == null || crystal == null || area == null)
             return;
 
         if (area.TryGetPosition(crystal.transform.position, _zoneMinimumCrystalDistance, out Vector3 position))
         {
-            _shopZone = Instantiate(_shopZonePrefab, position, Quaternion.identity);
-            _shopZone.SetWaitForWave(true);
-            _shopZone.NetworkObject.Spawn();
+            _summonZone = Instantiate(_summonZonePrefab, position, Quaternion.identity);
+            _summonZone.SetWaitForWave(true);
+            _summonZone.NetworkObject.Spawn();
             return;
         }
-        Debug.LogError("No shop zone position found inside the map.", this);
+        Debug.LogError("No summon zone position found inside the map", this);
     }
 
-    private void OpenShop()
+    private void SummonEvent()
     {
-        if (_shopZone != null && _shopZone.IsSpawned)
-            _shopZone.OpenShop();
-        _shopZone = null;
+        if (_summonZone != null && _summonZone.IsSpawned)
+            _summonZone.SummonEvent();
+        _summonZone = null;
     }
 
     private void StopCycle(bool wasHost)
     {
         _director.enabled = false;
         _director.Stop();
-        _shopZone = null;
+        _summonZone = null;
     }
 
     private void OnDisable()
@@ -86,8 +86,8 @@ public sealed class NetworkWaveDirector : MonoBehaviour
         _networkManager.OnServerStarted -= StartCycle;
         _networkManager.OnServerStopped -= StopCycle;
         _director.EnemyActivated -= SpawnEnemy;
-        _director.CalmStarted -= SpawnShopZone;
-        _director.WaveStarted -= OpenShop;
+        _director.CalmStarted -= SpawnSummonZone;
+        _director.WaveStarted -= SummonEvent;
         _director.enabled = false;
     }
 }

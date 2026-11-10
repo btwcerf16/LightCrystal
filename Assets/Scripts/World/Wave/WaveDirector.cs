@@ -12,7 +12,8 @@ public class WaveDirector : MonoBehaviour
     [SerializeField, Min(1)] private int _waveBudget = 10;
     [SerializeField, Min(0)] private int _budgetPerWave = 5;
     [SerializeField, Min(1)] private int _calmBudget = 4;
-    [SerializeField, Min(1)] private int _enemiesPerSubwave = 3;
+    [SerializeField, Min(1)] private int _calmBudgetPerWave = 2;
+    [SerializeField, Min(1)] private int _subwaveCount = 2;
     [SerializeField, Range(0f, 45f)] private float _initialCalmDuration = 20f;
     [SerializeField, Min(0f)] private float _calmDurationPerWave = 5f;
 
@@ -21,6 +22,8 @@ public class WaveDirector : MonoBehaviour
     private WaveStartState _waveState;
     private CalmState _calmState;
     private bool _isInitialized;
+    private int _subwaveBudget;
+    private int _startedSubwaveCount;
 
     public bool IsPaused { get; private set; }
     public int WaveCount { get; private set; }
@@ -79,13 +82,18 @@ public class WaveDirector : MonoBehaviour
     public void CreateWaveEnemies()
     {
         if (WaveEnemies.Count == 0)
-            CreateEnemies(_waveBudget + WaveCount * _budgetPerWave, WaveEnemies, false);
+        {
+            int waveBudget = _waveBudget + WaveCount * _budgetPerWave;
+            _subwaveBudget = Mathf.Max(1, waveBudget / Mathf.Max(1, _subwaveCount));
+            _startedSubwaveCount = 0;
+            CreateEnemies(waveBudget, WaveEnemies, false);
+        }
     }
 
     public void CreateCalmEnemies()
     {
         if (CalmEnemies.Count == 0)
-            CreateEnemies(_calmBudget, CalmEnemies, true);
+            CreateEnemies(_calmBudget + WaveCount * _calmBudgetPerWave, CalmEnemies, true);
     }
 
     private void CreateEnemies(int budget, List<Enemy> enemies, bool isCalm)
@@ -198,16 +206,22 @@ public class WaveDirector : MonoBehaviour
             return false;
 
         int count = 0;
+        int spentBudget = 0;
+        bool isLastSubwave = _startedSubwaveCount >= _subwaveCount - 1;
         foreach (Enemy enemy in WaveEnemies)
         {
             if (enemy.gameObject.activeSelf)
                 continue;
+            int enemyWeight = _enemyDatabase.GetWeight(enemy);
+            if (!isLastSubwave && count > 0 && spentBudget + enemyWeight > _subwaveBudget)
+                break;
             ActiveEnemies.Add(enemy);
             ActivateEnemy(enemy);
             count++;
-            if (count >= _enemiesPerSubwave)
-                break;
+            spentBudget += enemyWeight;
         }
+        if (count > 0)
+            _startedSubwaveCount++;
         return count > 0;
     }
 
@@ -222,6 +236,8 @@ public class WaveDirector : MonoBehaviour
         _stateMachine.Stop();
         _isInitialized = false;
         WaveCount = 0;
+        _subwaveBudget = 0;
+        _startedSubwaveCount = 0;
         CalmTimeRemaining = 0f;
         SetPaused(false);
         foreach (var pair in _deathHandlers)

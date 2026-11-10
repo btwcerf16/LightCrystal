@@ -11,4 +11,5 @@ public sealed class CharacterConfig : ScriptableObject
     public ActorStatsConfig Stats;
     public SpellConfig[] Spells;
     public NetworkObject PlayerPrefab;
+    public Weapon BeginningWeapon;
 }

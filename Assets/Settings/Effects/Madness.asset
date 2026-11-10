@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fc41912a40a1429f8b6bfadaf91e1a31, type: 3}
+  m_Name: Madness
+  m_EditorClassIdentifier: Assembly-CSharp::MadnessEffectData
+  EffectName: "\u0411\u0435\u0437\u0443\u043c\u0438\u0435"
+  EffectDescription: "\u041a\u043e\u0448\u043c\u0430\u0440 \u0446\u0435\u043f\u043b\u044f\u0435\u0442\u0441\u044f \u0437\u0430 \u0440\u0430\u0437\u0443\u043c. \u0421\u0442\u0430\u0434\u0438\u0438 \u0443\u0441\u0438\u043b\u0438\u0432\u0430\u044e\u0442\u0441\u044f \u043f\u0440\u0438 40%, 30%, 20% \u0438 10% \u0440\u0430\u0441\u0441\u0443\u0434\u043a\u0430. \u0412\u0441\u0435 \u043f\u043e\u043b\u0443\u0447\u0435\u043d\u043d\u044b\u0435 \u0448\u0442\u0440\u0430\u0444\u044b \u0434\u0435\u0440\u0436\u0430\u0442\u0441\u044f, \u043f\u043e\u043a\u0430 \u0440\u0430\u0441\u0441\u0443\u0434\u043e\u043a \u043d\u0435 \u0432\u043e\u0441\u0441\u0442\u0430\u043d\u043e\u0432\u0438\u0442\u0441\u044f \u0434\u043e 50%. \u0411\u0435\u0437\u0443\u043c\u0438\u0435 \u043d\u0435\u043b\u044c\u0437\u044f \u0440\u0430\u0437\u0432\u0435\u044f\u0442\u044c."
+  EffectStats: "40%: \u0434\u0430\u043b\u044c\u043d\u043e\u0441\u0442\u044c \u0437\u0440\u0435\u043d\u0438\u044f \u2212{ViewDistancePercent:0.#}%\n30%: \u0444\u0438\u0437\u0438\u0447\u0435\u0441\u043a\u0438\u0439 \u0443\u0440\u043e\u043d \u2212{PhysicalDamagePercent:0.#}%, \u0443\u0441\u0438\u043b\u0435\u043d\u0438\u0435 \u043c\u0430\u0433\u0438\u0438 \u2212{MagicAmplificationPercent:0.#}%\n20%: \u0444\u0438\u0437\u0438\u0447\u0435\u0441\u043a\u0430\u044f \u0438 \u043c\u0430\u0433\u0438\u0447\u0435\u0441\u043a\u0430\u044f \u0437\u0430\u0449\u0438\u0442\u0430 \u2212{ResistancePercent:0.#} \u043f.\u043f.\n10%: \u0441\u043a\u043e\u0440\u043e\u0441\u0442\u044c \u043f\u0435\u0440\u0435\u0434\u0432\u0438\u0436\u0435\u043d\u0438\u044f \u2212{MoveSpeedPercent:0.#}%"
+  EffectDuration: 1
+  SpriteIcon: {fileID: 21300000, guid: 6dd7f8fab61b4e3ab8009eb53f7c7cac, type: 3}
+  EffectColor: {r: 0.55, g: 0.25, b: 0.75, a: 1}
+  IsBuff: 0
+  IsPermanent: 1
+  Status: 0
+  CanPurged: 0
+  Stackable: 0
+  RestartOnReapply: 0
+  TintActor: 0
+  ActorTintStrength: 0.7
+  ViewDistancePenalty: 0.2
+  PhysicalDamagePenalty: 0.1
+  MagicAmplificationPenalty: 0.1
+  ResistancePenalty: 0.2
+  MoveSpeedPenalty: 0.3

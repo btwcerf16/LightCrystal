@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98d6cce08844461bb299f56d4dff0957, type: 3}
+  m_Name: SpiderWeb
+  m_EditorClassIdentifier: Assembly-CSharp::SpiderWebEffectData
+  EffectName: "\u041F\u0430\u0443\u0442\u0438\u043D\u0430"
+  EffectDuration: 3
+  EffectDescription: "\u041B\u0438\u043F\u043A\u0438\u0435 \u043D\u0438\u0442\u0438
+    \u043C\u0435\u0448\u0430\u044E\u0442 \u0434\u0432\u0438\u0433\u0430\u0442\u044C\u0441\u044F
+    \u0438 \u0430\u0442\u0430\u043A\u043E\u0432\u0430\u0442\u044C. \u041A\u0430\u0436\u0434\u044B\u0439
+    \u0441\u043B\u043E\u0439 \u0434\u0435\u0439\u0441\u0442\u0432\u0443\u0435\u0442
+    \u043E\u0442\u0434\u0435\u043B\u044C\u043D\u043E \u0438 \u043C\u043E\u0436\u0435\u0442
+    \u0431\u044B\u0442\u044C \u0440\u0430\u0437\u0432\u0435\u044F\u043D."
+  EffectStats: "\u0421\u043A\u043E\u0440\u043E\u0441\u0442\u044C \u043F\u0435\u0440\u0435\u0434\u0432\u0438\u0436\u0435\u043D\u0438\u044F:
+    \u2212{SlowPercent:0.#}% \u0437\u0430 \u0441\u043B\u043E\u0439\n\u0421\u043A\u043E\u0440\u043E\u0441\u0442\u044C
+    \u0430\u0442\u0430\u043A\u0438: \u2212{SlowPercent:0.#}% \u0437\u0430 \u0441\u043B\u043E\u0439"
+  SpriteIcon: {fileID: 21300000, guid: 4d9c8a135c584d4a936557d0fbfa2dbe, type: 3}
+  EffectColor: {r: 0.72, g: 0.74, b: 0.68, a: 1}
+  IsBuff: 0
+  IsPermanent: 0
+  Status: 0
+  CanPurged: 1
+  Stackable: 1
+  RestartOnReapply: 1
+  TintActor: 0
+  ActorTintStrength: 0.7
+  Slow: 0.05

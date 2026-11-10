@@ -31,3 +31,5 @@ MonoBehaviour:
   <ForceResistance>k__BackingField: 0
   <MadnessResistance>k__BackingField: 0
   <EffectResistance>k__BackingField: 0
+  <CriticalChance>k__BackingField: 0
+  <CriticalDamageMultiplier>k__BackingField: 1.3

@@ -43,6 +43,18 @@ public sealed class NetworkPlayerSetup : NetworkBehaviour
         }
     }
 
+    protected override void OnNetworkPostSpawn()
+    {
+        if (!IsServer)
+            return;
+        CharacterConfig character = GetComponent<NetworkSpellHolder>().Character;
+        if (character == null || character.BeginningWeapon == null)
+            return;
+        Transform hand = GetComponentInChildren<ActorHand>().HandTransform;
+        Weapon weapon = (Weapon)NetworkManager.GetComponent<ItemFactory>().CreateItem(character.BeginningWeapon.ItemId, hand);
+        GetComponent<ActorArsenal>().SetWeapon(0, weapon);
+    }
+
     public override void OnNetworkDespawn()
     {
         _health.DamageTaken -= OnDamageTaken;

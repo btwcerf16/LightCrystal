@@ -190,7 +190,7 @@ public sealed class Goblin : Enemy
             IDamageable damageable = target.GetComponentInParent<IDamageable>();
             if (damageable == null || !_hitTargets.Add(damageable))
                 continue;
-            damageable.TakeDamage(Stats.PhysicalDamage.Value, EDamageType.Physical, Stats);
+            DamageCalculator.DealCriticalDamage(damageable, Stats.PhysicalDamage.Value, EDamageType.Physical, Stats);
         }
     }
 

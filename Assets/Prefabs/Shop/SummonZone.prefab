@@ -103,7 +103,7 @@ GameObject:
   - component: {fileID: 8853697398938251615}
   - component: {fileID: 8618744320305533015}
   m_Layer: 0
-  m_Name: ShopSummonZone
+  m_Name: SummonZone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -161,7 +161,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 64146455eba9b35459ed201eb2c52bca, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::ShopSummonZone
+  m_EditorClassIdentifier: Assembly-CSharp::SummonZone
   _radius: 4
   _fillDuration: 20
   _duration: 30
@@ -177,7 +177,9 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4c1e66e539b0fbc48916d361123236d3, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkShopSummonZone
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkSummonZone
   ShowTopMostFoldoutHeaderGroup: 1
   _shopPrefab: {fileID: 3801610260901209035, guid: bc6ffe39c2db17b48940021ae59f0824, type: 3}
+  _enchanterPrefab: {fileID: 7065520716573070519, guid: 5e708cd8d54c400478cd8b08cf312a51, type: 3}
+  _enchanterChance: 0.3
   _minimumCrystalDistance: 30

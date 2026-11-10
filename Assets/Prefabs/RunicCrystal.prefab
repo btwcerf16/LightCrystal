@@ -73,6 +73,7 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::Enchanter
   _runePrefab: {fileID: 1236225425429832155, guid: 098c4e2946263854daf7e8c1be30e9c5, type: 3}
+  _disenchantRunePrefab: {fileID: 5850620790180875244, guid: 89fad668a79da824ca69eb0e0bc163be, type: 3}
   _runePoint: {fileID: 6775088302354079118}
 --- !u!114 &8711626236979103756
 MonoBehaviour:
@@ -93,7 +94,13 @@ MonoBehaviour:
   - {fileID: 21300000, guid: b1c71c3817e643e09c2257d9075a7cc0, type: 3}
   - {fileID: 21300000, guid: 14b922a9a430462a9ca1db291f3546f5, type: 3}
   - {fileID: 21300000, guid: 83b7c873e7c848e395883cf128681a0c, type: 3}
+  _charredRuneSprites:
+  - {fileID: 21300000, guid: 1e6c427b9add4cce9467cb81e53136e6, type: 3}
+  - {fileID: 21300000, guid: e86b95417602441ab2b14255d79215c5, type: 3}
+  - {fileID: 21300000, guid: 3c287d7a51b94e58a94995865705272b, type: 3}
+  - {fileID: 21300000, guid: ac4691e994e6499ea8bd5361a3f409cd, type: 3}
   _announceAppearance: 0
+  _lifetime: 0
 --- !u!1 &9034104809098633364
 GameObject:
   m_ObjectHideFlags: 0

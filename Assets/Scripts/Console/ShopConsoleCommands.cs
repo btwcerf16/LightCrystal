@@ -5,7 +5,7 @@ using UnityEngine;
 public sealed class ShopConsoleCommands : MonoBehaviour
 {
     [SerializeField] private NetworkShop _shopPrefab;
-    [SerializeField] private NetworkShopSummonZone _zonePrefab;
+    [SerializeField] private NetworkSummonZone _zonePrefab;
     [SerializeField] private NetworkEnchanter _enchanterPrefab;
     [SerializeField] private NetworkEnchanter _enchantRunePrefab;
 
@@ -32,7 +32,7 @@ public sealed class ShopConsoleCommands : MonoBehaviour
     }
 
     [ConsoleCommand]
-    private string SpawnShopZone()
+    private string SpawnSummonZone()
     {
         NetworkManager manager = NetworkManager.Singleton;
         if (manager == null || !manager.IsListening || !manager.IsServer)
@@ -43,7 +43,7 @@ public sealed class ShopConsoleCommands : MonoBehaviour
 
         float angle = UnityEngine.Random.Range(0f, Mathf.PI * 2f);
         Vector3 position = crystal.transform.position + new Vector3(Mathf.Cos(angle), Mathf.Sin(angle), 0f) * 12f;
-        NetworkShopSummonZone zone = Instantiate(_zonePrefab, position, Quaternion.identity);
+        NetworkSummonZone zone = Instantiate(_zonePrefab, position, Quaternion.identity);
         zone.NetworkObject.Spawn();
         return "Зона призыва появилась рядом с кристаллом.";
     }

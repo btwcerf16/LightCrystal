@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 493b48711456463a8e939c14af9d6030, type: 3}
+  m_Name: SpiderWebSpell
+  m_EditorClassIdentifier: Assembly-CSharp::SpiderWebSpellConfig
+  SpellName: "\u0411\u0440\u043E\u0441\u043E\u043A \u043F\u0430\u0443\u0442\u0438\u043D\u044B"
+  SpellDescription: "\u0411\u0440\u043E\u0441\u0430\u0435\u0442 \u043B\u0438\u043F\u043A\u0443\u044E
+    \u043F\u0430\u0443\u0442\u0438\u043D\u0443 \u0432 \u0438\u0433\u0440\u043E\u043A\u0430."
+  StatsDescription: "\u041F\u0435\u0440\u0435\u0437\u0430\u0440\u044F\u0434\u043A\u0430:
+    3 \u0441\u0435\u043A.\n\u0417\u0430\u043C\u0435\u0434\u043B\u0435\u043D\u0438\u0435
+    \u0434\u0432\u0438\u0436\u0435\u043D\u0438\u044F \u0438 \u0430\u0442\u0430\u043A\u0438:
+    5%\n\u0414\u043B\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C:
+    3 \u0441\u0435\u043A."
+  IsPassive: 0
+  CooldownTime: 3
+  SanityCost: 0
+  CastTime: 0
+  SpriteIcon: {fileID: 21300000, guid: 4d9c8a135c584d4a936557d0fbfa2dbe, type: 3}
+  Projectile: {fileID: 7533882771131879353, guid: ae35da3532db24e46bc2e7beb2ea5792, type: 3}
+  WebEffect: {fileID: 11400000, guid: efdd5543690b0a640a684b4b6a14b831, type: 2}
+  TargetMask:
+    serializedVersion: 2
+    m_Bits: 4294967295

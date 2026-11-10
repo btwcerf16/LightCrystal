@@ -29,6 +29,7 @@ public sealed class ShopSpawnArea : MonoBehaviour
             return false;
 
         NetworkShop[] shops = FindObjectsByType<NetworkShop>(FindObjectsSortMode.None);
+        Enchanter[] enchanters = FindObjectsByType<Enchanter>(FindObjectsSortMode.None);
         for (int attempt = 0; attempt < 256; attempt++)
         {
             var cell = new Vector3Int(Random.Range(bounds.xMin + _edgePadding, bounds.xMax - _edgePadding),
@@ -46,6 +47,9 @@ public sealed class ShopSpawnArea : MonoBehaviour
                     break;
                 }
             }
+            foreach (Enchanter enchanter in enchanters)
+                if (((Vector2)enchanter.transform.position - (Vector2)candidate).sqrMagnitude < 64f)
+                    overlapsShop = true;
             if (overlapsShop)
                 continue;
             position = candidate;

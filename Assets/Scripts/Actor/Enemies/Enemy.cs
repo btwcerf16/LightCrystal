@@ -127,7 +127,7 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
         {
             _nextSeparationCheck = Time.time + 0.12f;
             _separation = Vector2.zero;
-            ContactFilter2D filter = new ContactFilter2D();
+            ContactFilter2D filter = new();
             filter.SetLayerMask(1 << gameObject.layer);
             filter.useTriggers = true;
             int count = Physics2D.OverlapCircle(position, _separationRadius, filter, _neighbors);
