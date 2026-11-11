@@ -10,5 +10,7 @@ public struct TrapData
     public EDamageType DamageType;
     public float LifeTime;
     public float TriggerInterval;
+    public float TriggerDelay;
+    public float Radius;
     public int OperationsCount;
 }

@@ -452,6 +452,8 @@ GameObject:
   - component: {fileID: 1924743032757281319}
   - component: {fileID: 4187469046713326815}
   - component: {fileID: 5042758543093048090}
+  - component: {fileID: 7527403495508392570}
+  - component: {fileID: 167908290108240051}
   m_Layer: 0
   m_Name: Crystal
   m_TagString: Untagged
@@ -6161,3 +6163,30 @@ ParticleSystemRenderer:
   m_MeshWeighting1: 1
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
+--- !u!114 &7527403495508392570
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3724637992941763061}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c044ff24e80944119bdc6a90732af9cd, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::EffectHandler
+--- !u!114 &167908290108240051
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3724637992941763061}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38ae149da59442daa9aa16b7113e9f2d, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkEffectHandler
+  ShowTopMostFoldoutHeaderGroup: 1
+  _effectData:
+  - {fileID: 11400000, guid: 9504a655b3d3aa6438b4614226e28651, type: 2}

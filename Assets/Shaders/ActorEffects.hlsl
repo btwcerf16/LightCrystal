@@ -8,6 +8,7 @@ CBUFFER_START(UnityPerMaterial)
     half4 _OutlineColor;
     float4 _MainTex_TexelSize;
     half _OutlineWidth;
+    half _OutlineOpacity;
     half _EffectAmount;
     half _HitAmount;
 CBUFFER_END
@@ -32,7 +33,7 @@ half4 ApplyActorEffects(half4 color, float2 uv)
         half neighbors = min(min(OutlineAlpha(uv + float2(offset.x, 0)), OutlineAlpha(uv - float2(offset.x, 0))),
             min(OutlineAlpha(uv + float2(0, offset.y)), OutlineAlpha(uv - float2(0, offset.y))));
         half edge = 1.0h - step(0.1h, neighbors);
-        color.rgb = lerp(color.rgb, _OutlineColor.rgb, edge * _OutlineColor.a);
+        color.rgb = lerp(color.rgb, _OutlineColor.rgb, edge * _OutlineColor.a * _OutlineOpacity);
     }
     return color;
 }

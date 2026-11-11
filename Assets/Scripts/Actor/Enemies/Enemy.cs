@@ -5,10 +5,19 @@ using System;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(ActorStats), typeof(ActorHealth))]
+[RequireComponent(typeof(Rigidbody2D), typeof(Animator))]
 public abstract class Enemy : MonoBehaviour, ILightSensitive
 {
     [SerializeField, Min(0f)] private float _attackDistance = 1.4f;
     [SerializeField] private Transform _mainTarget;
+    [SerializeField] protected LayerMask _targetMask = ~0;
+    [SerializeField] protected Transform _facing;
+
+    protected Rigidbody2D _body;
+    protected Animator _animator;
+    protected Vector2 _moveDirection;
+    protected bool _isAttacking;
+
     private readonly Dictionary<Type, State> _states = new();
     private readonly StateMachine _stateMachine = new();
     private bool _isInitialized;
@@ -39,6 +48,8 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
 
     protected virtual void Awake()
     {
+        _body = GetComponent<Rigidbody2D>();
+        _animator = GetComponent<Animator>();
         Stats = GetComponent<ActorStats>();
         Effects = GetComponent<EffectHandler>();
         _nextSeparationCheck = Time.time + UnityEngine.Random.Range(0f, 0.12f);
@@ -118,6 +129,30 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
         _stateMachine.ChangeState(ChaseState);
     }
 
+    protected Transform FindPlayerTarget()
+    {
+        Transform bestTarget = null;
+        int bestPriority = int.MinValue;
+        float bestDistanceSquared = float.PositiveInfinity;
+        foreach (Collider2D candidate in Physics2D.OverlapCircleAll(transform.position, Stats.ViewDistance.Value, _targetMask))
+        {
+            PlayerInputReader player = candidate.GetComponentInParent<PlayerInputReader>();
+            if (player == null || player.GetComponent<ActorHealth>().IsDead)
+                continue;
+
+            int priority = player.GetComponent<ActorStats>().TargetPriority;
+            float distanceSquared = ((Vector2)(player.transform.position - transform.position)).sqrMagnitude;
+            if (priority > bestPriority || (priority == bestPriority && distanceSquared < bestDistanceSquared))
+            {
+                bestTarget = player.transform;
+                bestPriority = priority;
+                bestDistanceSquared = distanceSquared;
+            }
+        }
+
+        return bestTarget;
+    }
+
     protected Vector2 GetChaseDirection(Vector2 target)
     {
         if (IsStunned)
@@ -190,9 +225,8 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
         StopChase();
         foreach (Collider2D body in GetComponents<Collider2D>())
             body.enabled = true;
-        Animator animator = GetComponent<Animator>();
-        animator.Rebind();
-        animator.Update(0f);
+        _animator.Rebind();
+        _animator.Update(0f);
     }
 
     public void ApplyKnockback(Vector2 direction, float strength, float duration)
@@ -209,13 +243,12 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
 
     private IEnumerator Knockback(Vector2 velocity, float duration)
     {
-        Rigidbody2D body = GetComponent<Rigidbody2D>();
         WaitForFixedUpdate wait = new WaitForFixedUpdate();
         float remaining = duration;
         while (remaining > 0f && !Health.IsDead)
         {
             yield return wait;
-            body.MovePosition(body.position + velocity * (remaining / duration) * Time.fixedDeltaTime);
+            _body.MovePosition(_body.position + velocity * (remaining / duration) * Time.fixedDeltaTime);
             remaining -= Time.fixedDeltaTime;
         }
         _knockback = null;
@@ -261,6 +294,14 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
     protected void NotifyAttackStarted() => AttackStarted?.Invoke();
     public abstract void Attack();
     public abstract void Death();
-    public virtual void StopChase() { }
+    public virtual void StopChase()
+    {
+        _moveDirection = Vector2.zero;
+        if (_body != null)
+            _body.linearVelocity = Vector2.zero;
+        if (_animator != null)
+            _animator.SetBool("IsMoving", false);
+    }
+
     public virtual void CancelAttack() { }
 }

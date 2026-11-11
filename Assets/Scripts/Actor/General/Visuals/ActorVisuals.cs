@@ -11,6 +11,7 @@ public sealed class ActorVisuals : MonoBehaviour
     private static readonly int EffectAmount = Shader.PropertyToID("_EffectAmount");
     private static readonly int HitColor = Shader.PropertyToID("_HitColor");
     private static readonly int HitAmount = Shader.PropertyToID("_HitAmount");
+    private static readonly int OutlineOpacity = Shader.PropertyToID("_OutlineOpacity");
     private MaterialPropertyBlock _properties;
     private EffectHandler _effects;
     private Animator[] _animators;
@@ -18,6 +19,7 @@ public sealed class ActorVisuals : MonoBehaviour
     private float _effectAmount;
     private float _hitAmount;
     private float _hitEndsAt;
+    private float _outlineOpacity = 1f;
 
     private void Awake()
     {
@@ -51,6 +53,12 @@ public sealed class ActorVisuals : MonoBehaviour
     public void ClearEffectTint()
     {
         _effectAmount = 0f;
+        Apply();
+    }
+
+    public void SetOutlineOpacity(float opacity)
+    {
+        _outlineOpacity = opacity;
         Apply();
     }
 
@@ -127,6 +135,7 @@ public sealed class ActorVisuals : MonoBehaviour
             _properties.SetFloat(EffectAmount, _effectAmount);
             _properties.SetColor(HitColor, _hitColor);
             _properties.SetFloat(HitAmount, _hitAmount);
+            _properties.SetFloat(OutlineOpacity, _outlineOpacity);
             renderer.SetPropertyBlock(_properties);
         }
     }

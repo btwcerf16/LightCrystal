@@ -3,21 +3,14 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(Animator))]
 public sealed class Goblin : Enemy
 {
-    [SerializeField] private Transform _facing;
     [SerializeField] private Transform _weaponAim;
     [SerializeField] private Transform _attackPoint;
     [SerializeField] private Collider2D _bodyCollider;
     [SerializeField, Min(0f)] private float _attackRadius = 0.25f;
-    [SerializeField] private LayerMask _targetMask = ~0;
 
-    private Rigidbody2D _body;
-    private Animator _animator;
-    private Vector2 _moveDirection;
     private float _nextTargetSearch;
-    private bool _isAttacking;
     private bool _isMainTargetLocked;
     private bool _isSubscribed;
     private readonly HashSet<IDamageable> _hitTargets = new();
@@ -33,8 +26,6 @@ public sealed class Goblin : Enemy
     protected override void Awake()
     {
         base.Awake();
-        _body = GetComponent<Rigidbody2D>();
-        _animator = GetComponent<Animator>();
         RegisterState(new GoblinAriseState(this));
         RegisterState(new GoblinChaseState(this));
         RegisterState(new GoblinAttackState(this));
@@ -151,15 +142,6 @@ public sealed class Goblin : Enemy
         SetAim(AimAt(target));
         _moveDirection = GetChaseDirection(target.position);
         _animator.SetBool("IsMoving", _moveDirection.sqrMagnitude > 0f);
-    }
-
-    public override void StopChase()
-    {
-        _moveDirection = Vector2.zero;
-        if (_body != null)
-            _body.linearVelocity = Vector2.zero;
-        if (_animator != null)
-            _animator.SetBool("IsMoving", false);
     }
 
     public override bool CanAttack()

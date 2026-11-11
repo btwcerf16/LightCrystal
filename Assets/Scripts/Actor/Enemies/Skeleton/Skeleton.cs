@@ -2,22 +2,16 @@ using System;
 using Unity.Netcode;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody2D), typeof(Animator))]
 public sealed class Skeleton : Enemy
 {
-    [SerializeField] private Transform _facing;
     [SerializeField] private Transform _weaponAim;
     [SerializeField] private Transform _muzzle;
     [SerializeField] private Collider2D _bodyCollider;
     [SerializeField] private SkeletonArrowProjectile _arrowPrefab;
-    [SerializeField] private LayerMask _targetMask = ~0;
 
-    private Rigidbody2D _body;
-    private Animator _animator;
     private Vector2 _aimDirection = Vector2.right;
     private Vector2 _shotDirection;
     private float _nextTargetSearch;
-    private bool _isShooting;
     private bool _isMainTargetLocked;
 
     public event Action<Vector2> AimChanged;
@@ -29,8 +23,6 @@ public sealed class Skeleton : Enemy
     protected override void Awake()
     {
         base.Awake();
-        _body = GetComponent<Rigidbody2D>();
-        _animator = GetComponent<Animator>();
         RegisterState(new SkeletonAriseState(this));
         RegisterState(new SkeletonChaseState(this));
         RegisterState(new SkeletonAttackState(this));
@@ -47,7 +39,7 @@ public sealed class Skeleton : Enemy
     {
         Stats.AttackSpeed.ValueChanged -= UpdateAttackSpeed;
         _isMainTargetLocked = false;
-        _isShooting = false;
+        _isAttacking = false;
         base.OnDisable();
         StopChase();
     }
@@ -130,14 +122,6 @@ public sealed class Skeleton : Enemy
         _animator.SetBool("IsMoving", true);
     }
 
-    public override void StopChase()
-    {
-        if (_body != null)
-            _body.linearVelocity = Vector2.zero;
-        if (_animator != null)
-            _animator.SetBool("IsMoving", false);
-    }
-
     public override bool CanAttack()
     {
         return base.CanAttack() && Stats.AttackSpeed.Value > 0f;
@@ -151,15 +135,15 @@ public sealed class Skeleton : Enemy
             _isMainTargetLocked = true;
         SetAim(CurrentTarget.position - _weaponAim.position);
         _shotDirection = _aimDirection.normalized;
-        _isShooting = true;
+        _isAttacking = true;
         TriggerAnimation("Shoot");
     }
 
     public void ReleaseArrow()
     {
-        if (!isActiveAndEnabled || !_isShooting || Health.IsDead || IsStunned)
+        if (!isActiveAndEnabled || !_isAttacking || Health.IsDead || IsStunned)
             return;
-        _isShooting = false;
+        _isAttacking = false;
         SkeletonArrowProjectile arrow = GetComponent<NetworkObject>().NetworkManager.GetComponent<NetworkObjectPool>()
             .GetObject(_arrowPrefab, _muzzle.position, Quaternion.identity);
         // Скорость, дальность и пронзание применяет Projectile.Launch из статов владельца.
@@ -184,7 +168,7 @@ public sealed class Skeleton : Enemy
 
     public override void CancelAttack()
     {
-        _isShooting = false;
+        _isAttacking = false;
         _animator.ResetTrigger("Shoot");
     }
 

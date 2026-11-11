@@ -5420,7 +5420,7 @@ MonoBehaviour:
   _targetMask:
     serializedVersion: 2
     m_Bits: 4294967295
-  _preferredDistance: 4
+  _preferredDistance: 7
   _biteRadius: 0.45
 --- !u!114 &7520670796110298072
 MonoBehaviour:
