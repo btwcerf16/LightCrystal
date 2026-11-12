@@ -148,6 +148,12 @@ public sealed class PlayerHUD : NetworkBehaviour
         border.effectDistance = new Vector2(1f, -1f);
         CreateWalletUI();
         CreateWaveTimer();
+        if (IsClient && IsOwner)
+        {
+            var bossBars = new GameObject("BossBars", typeof(RectTransform), typeof(BossBarsUI));
+            bossBars.transform.SetParent(_canvas.transform, false);
+            bossBars.GetComponent<BossBarsUI>().Initialize(NetworkManager);
+        }
         CreateComboUI();
         _eventNotifications = new GameObject("EventNotifications", typeof(RectTransform)).AddComponent<EventNotificationsUI>();
         _eventNotifications.Initialize(_canvas.transform);

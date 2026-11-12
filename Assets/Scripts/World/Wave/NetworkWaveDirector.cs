@@ -5,6 +5,7 @@ using UnityEngine;
 public sealed class NetworkWaveDirector : MonoBehaviour
 {
     [SerializeField] private NetworkSummonZone _summonZonePrefab;
+    [SerializeField] private BossFightData _bossFightEffect;
     [SerializeField, Min(0f)] private float _zoneMinimumCrystalDistance = 30f;
     private NetworkSummonZone _summonZone;
     private NetworkManager _networkManager;
@@ -52,6 +53,7 @@ public sealed class NetworkWaveDirector : MonoBehaviour
 
     private void SpawnSummonZone()
     {
+        ClearBossFightEffect();
         Crystal crystal = FindFirstObjectByType<Crystal>();
         ShopSpawnArea area = FindFirstObjectByType<ShopSpawnArea>();
         if (!_networkManager.IsServer || _summonZonePrefab == null || crystal == null || area == null)
@@ -69,13 +71,40 @@ public sealed class NetworkWaveDirector : MonoBehaviour
 
     private void SummonEvent()
     {
+        if (_director.IsBossWave)
+            foreach (NetworkClient client in _networkManager.ConnectedClientsList)
+                if (client.PlayerObject != null)
+                    ApplyBossFightEffect(client.PlayerObject.gameObject);
         if (_summonZone != null && _summonZone.IsSpawned)
             _summonZone.SummonEvent();
         _summonZone = null;
     }
 
+    public void ApplyBossFightEffect(GameObject player)
+    {
+        if (_networkManager.IsServer && _director.IsBossWave && _bossFightEffect != null)
+            player.GetComponent<EffectHandler>().AddEffect(_bossFightEffect);
+    }
+
+    private void ClearBossFightEffect()
+    {
+        if (!_networkManager.IsServer || _bossFightEffect == null)
+            return;
+
+        foreach (NetworkClient client in _networkManager.ConnectedClientsList)
+        {
+            if (client.PlayerObject == null || !client.PlayerObject.TryGetComponent(out EffectHandler effects))
+                continue;
+
+            for (int i = effects.ActiveEffects.Count - 1; i >= 0; i--)
+                if (effects.ActiveEffects[i].EffectData == _bossFightEffect)
+                    effects.RemoveEffect(effects.ActiveEffects[i]);
+        }
+    }
+
     private void StopCycle(bool wasHost)
     {
+        ClearBossFightEffect();
         _director.enabled = false;
         _director.Stop();
         _summonZone = null;
@@ -83,6 +112,7 @@ public sealed class NetworkWaveDirector : MonoBehaviour
 
     private void OnDisable()
     {
+        ClearBossFightEffect();
         _networkManager.OnServerStarted -= StartCycle;
         _networkManager.OnServerStopped -= StopCycle;
         _director.EnemyActivated -= SpawnEnemy;

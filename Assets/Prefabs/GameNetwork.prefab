@@ -170,6 +170,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WaveDirector
   _enemyDatabase: {fileID: 11400000, guid: 2db1efbd41b741489d75aad158b563e3, type: 2}
+  _bossPrefab: {fileID: 3295282314445374176, guid: b1ddfd053c995ce4581a18d4635e94f6, type: 3}
+  _bossWaveInterval: 5
   _waveEffect: {fileID: 11400000, guid: 6f746dcefd044446a65043273cf29492, type: 2}
   _mainTarget: {fileID: 0}
   _spawnArea: {fileID: 0}
@@ -194,6 +196,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkWaveDirector
   _summonZonePrefab: {fileID: 8618744320305533015, guid: 52f10192a4d847048bce715a46d5e215, type: 3}
+  _bossFightEffect: {fileID: 11400000, guid: 94cbe35a8ba924a4597f2220da964c17, type: 2}
   _zoneMinimumCrystalDistance: 30
 --- !u!114 &2121476100
 MonoBehaviour:

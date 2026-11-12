@@ -36,7 +36,10 @@ public sealed class NetworkActorVitals : NetworkBehaviour
         {
             _health.HealthChanged += Publish;
             if (_sanity != null)
+            {
                 _sanity.SanityChanged += Publish;
+                NetworkManager.GetComponent<NetworkWaveDirector>()?.ApplyBossFightEffect(gameObject);
+            }
             Publish(0f, 0f);
         }
         Changed?.Invoke(State);

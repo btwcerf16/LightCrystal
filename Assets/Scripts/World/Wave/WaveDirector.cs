@@ -5,6 +5,8 @@ using UnityEngine;
 public class WaveDirector : MonoBehaviour
 {
     [SerializeField] private EnemyDatabase _enemyDatabase;
+    [SerializeField] private TrollBoss _bossPrefab;
+    [SerializeField, Min(1)] private int _bossWaveInterval = 5;
     [SerializeField] private NightmareGrowthData _waveEffect;
     [SerializeField] private Transform _mainTarget;
     [SerializeField] private ShopSpawnArea _spawnArea;
@@ -22,11 +24,14 @@ public class WaveDirector : MonoBehaviour
     private WaveStartState _waveState;
     private CalmState _calmState;
     private bool _isInitialized;
+    private bool _bossSpawned;
     private int _subwaveBudget;
     private int _startedSubwaveCount;
 
     public bool IsPaused { get; private set; }
     public int WaveCount { get; private set; }
+    public bool IsBossWave => _bossPrefab != null && CurrentState == _waveState &&
+        WaveCount > 0 && _bossWaveInterval > 0 && WaveCount % _bossWaveInterval == 0;
     public float CalmTimeRemaining { get; private set; }
     public State CurrentState => _stateMachine.CurrentState;
     public List<Enemy> ActiveEnemies { get; private set; } = new();
@@ -188,6 +193,7 @@ public class WaveDirector : MonoBehaviour
     public void StartWave()
     {
         WaveCount++;
+        _bossSpawned = false;
         StartNextSubwave();
         foreach (Enemy enemy in CalmEnemies)
         {
@@ -227,8 +233,30 @@ public class WaveDirector : MonoBehaviour
 
     public void UpdateWave()
     {
-        if (!IsPaused && ActiveEnemies.Count == 0 && !StartNextSubwave())
+        if (!IsPaused && ActiveEnemies.Count == 0 && !StartNextSubwave() && !StartBoss())
             _stateMachine.ChangeState(_calmState);
+    }
+
+    private bool StartBoss()
+    {
+        if (!IsBossWave || _bossSpawned)
+            return false;
+
+        if (!_spawnArea.TryGetPosition(_mainTarget.position, _minimumCrystalDistance, out Vector3 position))
+        {
+            Debug.LogError("No boss spawn position found away from the crystal.", this);
+            return false;
+        }
+
+        _bossSpawned = true;
+        TrollBoss boss = GetComponent<NetworkObjectPool>().GetObject(_bossPrefab, position, Quaternion.identity);
+        boss.SetMainTarget(_mainTarget);
+        Action onDied = () => RemoveEnemy(boss);
+        _deathHandlers.Add(boss, onDied);
+        boss.GetComponent<ActorHealth>().Died += onDied;
+        ActiveEnemies.Add(boss);
+        ActivateEnemy(boss);
+        return true;
     }
 
     public void Stop()

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
+using Unity.Netcode;
 
 public sealed class ConsoleCommandRegistry
 {
@@ -92,6 +93,19 @@ public sealed class ConsoleCommandRegistry
                     foreach (EnchantData enchant in database.Enchants)
                         if (enchant != null && enchant.name.StartsWith(fragment, StringComparison.OrdinalIgnoreCase))
                             matches.Add(leading + (enchant.name.Contains(" ") ? "\"" + enchant.name + "\"" : enchant.name));
+                matches.Sort(StringComparer.OrdinalIgnoreCase);
+                return matches;
+            }
+            if (parameters[argumentIndex].ParameterType == typeof(Enemy))
+            {
+                foreach (Enemy enemy in EnemyPrefabs())
+                {
+                    string name = enemy.GetType().Name;
+                    if (name.StartsWith(fragment, StringComparison.OrdinalIgnoreCase) && !matches.Contains(leading + name))
+                        matches.Add(leading + name);
+                    if (enemy.name.StartsWith(fragment, StringComparison.OrdinalIgnoreCase) && enemy.name != name)
+                        matches.Add(leading + (enemy.name.Contains(" ") ? "\"" + enemy.name + "\"" : enemy.name));
+                }
                 matches.Sort(StringComparer.OrdinalIgnoreCase);
                 return matches;
             }
@@ -284,6 +298,25 @@ public sealed class ConsoleCommandRegistry
                 throw new ArgumentException("Unknown enchant.");
             return enchant;
         }
+        if (type == typeof(Enemy))
+        {
+            Enemy byType = null;
+            bool ambiguous = false;
+            foreach (Enemy enemy in EnemyPrefabs())
+            {
+                if (string.Equals(enemy.name, text, StringComparison.OrdinalIgnoreCase))
+                    return enemy;
+                if (!string.Equals(enemy.GetType().Name, text, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                ambiguous |= byType != null && byType != enemy;
+                byType = enemy;
+            }
+
+            if (byType == null || ambiguous)
+                throw new ArgumentException("Укажи имя сетевого префаба моба.");
+            return byType;
+        }
         if (type == typeof(string))
             return text;
         if (!type.IsPrimitive && type != typeof(decimal))
@@ -303,6 +336,17 @@ public sealed class ConsoleCommandRegistry
         if (result is double doubleNumber && (double.IsNaN(doubleNumber) || double.IsInfinity(doubleNumber)))
             throw new FormatException("Expected a finite number.");
         return result;
+    }
+
+    private static IEnumerable<Enemy> EnemyPrefabs()
+    {
+        NetworkManager manager = NetworkManager.Singleton;
+        if (manager == null)
+            yield break;
+
+        foreach (NetworkPrefab entry in manager.NetworkConfig.Prefabs.Prefabs)
+            if (entry.Prefab != null && entry.Prefab.TryGetComponent(out Enemy enemy))
+                yield return enemy;
     }
 
     private List<string> Split(string input)

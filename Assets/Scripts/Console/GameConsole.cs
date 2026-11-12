@@ -369,6 +369,28 @@ public sealed class GameConsole : NetworkBehaviour
     [ConsoleCommand(ServerOnly = false)]
     private string Help(string command = "") => _commands.GetHelp(command);
 
+    [ConsoleCommand]
+    private string SpawnEnemy(Enemy enemy)
+    {
+        if (!IsServer || !IsSpawned)
+            throw new System.InvalidOperationException("Мобов можно создать только на хосте.");
+
+        ShopSpawnArea area = FindFirstObjectByType<ShopSpawnArea>();
+        Crystal crystal = FindFirstObjectByType<Crystal>();
+        if (area == null || crystal == null)
+            throw new System.InvalidOperationException("Для спавна нужна арена с кристаллом.");
+
+        Vector3 position = transform.position + Vector3.right * 4f;
+        if (!area.IsInsideMap(position) && !area.TryGetPosition(transform.position, 4f, out position))
+            throw new System.InvalidOperationException("На карте не нашлось точки для спавна.");
+
+        Enemy instance = NetworkManager.GetComponent<NetworkObjectPool>().GetObject(enemy, position, Quaternion.identity);
+        instance.SetMainTarget(crystal.transform);
+        instance.SetTemporaryTarget(transform);
+        instance.GetComponent<NetworkObject>().Spawn();
+        return $"Создан моб: {enemy.GetType().Name}.";
+    }
+
     [ConsoleCommand(ServerOnly = false)]
     private string Players()
     {
