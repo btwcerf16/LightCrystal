@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7135c64b96d4b1499beabb57c1fed51, type: 3}
+  m_Name: Pull
+  m_EditorClassIdentifier: Assembly-CSharp::PullEnchantData
+  Id: 5
+  DisplayName: "Стяжка"
+  Description: "Попадание в ближнем бою притягивает ближайших врагов к точке удара. Сила притяжения: {value}."
+  AllowDuplicates: 0
+  CommonValue: 8
+  RareValue: 10
+  EpicValue: 12
+  MythicalValue: 14
+  LegendaryValue: 16
+  BaseCooldown: 12
+  CooldownReductionPerRarity: 2
+  Radius: 3
+  PullDuration: 0.25
+  EnemyMask:
+    serializedVersion: 2
+    m_Bits: 256

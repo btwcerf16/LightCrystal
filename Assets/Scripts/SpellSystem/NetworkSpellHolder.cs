@@ -7,7 +7,7 @@ public sealed class NetworkSpellHolder : NetworkBehaviour
     private NetworkList<double> _cooldowns;
     private NetworkList<float> _castProgress;
     private SpellHolder _holder;
-    [SerializeField] private SpriteRenderer _bodyRenderer;
+    private PlayerBodyAnimation _bodyAnimation;
     private readonly NetworkVariable<int> _characterIndex = new(0);
     private int _initialCharacter;
     public CharacterConfig Character { get; private set; }
@@ -36,11 +36,7 @@ public sealed class NetworkSpellHolder : NetworkBehaviour
         CharacterConfig character = NetworkManager.GetComponent<LobbyConnection>().Characters.Get(current);
         if (character == null) return;
         Character = character;
-        if (_bodyRenderer != null)
-        {
-            _bodyRenderer.sprite = character.BodySprite;
-            _bodyRenderer.color = Color.white;
-        }
+        _bodyAnimation.SetModel(character.ModelPrefab);
         _holder.SetSpells(character.Spells, IsServer);
         if (IsServer)
         {
@@ -59,6 +55,7 @@ public sealed class NetworkSpellHolder : NetworkBehaviour
     private void Awake()
     {
         _holder = GetComponent<SpellHolder>();
+        _bodyAnimation = GetComponent<PlayerBodyAnimation>();
         _cooldowns = new NetworkList<double>();
         _castProgress = new NetworkList<float>();
     }

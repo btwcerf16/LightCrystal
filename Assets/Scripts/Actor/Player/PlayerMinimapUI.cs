@@ -33,6 +33,14 @@ public sealed class PlayerMinimapUI : MonoBehaviour
     private Texture2D _mapTexture;
     private Texture2D _dotTexture;
     private Sprite _dotSprite;
+    private ulong _revealedEventId;
+    private double _eventRevealedUntil;
+
+    public void RevealWaveEvent(ulong objectId, double revealedUntil)
+    {
+        _revealedEventId = objectId;
+        _eventRevealedUntil = revealedUntil;
+    }
 
     public void Initialize(Transform player, Tilemap ground, Transform crystal)
     {
@@ -133,7 +141,7 @@ public sealed class PlayerMinimapUI : MonoBehaviour
                 color = new Color(1f, 0.2f, 0.18f);
             else if (target.GetComponent<PlayerInputReader>() != null)
                 color = new Color(0.25f, 0.55f, 1f);
-            else if (target.GetComponent<Shop>() != null || target.GetComponent<SummonZone>() != null || target.GetComponent<Enchanter>() != null)
+            else if (target.TryGetComponent<IWaveEvent>(out _) || target.GetComponent<SummonZone>() != null)
                 color = new Color(1f, 0.83f, 0.2f);
             else
                 continue;
@@ -164,7 +172,9 @@ public sealed class PlayerMinimapUI : MonoBehaviour
             bool dying = marker.Animator != null && marker.Animator.runtimeAnimatorController != null
                 && (marker.Animator.GetCurrentAnimatorStateInfo(0).IsName("Death")
                     || (marker.Animator.IsInTransition(0) && marker.Animator.GetNextAnimatorStateInfo(0).IsName("Death")));
-            bool visible = !dying && _vision != null && _vision.CanSee(target.transform.position)
+            bool revealed = _eventRevealedUntil > 0d && target.NetworkObjectId == _revealedEventId
+                && target.NetworkManager.ServerTime.Time < _eventRevealedUntil;
+            bool visible = !dying && (_vision != null && _vision.CanSee(target.transform.position) || revealed)
                 && (marker.Vitals != null ? marker.Vitals.State.x > 0f : marker.Health == null || !marker.Health.IsDead);
             if (visible && marker.Dot == null)
             {

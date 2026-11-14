@@ -2,7 +2,7 @@ using Unity.Netcode;
 using UnityEngine;
 
 [RequireComponent(typeof(NetworkObject), typeof(Enchanter))]
-public sealed class NetworkEnchanter : NetworkBehaviour
+public sealed class NetworkEnchanter : NetworkBehaviour, IWaveEvent
 {
     [SerializeField] private EnchantDatabase _enchantDatabase;
     [SerializeField] private Sprite[] _runeSprites;
@@ -14,6 +14,8 @@ public sealed class NetworkEnchanter : NetworkBehaviour
     private Enchanter _enchanter;
     private float _capacity = 50f;
     private double _expiresAt;
+    private bool _wasUsed;
+    public event System.Action<bool> Finished;
     public int EventLevel => _eventLevel.Value;
     public void SetCapacity(float capacity) => _capacity = Mathf.Clamp(capacity, 0f, 100f);
 
@@ -32,6 +34,7 @@ public sealed class NetworkEnchanter : NetworkBehaviour
         }
         if (IsServer)
         {
+            _wasUsed = false;
             if (_capacity < 50f)
                 _eventLevel.Value = 1;
             else if (_capacity < 80f)
@@ -77,14 +80,20 @@ public sealed class NetworkEnchanter : NetworkBehaviour
 
     private void Update()
     {
-        if (IsSpawned && IsServer && _expiresAt > 0 && NetworkManager.ServerTime.Time >= _expiresAt)
-            NetworkObject.Despawn();
+        if (!IsSpawned || !IsServer || NetworkManager.ShutdownInProgress || _expiresAt <= 0
+            || NetworkManager.ServerTime.Time < _expiresAt)
+            return;
+
+        _expiresAt = 0;
+        Finished?.Invoke(_wasUsed);
+        NetworkObject.Despawn();
     }
 
     private void OnRuneBroken(int index)
     {
         if (_runes[index].IsBroken)
             return;
+        _wasUsed = true;
         BreakRuneRpc(index);
         for (int i = 0; i < _runes.Count; i++)
         {
@@ -107,6 +116,8 @@ public sealed class NetworkEnchanter : NetworkBehaviour
 
     public override void OnNetworkDespawn()
     {
+        Finished = null;
+        _expiresAt = 0;
         _runes.OnListChanged -= ApplyRuneStates;
         _enchanter.RuneBroken -= OnRuneBroken;
     }

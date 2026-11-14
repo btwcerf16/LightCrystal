@@ -31,11 +31,12 @@ public abstract class Projectile : MonoBehaviour
         if (projectileData.Attacker != null && !projectileData.StatsApplied)
         {
             ActorStats attackerStats = projectileData.Attacker;
-            float flightRange = Mathf.Max(0f, projectileData.Speed * projectileData.LifeTime + attackerStats.ProjectileRange.Value);
-            projectileData.Speed = Mathf.Max(0.01f, (projectileData.Speed + attackerStats.ProjectileSpeed.Value) * attackerStats.ProjectileSpeedMultiplier.Value);
+            float flightRange = attackerStats.GetProjectileRange(projectileData.Speed * projectileData.LifeTime);
+            projectileData.Speed = attackerStats.GetProjectileSpeed(projectileData.Speed);
             projectileData.LifeTime = flightRange / projectileData.Speed;
             if (projectileData.DamageType == EDamageType.Physical ||
-                (projectileData.DamageType == EDamageType.Magic && UnityEngine.Random.value < 0.2f))
+                (projectileData.DamageType == EDamageType.Magic && UnityEngine.Random.value < 0.2f) ||
+                (attackerStats.TryGetComponent(out FreakInsightSpell insight) && insight.IsEmpowered))
                 ExtraPiercing = Mathf.Max(0, Mathf.FloorToInt(attackerStats.ProjectilePiercing.Value));
         }
         if (projectileData.SourceWeapon != null)
@@ -69,7 +70,17 @@ public abstract class Projectile : MonoBehaviour
         }
 
         _remainingLifetime -= simulationDeltaTime;
-        float movementDistance = Mathf.Max(0f, Data.Speed) * simulationDeltaTime;
+        Vector2 movement = _flightDirection * (Mathf.Max(0f, Data.Speed) * simulationDeltaTime);
+        float movementDistance = movement.magnitude;
+        if (movementDistance <= 0f)
+        {
+            if (_isFlying && _remainingLifetime <= 0f)
+                OnLifetimeExpired();
+            return;
+        }
+        Vector2 movementDirection = movement / movementDistance;
+        if (_flightDirection != movementDirection)
+            SetDirection(movementDirection);
         ContactFilter2D collisionFilter = new ContactFilter2D();
         collisionFilter.SetLayerMask(Data.LayerMask);
         collisionFilter.useTriggers = true;
@@ -95,6 +106,8 @@ public abstract class Projectile : MonoBehaviour
         if (targetCollider.isTrigger && targetCollider.GetComponentInParent<IDamageable>() == null)
             return false;
         IDamageable damageableTarget = targetCollider.GetComponentInParent<IDamageable>();
+        if (damageableTarget is ActorHealth health && !health.AcceptsDamageFrom(Data.Attacker))
+            return false;
         if (damageableTarget != null && (damageableTarget.IsDead || _hitTargets.Contains(damageableTarget)))
             return false;
         return Data.Attacker == null || targetCollider.GetComponentInParent<ActorStats>() != Data.Attacker;
@@ -108,18 +121,27 @@ public abstract class Projectile : MonoBehaviour
         if (damageableTarget != null)
         {
             _hitTargets.Add(damageableTarget);
+            if (Data.Attacker == null && Data.SourceWeapon != null)
+            {
+                Finish();
+                return;
+            }
             float dealtDamage = DamageCalculator.DealCriticalDamage(damageableTarget, Data.Damage, Data.DamageType, Data.Attacker);
             if (dealtDamage > 0f)
             {
                 if (!damageableTarget.IsDead && Data.EffectOnHit != null)
                     targetCollider.GetComponentInParent<EffectHandler>()?.AddEffect(Data.EffectOnHit);
-                if (Data.SourceWeapon != null)
-                    Data.SourceWeapon.NotifyHit(damageableTarget);
+                if (Data.SourceWeapon != null && Data.SourceWeapon.OwnerStats == Data.Attacker)
+                    Data.SourceWeapon.NotifyHit(damageableTarget, EAttackType.Range, targetCollider.ClosestPoint(transform.position));
             }
-            if (!Data.IgnoreItemEffects && damageableTarget is ActorHealth targetHealth)
-                TargetHit?.Invoke(this, targetHealth, dealtDamage);
-            if (_hitTargets.Count <= ExtraPiercing)
-                return;
+            if (damageableTarget is ActorHealth targetHealth)
+            {
+                if (!Data.IgnoreItemEffects)
+                    TargetHit?.Invoke(this, targetHealth, dealtDamage);
+            }
+            if (_hitTargets.Count > ExtraPiercing)
+                Finish();
+            return;
         }
         Finish();
     }
@@ -145,5 +167,6 @@ public abstract class Projectile : MonoBehaviour
         _hitTargets.Clear();
         ExtraPiercing = 0;
         Data = default;
+        Finished = null;
     }
 }

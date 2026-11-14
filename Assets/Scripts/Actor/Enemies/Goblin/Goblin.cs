@@ -165,6 +165,8 @@ public sealed class Goblin : Enemy
     {
         if (!isActiveAndEnabled || !_isAttacking || Health.IsDead || IsStunned)
             return;
+        NetworkManager manager = GetComponent<NetworkObject>().NetworkManager;
+        NetworkWorldAudio.Play(manager, WorldSoundId.GoblinDaggerSwing, _attackPoint.position);
         foreach (Collider2D target in Physics2D.OverlapCircleAll(_attackPoint.position, _attackRadius, _targetMask))
         {
             if (target.GetComponentInParent<Enemy>() != null)
@@ -172,7 +174,8 @@ public sealed class Goblin : Enemy
             IDamageable damageable = target.GetComponentInParent<IDamageable>();
             if (damageable == null || !_hitTargets.Add(damageable))
                 continue;
-            DamageCalculator.DealCriticalDamage(damageable, Stats.PhysicalDamage.Value, EDamageType.Physical, Stats);
+            if (DamageCalculator.DealCriticalDamage(damageable, Stats.PhysicalDamage.Value, EDamageType.Physical, Stats) > 0f)
+                NetworkWorldAudio.Play(manager, WorldSoundId.GoblinDaggerHit, target.ClosestPoint(_attackPoint.position));
         }
     }
 

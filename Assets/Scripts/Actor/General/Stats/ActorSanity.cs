@@ -12,6 +12,7 @@ public sealed class ActorSanity : MonoBehaviour, ISanity, ILightSensitive
 
     public event Action<float, float> SanityChanged;
     public event Action SanityDepleted;
+    public event Action<float> SanityDrained;
 
     public float CurrentSanity { get; private set; }
     public float MaxSanity => _stats.MaxSanity.Value;
@@ -69,6 +70,8 @@ public sealed class ActorSanity : MonoBehaviour, ISanity, ILightSensitive
         if (CurrentSanity <= 0f)
             SanityDepleted?.Invoke();
 
+        if (drainedSanity > 0f)
+            SanityDrained?.Invoke(drainedSanity);
         return drainedSanity;
     }
 
@@ -113,9 +116,11 @@ public sealed class ActorSanity : MonoBehaviour, ISanity, ILightSensitive
         if (IsSanityDepleted)
             return;
 
+        float drainedSanity = CurrentSanity;
         CurrentSanity = 0f;
         SanityChanged?.Invoke(CurrentSanity, MaxSanity);
         SanityDepleted?.Invoke();
+        SanityDrained?.Invoke(drainedSanity);
     }
 
     private void OnMaxSanityChanged(float maxSanity)

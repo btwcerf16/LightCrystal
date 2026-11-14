@@ -15,7 +15,7 @@ MonoBehaviour:
   DisplayName: "Гонец"
   Description: "Быстрый помощник. Уклоняется от урона, отвлекает врагов и носит больше предметов."
   Preview: {fileID: 21300000, guid: 466aa9a74a534e01ab6416abecdc0a1c, type: 3}
-  BodySprite: {fileID: 21300000, guid: fa7030e772854995a8b767291af242a9, type: 3}
+  ModelPrefab: {fileID: 3468893335613898250, guid: 55c3f3a97a88435590ab0d84a2d08923, type: 3}
   Stats: {fileID: 11400000, guid: f283f57b12ad4e909d99c42c5d6252da, type: 2}
   Spells:
   - {fileID: 11400000, guid: 5501f6c3ceec4bd5b9744179fa8bb2bf, type: 2}

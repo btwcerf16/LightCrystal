@@ -33,7 +33,7 @@ public sealed class NetworkWaveDirector : MonoBehaviour
     {
         if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "Arena01") return;
         _director.enabled = true;
-        _director.Initialize();
+        _director.Initialize(_networkManager.ConnectedClientsIds.Count);
     }
 
     [ConsoleCommand]
@@ -76,8 +76,29 @@ public sealed class NetworkWaveDirector : MonoBehaviour
                 if (client.PlayerObject != null)
                     ApplyBossFightEffect(client.PlayerObject.gameObject);
         if (_summonZone != null && _summonZone.IsSpawned)
-            _summonZone.SummonEvent();
+        {
+            NetworkObject spawnedEvent = _summonZone.SummonEvent();
+            if (spawnedEvent != null && spawnedEvent.TryGetComponent(out IWaveEvent waveEvent))
+                TrackEvent(spawnedEvent, waveEvent);
+        }
         _summonZone = null;
+    }
+
+    private void TrackEvent(NetworkObject spawnedEvent, IWaveEvent waveEvent)
+    {
+        void OnFinished(bool wasUsed)
+        {
+            waveEvent.Finished -= OnFinished;
+            _director.RecordEventResult(wasUsed);
+        }
+
+        waveEvent.Finished += OnFinished;
+        if (!_director.TryConsumeEventReveal())
+            return;
+
+        double revealedUntil = _networkManager.ServerTime.Time + 10d;
+        foreach (NetworkClient client in _networkManager.ConnectedClientsList)
+            client.PlayerObject?.GetComponent<PlayerHUD>()?.RevealWaveEventRpc(spawnedEvent.NetworkObjectId, revealedUntil);
     }
 
     public void ApplyBossFightEffect(GameObject player)

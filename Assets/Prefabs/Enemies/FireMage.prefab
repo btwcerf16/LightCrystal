@@ -336,6 +336,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 3253a5084dac41a1994375a8f50cc960, type: 2}
   - {fileID: 11400000, guid: c10899f78e064824dad03a703c252125, type: 2}
   - {fileID: 11400000, guid: 0f79205b73a97df4d8e1f061dca88355, type: 2}
+  - {fileID: 11400000, guid: caa4249fd54546d08e1234918e2fa9ae, type: 2}
 --- !u!114 &133910297526098486
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -348,6 +349,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3c7e562d9d34f679d31b85ef80f0c59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActorVisuals
+  _stunPivot: {fileID: 7108206161301247066}
+  _stunStar: {fileID: 21300000, guid: f7a5d98462ba4f86a47f942024ed2b4e, type: 3}
+  _stunStarMaterial: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   _renderers:
   - {fileID: 7879669705978610652}
   - {fileID: 7852932806736697478}

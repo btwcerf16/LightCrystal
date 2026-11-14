@@ -19,6 +19,8 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
     protected bool _isAttacking;
 
     private readonly Dictionary<Type, State> _states = new();
+    private readonly HashSet<ActorWallet> _goldContributors = new();
+    private float _goldDropMultiplier = 1f;
     private readonly StateMachine _stateMachine = new();
     private bool _isInitialized;
     private ActorHealth _mainTargetHealth;
@@ -185,19 +187,37 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
         return Vector2.ClampMagnitude(direction + _separation * _separationStrength, 1f);
     }
 
-    public void GiveGold(ActorWallet killerWallet)
+    public void SetGoldDropMultiplier(float multiplier) => _goldDropMultiplier = multiplier;
+
+    public void RecordGoldContributor(ActorStats attacker)
+    {
+        if (attacker.TryGetComponent(out NetworkObject player) && player.IsSpawned && player.IsPlayerObject
+            && player.NetworkManager.IsServer && attacker.TryGetComponent(out ActorWallet wallet))
+            _goldContributors.Add(wallet);
+    }
+
+    private void GiveGold()
     {
         NetworkObject networkObject = GetComponent<NetworkObject>();
-        if (killerWallet == null || networkObject == null || !networkObject.IsSpawned || !networkObject.NetworkManager.IsServer)
+        if (_goldContributors.Count == 0 || networkObject == null || !networkObject.IsSpawned || !networkObject.NetworkManager.IsServer)
             return;
         EnemyDatabase database = networkObject.NetworkManager.GetComponent<WaveDirector>()?.EnemyDatabase;
         int weight = database != null ? database.GetWeight(this) : 0;
-        if (weight > 0 && UnityEngine.Random.value < 0.4f)
-            killerWallet.AddCurrency(weight * 3);
+        if (weight <= 0 || UnityEngine.Random.value >= 0.4f)
+            return;
+
+        _goldContributors.RemoveWhere(wallet => wallet == null || !wallet.GetComponent<NetworkObject>().IsSpawned);
+        if (_goldContributors.Count == 0)
+            return;
+
+        int share = Mathf.FloorToInt(weight * 3 * _goldDropMultiplier) / _goldContributors.Count;
+        foreach (ActorWallet wallet in _goldContributors)
+            wallet.AddCurrency(share);
     }
 
     private void OnDied()
     {
+        GiveGold();
         _stateMachine.ChangeState(DeadState);
         StartCoroutine(ReturnAfterDeath());
     }
@@ -212,6 +232,8 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
 
     public void ResetForSpawn()
     {
+        _goldContributors.Clear();
+        _goldDropMultiplier = 1f;
         StopAllCoroutines();
         _knockback = null;
         ClearTemporaryTarget();
@@ -290,7 +312,7 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
     public abstract void Arise();
     public abstract void Chase(Transform target);
     public event Action AttackStarted;
-    public virtual bool CanBeExecuted => true;
+    public virtual bool CanBeExecuted => !CompareTag("Boss");
     protected void NotifyAttackStarted() => AttackStarted?.Invoke();
     public abstract void Attack();
     public abstract void Death();

@@ -49,6 +49,7 @@ public class NetworkActorStats : NetworkBehaviour
             _stats.MoveSpeed,
             _stats.AttackSpeed,
             _stats.CooldownReduction,
+            _stats.SpellCooldownReduction,
             _stats.PhysicalDamage,
             _stats.PhysicalDamageMultiplier,
             _stats.MagicDamageMultiplier,
@@ -59,12 +60,12 @@ public class NetworkActorStats : NetworkBehaviour
             _stats.ForceResistance,
             _stats.MadnessResistance,
             _stats.EffectResistance,
-            _stats.Stability,
             _stats.CameraDistance,
             _stats.CastSpeed,
             _stats.ProjectileSpeed,
             _stats.ProjectileSpeedMultiplier,
             _stats.ProjectileRange,
+            _stats.ProjectileRangeMultiplier,
             _stats.ProjectilePiercing,
             _stats.SanityCostReduction,
             _stats.CriticalChance,
@@ -124,6 +125,7 @@ public class NetworkActorStats : NetworkBehaviour
         _stats.MoveSpeed.SetReplicatedValues(snapshot.MoveSpeed.BaseValue, snapshot.MoveSpeed.Value);
         _stats.AttackSpeed.SetReplicatedValues(snapshot.AttackSpeed.BaseValue, snapshot.AttackSpeed.Value);
         _stats.CooldownReduction.SetReplicatedValues(snapshot.CooldownReduction.BaseValue, snapshot.CooldownReduction.Value);
+        _stats.SpellCooldownReduction.SetReplicatedValues(snapshot.SpellCooldownReduction.BaseValue, snapshot.SpellCooldownReduction.Value);
         _stats.PhysicalDamage.SetReplicatedValues(snapshot.PhysicalDamage.BaseValue, snapshot.PhysicalDamage.Value);
         _stats.PhysicalDamageMultiplier.SetReplicatedValues(snapshot.PhysicalDamageMultiplier.BaseValue, snapshot.PhysicalDamageMultiplier.Value);
         _stats.MagicDamageMultiplier.SetReplicatedValues(snapshot.MagicDamageMultiplier.BaseValue, snapshot.MagicDamageMultiplier.Value);
@@ -134,12 +136,12 @@ public class NetworkActorStats : NetworkBehaviour
         _stats.ForceResistance.SetReplicatedValues(snapshot.ForceResistance.BaseValue, snapshot.ForceResistance.Value);
         _stats.MadnessResistance.SetReplicatedValues(snapshot.MadnessResistance.BaseValue, snapshot.MadnessResistance.Value);
         _stats.EffectResistance.SetReplicatedValues(snapshot.EffectResistance.BaseValue, snapshot.EffectResistance.Value);
-        _stats.Stability.SetReplicatedValues(snapshot.Stability.BaseValue, snapshot.Stability.Value);
         _stats.CameraDistance.SetReplicatedValues(snapshot.CameraDistance.BaseValue, snapshot.CameraDistance.Value);
         _stats.CastSpeed.SetReplicatedValues(snapshot.CastSpeed.BaseValue, snapshot.CastSpeed.Value);
         _stats.ProjectileSpeed.SetReplicatedValues(snapshot.ProjectileSpeed.BaseValue, snapshot.ProjectileSpeed.Value);
         _stats.ProjectileSpeedMultiplier.SetReplicatedValues(snapshot.ProjectileSpeedMultiplier.BaseValue, snapshot.ProjectileSpeedMultiplier.Value);
         _stats.ProjectileRange.SetReplicatedValues(snapshot.ProjectileRange.BaseValue, snapshot.ProjectileRange.Value);
+        _stats.ProjectileRangeMultiplier.SetReplicatedValues(snapshot.ProjectileRangeMultiplier.BaseValue, snapshot.ProjectileRangeMultiplier.Value);
         _stats.ProjectilePiercing.SetReplicatedValues(snapshot.ProjectilePiercing.BaseValue, snapshot.ProjectilePiercing.Value);
         _stats.SanityCostReduction.SetReplicatedValues(snapshot.SanityCostReduction.BaseValue, snapshot.SanityCostReduction.Value);
         _stats.CriticalChance.SetReplicatedValues(snapshot.CriticalChance.BaseValue, snapshot.CriticalChance.Value);

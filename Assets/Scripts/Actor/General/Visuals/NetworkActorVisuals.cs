@@ -49,6 +49,7 @@ public sealed class NetworkActorVisuals : NetworkBehaviour
             _health.HealthChanged -= PublishOutlineHealth;
             _outlineHealthPercent.OnValueChanged -= UpdateOutline;
             _visuals.SetOutlineOpacity(1f);
+            _visuals.SetAlive(true);
         }
         if (_effects != null)
             _effects.EffectsChanged -= RefreshTint;
@@ -59,13 +60,14 @@ public sealed class NetworkActorVisuals : NetworkBehaviour
     private void PublishOutlineHealth(float currentHealth, float maxHealth)
     {
         float healthPercent = maxHealth > 0f ? currentHealth / maxHealth * 100f : 0f;
-        _outlineHealthPercent.Value = (byte)Mathf.Clamp(Mathf.RoundToInt(healthPercent), 0, FullOutlineHealthPercent);
+        _outlineHealthPercent.Value = (byte)Mathf.Clamp(Mathf.CeilToInt(healthPercent), 0, FullOutlineHealthPercent);
     }
 
     private void UpdateOutline(byte previousHealthPercent, byte healthPercent)
     {
         float opacity = Mathf.Lerp(0.35f, 1f, (float)healthPercent / FullOutlineHealthPercent);
         _visuals.SetOutlineOpacity(opacity);
+        _visuals.SetAlive(healthPercent > 0);
     }
 
     private void OnDamageTaken(float damage, EDamageType type, bool critical)

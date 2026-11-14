@@ -21,6 +21,7 @@ public class EffectHandler : MonoBehaviour
     }
 
     public event Action EffectsChanged;
+    public event Action<EffectData> EffectApplied;
     public event Action StatusChanged;
     public EActorStatus Status { get; private set; }
     public bool IsStunned => (Status & EActorStatus.Stunned) != 0;
@@ -76,6 +77,8 @@ public class EffectHandler : MonoBehaviour
     {
         if (!CanProcess || !isActiveAndEnabled || effectData == null || (!effectData.IsPermanent && effectData.EffectDuration <= 0f))
             return null;
+        if ((effectData.Status & EActorStatus.Stunned) != 0 && CompareTag("Boss"))
+            return null;
 
         float duration = effectData.IsPermanent ? float.PositiveInfinity : effectData.EffectDuration;
         if (!effectData.IsPermanent && !effectData.IsBuff && effectData.Status != EActorStatus.None)
@@ -96,6 +99,7 @@ public class EffectHandler : MonoBehaviour
                 }
                 RefreshStatus();
                 EffectsChanged?.Invoke();
+                EffectApplied?.Invoke(effectData);
                 return existing;
             }
         }
@@ -106,6 +110,7 @@ public class EffectHandler : MonoBehaviour
         newEffect.EffectStart(_ownerStats);
         RefreshStatus();
         EffectsChanged?.Invoke();
+        EffectApplied?.Invoke(effectData);
         return newEffect;
     }
 

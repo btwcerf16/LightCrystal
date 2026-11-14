@@ -141,6 +141,7 @@ public sealed class TrollBoss : Enemy, INamed
         Vector3 landingPoint = target.position;
         _hitbox.enabled = false;
         AnimationTriggered?.Invoke("Leap");
+        NetworkWorldAudio.Play(_networkTransform.NetworkManager, WorldSoundId.TrollTakeoff, transform.position);
         DustRaised?.Invoke(transform.position, new Vector2(1.1f, 2f));
         yield return new WaitForSeconds(1.35f);
 
@@ -154,6 +155,7 @@ public sealed class TrollBoss : Enemy, INamed
         yield return new WaitForSeconds(0.2f);
 
         _hitbox.enabled = true;
+        NetworkWorldAudio.Play(_networkTransform.NetworkManager, WorldSoundId.TrollLanding, landingPoint);
         HitArea(landingPoint, _landingRadius, _landingStun);
         yield return new WaitForSeconds(0.3f);
         _attackRoutine = null;
@@ -165,6 +167,7 @@ public sealed class TrollBoss : Enemy, INamed
         yield return new WaitForSeconds(0.65f);
 
         Vector2 center = _hammerZone != null ? _hammerZone.position : _facing.TransformPoint(Vector3.right * 1.1f);
+        NetworkWorldAudio.Play(_networkTransform.NetworkManager, WorldSoundId.TrollHammerImpact, center);
         HitArea(center, _hammerRadius, null);
         yield return new WaitForSeconds(0.4f);
         _attackRoutine = null;

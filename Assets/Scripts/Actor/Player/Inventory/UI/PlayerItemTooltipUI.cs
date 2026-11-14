@@ -1,0 +1,147 @@
+using System.Collections.Generic;
+using Unity.Netcode;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.UI;
+using UnityEngine.UI;
+
+public sealed class PlayerItemTooltipUI : NetworkBehaviour
+{
+    private readonly List<RaycastResult> _uiHits = new();
+    private readonly List<Collider2D> _worldHits = new();
+    [SerializeField] private SpellRangePreview _rangePreviewPrefab;
+    private SpellRangePreview _rangePreview;
+    private HoverTooltipUI _tooltip;
+    private PointerEventData _pointerData;
+    private PlayerInputReader _input;
+    private Camera _camera;
+    private ActorStats _stats;
+    private EnchantDatabase _enchantDatabase;
+
+    public override void OnNetworkSpawn() => Bind();
+    public override void OnGainedOwnership() => Bind();
+    public override void OnLostOwnership() => Unbind();
+    public override void OnNetworkDespawn() => Unbind();
+    private void OnEnable() => Bind();
+    private void OnDisable() => Unbind();
+
+    private void Bind()
+    {
+        if (!IsSpawned || !IsClient || !IsOwner || !isActiveAndEnabled || _tooltip != null)
+            return;
+        _input = GetComponent<PlayerInputReader>();
+        _stats = GetComponent<ActorStats>();
+        _enchantDatabase = NetworkManager.GetComponent<ItemFactory>().EnchantDatabase;
+        if (EventSystem.current == null)
+            new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
+        _pointerData = new PointerEventData(EventSystem.current);
+        _tooltip = HoverTooltipUI.Create(transform, "ItemTooltipCanvas", "ItemTooltip");
+        _rangePreview = Instantiate(_rangePreviewPrefab, transform);
+        _rangePreview.Hide();
+    }
+
+    private void LateUpdate()
+    {
+        if (_tooltip == null)
+            return;
+        if (Pointer.current == null || Pointer.current.press.isPressed || (_input != null && _input.IsMenuOpen))
+        {
+            _tooltip.Hide();
+            _rangePreview.Hide();
+            return;
+        }
+        Vector2 pointer = Pointer.current.position.ReadValue();
+        ITooltipSource source = GetHoveredSource(pointer);
+        if (source == null)
+        {
+            _tooltip.Hide();
+            _rangePreview.Hide();
+            return;
+        }
+        ShowRange(source);
+        if (source is Item item)
+            _tooltip.SetRarity(item.Rarity);
+        else if (source is WorldItem worldItem)
+            _tooltip.SetRarity(worldItem.Rarity);
+        else
+            _tooltip.SetBorderColor(new Color(0.3f, 0.75f, 0.85f));
+        if (source is Weapon weapon && weapon.TryGetComponent(out WeaponEnchants enchants))
+            _tooltip.SetEnchantments(enchants.GetEnchantState(), weapon.Rarity, _enchantDatabase, weapon.OwnerStats != null ? weapon.OwnerStats : _stats);
+        else if (source is WorldItem droppedWeapon && droppedWeapon.ItemPrefab is Weapon)
+            _tooltip.SetEnchantments(droppedWeapon.Enchants, droppedWeapon.Rarity, _enchantDatabase, _stats);
+        else
+            _tooltip.ClearEnchantments();
+        Weapon hoveredWeapon = source as Weapon;
+        if (source is WorldItem world)
+            hoveredWeapon = world.ItemPrefab as Weapon;
+
+        string description = source.TooltipDescription;
+        if (hoveredWeapon != null)
+        {
+            Keyboard keyboard = Keyboard.current;
+            bool detailed = keyboard != null && (keyboard.leftAltKey.isPressed || keyboard.rightAltKey.isPressed);
+            description = hoveredWeapon.GetWeaponTooltip(detailed);
+            if (!detailed)
+                description += "\n\nAlt — расчёт характеристик";
+        }
+        _tooltip.Show(source, source.TooltipTitle, description, pointer, source.TooltipDelay);
+    }
+
+    private void ShowRange(ITooltipSource source)
+    {
+        Item item = source as Item;
+        _rangePreview.Show(item != null && item.transform.IsChildOf(transform) ? item.GetRange(_stats) : 0f);
+    }
+
+    private ITooltipSource GetHoveredSource(Vector2 pointer)
+    {
+        if (EventSystem.current != null)
+        {
+            _pointerData.position = pointer;
+            _uiHits.Clear();
+            EventSystem.current.RaycastAll(_pointerData, _uiHits);
+            foreach (RaycastResult hit in _uiHits)
+            {
+                if (!(hit.module is GraphicRaycaster))
+                    continue;
+                ItemSlotUI slot = hit.gameObject.GetComponentInParent<ItemSlotUI>();
+                return slot != null ? slot.CurrentItem : null;
+            }
+        }
+        if (_camera == null)
+            _camera = Camera.main;
+        if (_camera == null)
+            return null;
+        Ray ray = _camera.ScreenPointToRay(pointer);
+        Plane plane = new Plane(Vector3.forward, Vector3.zero);
+        if (!plane.Raycast(ray, out float distance))
+            return null;
+        _worldHits.Clear();
+        Physics2D.OverlapPoint(ray.GetPoint(distance), ContactFilter2D.noFilter, _worldHits);
+        foreach (Collider2D hit in _worldHits)
+        {
+            WorldItem worldItem = hit.GetComponentInParent<WorldItem>();
+            if (worldItem != null && worldItem.CanBePicked)
+                return worldItem;
+            ITooltipSource source = hit.GetComponentInParent<ITooltipSource>();
+            if (source != null)
+                return source;
+        }
+        return null;
+    }
+
+    private void Unbind()
+    {
+        if (_tooltip == null)
+            return;
+        _tooltip.gameObject.SetActive(false);
+        Destroy(_tooltip.gameObject);
+        _tooltip = null;
+        if (_rangePreview != null)
+        {
+            Destroy(_rangePreview.gameObject);
+            _rangePreview = null;
+        }
+    }
+}

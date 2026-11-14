@@ -42,7 +42,7 @@ public sealed class DawnWaveProjectile : Projectile
             if (!target.IsDead)
                 collider.GetComponentInParent<EffectHandler>()?.AddEffect(_stun);
             if (_source != null)
-                _source.NotifyHit(target);
+                _source.NotifyHit(target, EAttackType.Magic);
         }
         if (_hitTargets.Count >= _targetLimit + ExtraPiercing)
             Finish();

@@ -15,7 +15,7 @@ MonoBehaviour:
   DisplayName: "Студент магической академии"
   Description: "Магические шары, телепортация и щит рассудка. Силен, пока рядом немного врагов."
   Preview: {fileID: 21300000, guid: 9234244843a04fe987e7e11df34ec1b6, type: 3}
-  BodySprite: {fileID: 21300000, guid: 44423a01be54431b99c14065d739e069, type: 3}
+  ModelPrefab: {fileID: 3468893335613898250, guid: bd2ae9e7c1574f27b8c747514fd0771b, type: 3}
   Stats: {fileID: 11400000, guid: f5f46fdad4054717b79e217706c0bb4a, type: 2}
   Spells:
   - {fileID: 11400000, guid: 5eff4c5412f9444f9d1432e8ead1c2c7, type: 2}

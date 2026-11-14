@@ -30,6 +30,24 @@ public class WaveDirector : MonoBehaviour
 
     public bool IsPaused { get; private set; }
     public int WaveCount { get; private set; }
+    public float GoldDropMultiplier { get; private set; } = 1f;
+    public int MissedEventsCount { get; private set; }
+
+    public bool TryConsumeEventReveal()
+    {
+        if (!_isInitialized || MissedEventsCount < 2)
+            return false;
+
+        MissedEventsCount = 0;
+        return true;
+    }
+
+    public void RecordEventResult(bool wasUsed)
+    {
+        if (_isInitialized)
+            MissedEventsCount = wasUsed ? 0 : MissedEventsCount + 1;
+    }
+
     public bool IsBossWave => _bossPrefab != null && CurrentState == _waveState &&
         WaveCount > 0 && _bossWaveInterval > 0 && WaveCount % _bossWaveInterval == 0;
     public float CalmTimeRemaining { get; private set; }
@@ -49,7 +67,7 @@ public class WaveDirector : MonoBehaviour
         _calmState = new CalmState(this);
     }
 
-    public void Initialize()
+    public void Initialize(int playerCount)
     {
         if (_isInitialized)
             return;
@@ -66,6 +84,7 @@ public class WaveDirector : MonoBehaviour
             Debug.LogError("WaveDirector requires an enemy database, a crystal and a map spawn area.", this);
             return;
         }
+        GoldDropMultiplier = 1f + (Mathf.Clamp(playerCount, 1, 4) - 1) * 0.5f;
         _isInitialized = true;
         _stateMachine.Initialize(_calmState);
     }
@@ -123,6 +142,7 @@ public class WaveDirector : MonoBehaviour
             }
             Enemy enemy = GetComponent<NetworkObjectPool>().GetObject(selected.Prefab, position, Quaternion.identity);
             enemy.gameObject.SetActive(false);
+            enemy.SetGoldDropMultiplier(GoldDropMultiplier);
             enemy.SetMainTarget(_mainTarget);
             enemy.SetWaitingForWave(isCalm);
             enemies.Add(enemy);
@@ -250,6 +270,7 @@ public class WaveDirector : MonoBehaviour
 
         _bossSpawned = true;
         TrollBoss boss = GetComponent<NetworkObjectPool>().GetObject(_bossPrefab, position, Quaternion.identity);
+        boss.SetGoldDropMultiplier(GoldDropMultiplier);
         boss.SetMainTarget(_mainTarget);
         Action onDied = () => RemoveEnemy(boss);
         _deathHandlers.Add(boss, onDied);
@@ -264,6 +285,8 @@ public class WaveDirector : MonoBehaviour
         _stateMachine.Stop();
         _isInitialized = false;
         WaveCount = 0;
+        GoldDropMultiplier = 1f;
+        MissedEventsCount = 0;
         _subwaveBudget = 0;
         _startedSubwaveCount = 0;
         CalmTimeRemaining = 0f;

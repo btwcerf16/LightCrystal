@@ -8,6 +8,7 @@ public sealed class Crystal : MonoBehaviour
 {
     [SerializeField, Min(0.1f)] private float _radius = 6f;
     [SerializeField, Min(0f)] private float _power = 5f;
+    [SerializeField, Range(0f, 1f)] private float _healthRegenPerSecond = 0.01f;
     [SerializeField, Min(0.05f)] private float _tickInterval = 0.2f;
     [SerializeField] private LayerMask _targetMask = ~0;
 
@@ -51,13 +52,15 @@ public sealed class Crystal : MonoBehaviour
         if (_elapsed < _tickInterval)
             return;
 
-        float amount = _power * _elapsed;
+        float elapsed = _elapsed;
         _elapsed = 0f;
-        Illuminate(amount);
+        Illuminate(elapsed);
     }
 
-    private void Illuminate(float amount)
+    private void Illuminate(float elapsed)
     {
+        float lightAmount = _power * elapsed;
+        float healingFraction = _healthRegenPerSecond * elapsed;
         ContactFilter2D filter = new ContactFilter2D();
         filter.SetLayerMask(_targetMask);
         filter.useTriggers = true;
@@ -71,7 +74,9 @@ public sealed class Crystal : MonoBehaviour
                 continue;
             if (!_previousTargets.Contains(target))
                 target.EnterLight();
-            target.ReceiveLight(amount);
+            target.ReceiveLight(lightAmount);
+            if (healingFraction > 0f && target is ActorSanity sanity && sanity.TryGetComponent(out ActorHealth health))
+                health.Heal(health.MaxHealth * healingFraction);
         }
 
         foreach (ILightSensitive target in _previousTargets)

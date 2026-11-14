@@ -12,30 +12,36 @@ public sealed class LobbyConnection : MonoBehaviour
     public CharacterDatabase Characters => _characters;
     [SerializeField] private int _maximumPlayers = 4;
     private NetworkManager _manager;
+    private ushort _multiplayerPort;
     private bool _returning;
     private bool _quitting;
     private bool _leaving;
     private static string _lastError;
     public string Error { get; private set; }
+    public bool IsSinglePlayer { get; private set; }
 
     private void Awake()
     {
         Error = _lastError;
         _manager = GetComponent<NetworkManager>();
+        _multiplayerPort = GetComponent<UnityTransport>().ConnectionData.Port;
         _manager.ConnectionApprovalCallback += ApproveConnection;
         _manager.OnServerStarted += OnServerStarted;
         _manager.OnClientStopped += OnStopped;
     }
 
-    public void CreateLobby()
+    public void CreateLobby(bool singlePlayer = false)
     {
         if (_manager.IsListening || _manager.ShutdownInProgress || _returning) return;
         if (_lobbyPrefab == null) { StartupFailed("Префаб лобби не назначен."); return; }
         if (_characters == null || _characters.Count == 0) { StartupFailed("Каталог классов не назначен или пуст."); return; }
         Error = "";
+        _leaving = false;
+        IsSinglePlayer = singlePlayer;
         _manager.NetworkConfig.ConnectionApproval = true;
         UnityTransport transport = GetComponent<UnityTransport>();
-        transport.SetConnectionData("127.0.0.1", transport.ConnectionData.Port, "0.0.0.0");
+        transport.SetConnectionData(singlePlayer, "127.0.0.1", singlePlayer ? (ushort)0 : _multiplayerPort,
+            singlePlayer ? "127.0.0.1" : "0.0.0.0");
         if (!_manager.StartHost()) StartupFailed("Не удалось запустить хост на UDP-порту " + transport.ConnectionData.Port + ".");
     }
 
@@ -46,9 +52,11 @@ public sealed class LobbyConnection : MonoBehaviour
         address = address.Trim();
         if (!System.Net.IPAddress.TryParse(address, out _)) { Error = "Введите IP-адрес хоста."; return; }
         Error = "";
+        _leaving = false;
+        IsSinglePlayer = false;
         _manager.NetworkConfig.ConnectionApproval = true;
         UnityTransport transport = GetComponent<UnityTransport>();
-        transport.SetConnectionData(address, transport.ConnectionData.Port);
+        transport.SetConnectionData(address, _multiplayerPort);
         if (!_manager.StartClient()) StartupFailed("Не удалось начать подключение.");
     }
 
@@ -65,10 +73,11 @@ public sealed class LobbyConnection : MonoBehaviour
     {
         bool full = _manager.ConnectedClientsIds.Count >= Mathf.Min(_maximumPlayers, _characters.Count);
         bool started = GameLobby.Instance != null && GameLobby.Instance.IsStarting;
-        response.Approved = !full && !started;
+        bool closedRoom = IsSinglePlayer && request.ClientNetworkId != NetworkManager.ServerClientId;
+        response.Approved = !closedRoom && !full && !started;
         response.CreatePlayerObject = SceneManager.GetActiveScene().name == "Arena01" && GameLobby.Instance == null;
         response.Pending = false;
-        response.Reason = full ? "Комната заполнена." : started ? "Игра уже началась." : "";
+        response.Reason = closedRoom ? "Одиночная игра." : full ? "Комната заполнена." : started ? "Игра уже началась." : "";
     }
 
     private void OnServerStarted()
@@ -91,7 +100,15 @@ public sealed class LobbyConnection : MonoBehaviour
 
     private void OnStopped(bool wasHost)
     {
-        if (_quitting || _returning || SceneTransition.Instance == null) return;
+        if (_quitting || _returning) return;
+        if (_leaving && IsSinglePlayer && SceneManager.GetActiveScene().name == "MainMenu")
+        {
+            _leaving = false;
+            IsSinglePlayer = false;
+            Error = _lastError = "";
+            return;
+        }
+        if (SceneTransition.Instance == null) return;
         _lastError = _leaving ? "" : string.IsNullOrEmpty(_manager.DisconnectReason)
             ? "Соединение с хостом потеряно." : _manager.DisconnectReason;
         _returning = true;

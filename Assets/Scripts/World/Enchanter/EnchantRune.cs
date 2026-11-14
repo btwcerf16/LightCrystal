@@ -42,9 +42,11 @@ public sealed class EnchantRune : MonoBehaviour, IDamageable, ITooltipSource
             attacker.GetComponent<NetworkPlayerWallet>()?.ShowHint("Возьмите оружие в руки");
             return 0f;
         }
+        if (!weapon.TryGetComponent(out WeaponEnchants enchants))
+            return 0f;
         if (_removesEnchant)
         {
-            if (!weapon.RemoveLastEnchant())
+            if (!enchants.RemoveLastEnchant())
             {
                 attacker.GetComponent<NetworkPlayerWallet>()?.ShowHint("На оружии нет зачарований");
                 return 0f;
@@ -54,9 +56,9 @@ public sealed class EnchantRune : MonoBehaviour, IDamageable, ITooltipSource
         {
             if (_enchant == null || _enchant.Id <= 0)
                 return 0f;
-            if (!weapon.AddEnchant(_enchant))
+            if (!enchants.AddEnchant(_enchant))
             {
-                string message = weapon.GetEnchantState().GetId(weapon.EnchantCapacity - 1) != 0 ? "На оружии нет места для зачарования" : "Это зачарование нельзя повторить";
+                string message = enchants.GetEnchantState().GetId(enchants.Capacity - 1) != 0 ? "На оружии нет места для зачарования" : "Это зачарование нельзя повторить";
                 attacker.GetComponent<NetworkPlayerWallet>()?.ShowHint(message);
                 return 0f;
             }

@@ -264,7 +264,8 @@ public class PlayerNetworkInteractions : NetworkBehaviour
 
         if (_actorArsenal.CanUseWeapons && _lastUsedWeapon != null && _lastUsedWeapon.IsEquipped)
         {
-            _lastUsedWeapon.BeginPrimaryUse();
+            if (!_lastUsedWeapon.BeginPrimaryUse())
+                return;
             _lastInputType = EInputType.Primary;
             _lastUsedWeaponIndex = _actorArsenal.ActiveWeaponIndex;
             PlayWeaponActionRpc(_lastUsedWeaponIndex, EInputType.Primary);

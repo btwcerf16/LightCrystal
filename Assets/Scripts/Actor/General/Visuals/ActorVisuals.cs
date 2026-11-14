@@ -1,9 +1,14 @@
+using DG.Tweening;
 using UnityEngine;
 
 public sealed class ActorVisuals : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer[] _renderers = new SpriteRenderer[0];
     [SerializeField] private ParticleSystem _hitParticles;
+    [SerializeField] private Transform _stunPivot;
+    [SerializeField] private float _stunTilt = 30f;
+    [SerializeField] private Sprite _stunStar;
+    [SerializeField] private Material _stunStarMaterial;
     [SerializeField] private Color _hitColor = new Color(1f, 0.92f, 0.72f);
     [SerializeField, Min(0.01f)] private float _hitDuration = 0.15f;
 
@@ -14,7 +19,12 @@ public sealed class ActorVisuals : MonoBehaviour
     private static readonly int OutlineOpacity = Shader.PropertyToID("_OutlineOpacity");
     private MaterialPropertyBlock _properties;
     private EffectHandler _effects;
-    private Animator[] _animators;
+    private Quaternion _restRotation;
+    private Tween _stunMotion;
+    private bool _showStun;
+    private bool _isAlive = true;
+    private SpriteRenderer[] _stunStars;
+    private float _stunStartedAt;
     private Color _effectColor = Color.white;
     private float _effectAmount;
     private float _hitAmount;
@@ -25,7 +35,8 @@ public sealed class ActorVisuals : MonoBehaviour
     {
         _properties = new MaterialPropertyBlock();
         _effects = GetComponent<EffectHandler>();
-        _animators = GetComponentsInChildren<Animator>(true);
+        if (_stunPivot != null)
+            _restRotation = _stunPivot.localRotation;
     }
 
     private void OnEnable()
@@ -37,10 +48,95 @@ public sealed class ActorVisuals : MonoBehaviour
 
     private void UpdateStatus()
     {
-        bool stunned = _effects != null && _effects.IsStunned;
-        foreach (Animator animator in _animators)
-            if (animator != null)
-                animator.speed = stunned ? 0f : 1f;
+        if (_stunPivot == null || _effects == null)
+            return;
+
+        bool stunned = _isAlive && _effects.IsStunned && !_effects.IsDowned;
+        if (stunned == _showStun)
+            return;
+
+        _showStun = stunned;
+        SetStunStarsVisible(stunned);
+        _stunMotion?.Kill();
+        if (!stunned)
+        {
+            _stunMotion = _stunPivot.DOLocalRotateQuaternion(_restRotation, 0.14f).SetEase(Ease.OutQuad);
+            return;
+        }
+
+        Quaternion tilt = _restRotation * Quaternion.Euler(0f, 0f, -_stunTilt);
+        _stunMotion = _stunPivot.DOLocalRotateQuaternion(tilt, 0.12f).SetEase(Ease.OutQuad).OnComplete(() =>
+        {
+            Quaternion sway = _restRotation * Quaternion.Euler(0f, 0f, -_stunTilt + 9f);
+            _stunMotion = _stunPivot.DOLocalRotateQuaternion(sway, 0.22f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
+        });
+    }
+
+    public void SetAlive(bool isAlive)
+    {
+        _isAlive = isAlive;
+        UpdateStatus();
+    }
+
+    private void SetStunStarsVisible(bool visible)
+    {
+        if (visible && _stunStars == null && _stunStar != null)
+        {
+            _stunStars = new SpriteRenderer[3];
+            for (int i = 0; i < _stunStars.Length; i++)
+            {
+                SpriteRenderer star = new GameObject("StunStar").AddComponent<SpriteRenderer>();
+                star.transform.SetParent(transform, false);
+                star.sprite = _stunStar;
+                star.sharedMaterial = _stunStarMaterial;
+                star.sortingOrder = 4;
+                _stunStars[i] = star;
+            }
+        }
+
+        if (_stunStars == null)
+            return;
+
+        foreach (SpriteRenderer star in _stunStars)
+            star.enabled = visible;
+        if (visible)
+            _stunStartedAt = Time.time;
+    }
+
+    private void LateUpdate()
+    {
+        if (!_showStun || _stunStars == null)
+            return;
+
+        float top = transform.position.y;
+        float halfWidth = 0.25f;
+        foreach (SpriteRenderer renderer in _renderers)
+        {
+            if (renderer == null || !renderer.enabled || !renderer.gameObject.activeInHierarchy)
+                continue;
+
+            Bounds bounds = renderer.bounds;
+            top = Mathf.Max(top, bounds.max.y);
+            halfWidth = Mathf.Max(halfWidth, bounds.extents.x);
+        }
+
+        float spin = (Time.time - _stunStartedAt) * 5f;
+        for (int i = 0; i < _stunStars.Length; i++)
+        {
+            float phase = spin + i * (2f * Mathf.PI / _stunStars.Length);
+            float depth = Mathf.Sin(phase);
+            Transform star = _stunStars[i].transform;
+            star.position = new Vector3(transform.position.x + Mathf.Cos(phase) * (halfWidth + 0.12f) * 0.7f,
+                top + 0.22f + depth * 0.07f, transform.position.z);
+            star.localScale = Vector3.one * (0.25f + depth * 0.05f);
+            star.localRotation = Quaternion.Euler(0f, 0f, Mathf.Cos(phase) * 22f);
+        }
+    }
+
+    public void SetRenderers(SpriteRenderer[] renderers)
+    {
+        _renderers = renderers;
+        Apply();
     }
 
     public void SetEffectTint(Color color, float amount)
@@ -116,9 +212,12 @@ public sealed class ActorVisuals : MonoBehaviour
     {
         if (_effects != null)
             _effects.StatusChanged -= UpdateStatus;
-        foreach (Animator animator in _animators)
-            if (animator != null)
-                animator.speed = 1f;
+        _stunMotion?.Kill();
+        _stunMotion = null;
+        _showStun = false;
+        SetStunStarsVisible(false);
+        if (_stunPivot != null)
+            _stunPivot.localRotation = _restRotation;
         ClearHit();
         if (_hitParticles != null)
             _hitParticles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);

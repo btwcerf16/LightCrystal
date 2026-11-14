@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.Netcode;
 using UnityEngine;
 
 [RequireComponent(typeof(SpellHolder))]
@@ -148,6 +149,7 @@ public sealed class Spider : Enemy
         if (!isActiveAndEnabled || !_isAttacking || Health.IsDead || IsStunned)
             return;
 
+        NetworkWorldAudio.Play(GetComponent<NetworkObject>().NetworkManager, WorldSoundId.SpiderHiss, transform.position);
         Vector2 biteCenter = (Vector2)transform.position - (Vector2)_facing.up * 0.5f;
         foreach (Collider2D target in Physics2D.OverlapCircleAll(biteCenter, _biteRadius, _targetMask))
         {

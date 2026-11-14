@@ -60,7 +60,7 @@ public sealed class PlayerMenuUI : NetworkBehaviour
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.Expand;
         Paint((RectTransform)_canvas.transform, new Color(0f, 0f, 0f, 0.78f));
 
-        RectTransform main = Panel("Menu", new Vector2(384f, IsServer ? 400f : 336f));
+        RectTransform main = Panel("Menu", new Vector2(384f, IsServer ? 432f : 368f));
         _mainPanel = main.gameObject;
         Label(main, "Меню", new Vector2(24f, -24f), new Vector2(336f, 32f), 24);
         Label(main, "Игра продолжается", new Vector2(24f, -64f), new Vector2(336f, 24f), 14);
@@ -68,11 +68,17 @@ public sealed class PlayerMenuUI : NetworkBehaviour
         MakeButton(main, "Настройки", new Vector2(24f, -176f), new Vector2(336f, 48f), () => ShowSettings(ESlotBindingType.Inventory));
         if (IsServer)
             _wavePauseLabel = MakeButton(main, "Приостановить волны", new Vector2(24f, -240f), new Vector2(336f, 48f), ToggleWavePause).GetComponentInChildren<Text>();
-        MakeButton(main, "Выйти из игры", new Vector2(24f, IsServer ? -304f : -240f), new Vector2(336f, 48f), QuitGame);
+        MakeButton(main, "Выйти в главное меню", new Vector2(24f, IsServer ? -304f : -240f), new Vector2(336f, 48f), () =>
+        {
+            NetworkManager.GetComponent<LobbyConnection>().Leave();
+        });
+        MakeButton(main, "Выйти из игры", new Vector2(24f, IsServer ? -368f : -304f), new Vector2(336f, 48f), QuitGame);
 
         RectTransform settings = Panel("Settings", new Vector2(800f, 600f));
         _settingsPanel = settings.gameObject;
         Label(settings, "Привязки клавиш", new Vector2(24f, -24f), new Vector2(752f, 40f), 24);
+        BuildVolumeSlider(settings, "MasterVolume", "Общая громкость", -14f, AudioListener.volume, LocalPlayerSettings.SetVolume);
+        BuildVolumeSlider(settings, "WindVolume", "Громкость ветра", -52f, LocalPlayerSettings.WindVolume, LocalPlayerSettings.SetWindVolume);
         _inventoryTab = MakeButton(settings, "Инвентарь", new Vector2(24f, -88f), new Vector2(240f, 40f), () => ShowSettings(ESlotBindingType.Inventory));
         _arsenalTab = MakeButton(settings, "Арсенал", new Vector2(280f, -88f), new Vector2(240f, 40f), () => ShowSettings(ESlotBindingType.Arsenal));
         _spellsTab = MakeButton(settings, "Способности", new Vector2(536f, -88f), new Vector2(240f, 40f), () => ShowSettings(ESlotBindingType.Spell));
@@ -97,6 +103,12 @@ public sealed class PlayerMenuUI : NetworkBehaviour
         scroll.content = _rows;
 
         _message = Label(settings, "Нажми на привязку, затем на новую клавишу. Esc — отмена.", new Vector2(24f, -492f), new Vector2(752f, 36f), 14);
+        Text performanceLabel = null;
+        performanceLabel = MakeButton(settings, PerformanceLabel(), new Vector2(200f, -544f), new Vector2(296f, 40f), () =>
+        {
+            LocalPlayerSettings.SetShowPerformanceStats(!LocalPlayerSettings.ShowPerformanceStats);
+            performanceLabel.text = PerformanceLabel();
+        }).GetComponentInChildren<Text>();
         MakeButton(settings, "Назад", new Vector2(24f, -544f), new Vector2(160f, 40f), ShowMain);
         MakeButton(settings, "Сбросить все привязки", new Vector2(512f, -544f), new Vector2(264f, 40f), ResetBindings);
         _bindings.BindingsChanged += RefreshBindings;
@@ -104,6 +116,38 @@ public sealed class PlayerMenuUI : NetworkBehaviour
         _settingsPanel.SetActive(false);
         _canvas.SetActive(false);
         _toggleMenu.Enable();
+    }
+
+    private static string PerformanceLabel() => LocalPlayerSettings.ShowPerformanceStats ? "FPS и пинг: вкл." : "FPS и пинг: выкл.";
+
+    private void BuildVolumeSlider(RectTransform settings, string name, string label, float y, float initialValue, System.Action<float> setVolume)
+    {
+        Text title = Label(settings, label, new Vector2(390f, y), new Vector2(160f, 40f), 16);
+        title.alignment = TextAnchor.MiddleLeft;
+
+        RectTransform sliderRect = Rect(name, settings, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(560f, y), new Vector2(152f, 40f));
+        Paint(sliderRect, Color.clear);
+        RectTransform track = Rect("Track", sliderRect, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(152f, 6f));
+        Paint(track, HudStyle.Line);
+        RectTransform fill = Rect("Fill", track, Vector2.zero, new Vector2(0f, 0.5f), Vector2.zero, Vector2.zero);
+        Paint(fill, HudStyle.Muted);
+        RectTransform handle = Rect("Handle", sliderRect, new Vector2(0f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero, new Vector2(12f, 20f));
+        Paint(handle, HudStyle.Text);
+
+        Slider slider = sliderRect.gameObject.AddComponent<Slider>();
+        slider.navigation = new Navigation { mode = Navigation.Mode.None };
+        slider.fillRect = fill;
+        slider.handleRect = handle;
+        slider.targetGraphic = handle.GetComponent<Image>();
+        slider.SetValueWithoutNotify(initialValue);
+
+        Text value = Label(settings, Mathf.RoundToInt(slider.value * 100f) + "%", new Vector2(728f, y), new Vector2(48f, 40f), 16);
+        value.alignment = TextAnchor.MiddleRight;
+        slider.onValueChanged.AddListener(volume =>
+        {
+            setVolume(volume);
+            value.text = Mathf.RoundToInt(volume * 100f) + "%";
+        });
     }
 
     private void OnToggleMenu(InputAction.CallbackContext context)
@@ -133,6 +177,8 @@ public sealed class PlayerMenuUI : NetworkBehaviour
 
     private void ShowMain()
     {
+        if (_settingsPanel.activeSelf)
+            PlayerPrefs.Save();
         _bindings.CancelRebind();
         _settingsPanel.SetActive(false);
         _mainPanel.SetActive(true);
@@ -260,6 +306,8 @@ public sealed class PlayerMenuUI : NetworkBehaviour
 
     private void RemoveMenu()
     {
+        if (_settingsPanel != null && _settingsPanel.activeInHierarchy)
+            PlayerPrefs.Save();
         _bindings.CancelRebind();
         _toggleMenu.Disable();
         _bindings.BindingsChanged -= RefreshBindings;

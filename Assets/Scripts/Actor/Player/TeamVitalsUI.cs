@@ -22,6 +22,7 @@ public sealed class TeamVitalsUI : NetworkBehaviour
         public NetworkActorVitals Source;
         public GameObject Root;
         public Text Name;
+        public Image Portrait;
         public RectTransform HealthFill;
         public RectTransform SanityFill;
         public Text HealthText;
@@ -71,7 +72,7 @@ public sealed class TeamVitalsUI : NetworkBehaviour
         _players.Clear();
         foreach (NetworkObject obj in NetworkManager.SpawnManager.SpawnedObjectsList)
         {
-            if (obj.IsPlayerObject && obj.IsSpawned && !obj.IsOwner && obj.TryGetComponent(out NetworkActorVitals source) && source.IsSpawned)
+            if (obj.IsPlayerObject && obj.IsSpawned && obj.TryGetComponent(out NetworkActorVitals source) && source.IsSpawned)
                 _players.Add(source);
         }
         _players.Sort((a, b) => a.OwnerClientId.CompareTo(b.OwnerClientId));
@@ -112,7 +113,10 @@ public sealed class TeamVitalsUI : NetworkBehaviour
             }
             RectTransform rect = (RectTransform)row.Root.transform;
             rect.anchoredPosition = new Vector2(0f, -i * rowHeight);
-            row.Name.text = $"Игрок {player.OwnerClientId + 1}";
+            row.Name.text = GameLobby.Instance != null ? GameLobby.Instance.GetPlayerName(player.OwnerClientId) : $"Player{player.OwnerClientId + 1}";
+            Sprite portrait = player.GetComponent<NetworkSpellHolder>()?.Character?.Preview;
+            row.Portrait.sprite = portrait;
+            row.Portrait.enabled = portrait != null;
         }
     }
 
@@ -124,10 +128,18 @@ public sealed class TeamVitalsUI : NetworkBehaviour
         root.sizeDelta = new Vector2(_width, 78f);
         Image(root, new Color(0.025f, 0.024f, 0.022f, 1f));
         Row row = new Row { Source = source, Root = root.gameObject };
+        RectTransform portrait = Rect("Portrait", root);
+        portrait.anchorMin = portrait.anchorMax = portrait.pivot = new Vector2(0f, 1f);
+        portrait.anchoredPosition = new Vector2(10f, -4f);
+        portrait.sizeDelta = new Vector2(20f, 20f);
+        row.Portrait = portrait.gameObject.AddComponent<Image>();
+        row.Portrait.preserveAspect = true;
+        row.Portrait.raycastTarget = false;
         row.Name = Label(root, "Name", TextAnchor.MiddleLeft, 13);
+        row.Name.supportRichText = false;
         row.Name.rectTransform.anchorMin = new Vector2(0f, 1f);
         row.Name.rectTransform.anchorMax = Vector2.one;
-        row.Name.rectTransform.offsetMin = new Vector2(10f, -24f);
+        row.Name.rectTransform.offsetMin = new Vector2(36f, -24f);
         row.Name.rectTransform.offsetMax = new Vector2(-10f, -4f);
         Bar(root, "HP", -28f, new Color(0.19f, 0.34f, 0.23f), out row.HealthFill, out row.HealthText);
         Bar(root, "Рассудок", -52f, new Color(0.72f, 0.32f, 0.075f), out row.SanityFill, out row.SanityText);

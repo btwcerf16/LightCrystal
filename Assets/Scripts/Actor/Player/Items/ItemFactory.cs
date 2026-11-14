@@ -17,8 +17,8 @@ public sealed class ItemFactory : MonoBehaviour
 
     public bool ApplyItemState(Item item, EItemRarity rarity, EnchantState state)
     {
-        if (item is not Weapon weapon)
-            return item.SetRarity(rarity);
+        if (!item.TryGetComponent(out WeaponEnchants enchants))
+            return state.Equals(default(EnchantState)) && item.SetRarity(rarity);
         System.Collections.Generic.List<EnchantData> definitions = new();
         bool empty = false;
         for (int i = 0; i < 3; i++)
@@ -37,7 +37,7 @@ public sealed class ItemFactory : MonoBehaviour
             }
             definitions.Add(data);
         }
-        return weapon.SetEnchants(definitions, rarity);
+        return enchants.SetEnchants(definitions, rarity);
     }
 
     private void Awake()

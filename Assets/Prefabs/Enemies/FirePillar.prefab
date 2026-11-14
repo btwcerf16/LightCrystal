@@ -245,3 +245,4 @@ MonoBehaviour:
   ShowTopMostFoldoutHeaderGroup: 1
   _warningAnimator: {fileID: 7309809531007726673}
   _triggerEffectPrefab: {fileID: 6970602608624070368, guid: 14a6990d4c31e7442a1c6ed389951bbd, type: 3}
+  _triggerSound: 0

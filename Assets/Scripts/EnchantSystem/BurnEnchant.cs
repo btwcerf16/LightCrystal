@@ -1,6 +1,6 @@
 public sealed class BurnEnchant : Enchant
 {
-    public override void OnHit(IDamageable target)
+    public override void OnHit(IDamageable target, EAttackType attackType, UnityEngine.Vector2 impactPoint)
     {
         ActorHealth health = target as ActorHealth;
         if (health == null || health.IsDead)

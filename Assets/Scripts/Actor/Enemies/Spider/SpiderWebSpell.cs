@@ -16,5 +16,6 @@ public sealed class SpiderWebSpell : Spell
         SpiderWebProjectile web = manager.GetComponent<NetworkObjectPool>().GetObject(config.Projectile, transform.position + (Vector3)direction.normalized * 0.4f, Quaternion.identity);
         web.Launch(new ProjectileData { Attacker = _ownerStats, Direction = direction, LayerMask = config.TargetMask, EffectOnHit = config.WebEffect, DamageType = EDamageType.Physical, IgnoreItemEffects = true });
         web.GetComponent<NetworkObject>().Spawn();
+        NetworkWorldAudio.Play(manager, WorldSoundId.SpiderWebSpit, web.transform.position);
     }
 }

@@ -8,9 +8,9 @@ public sealed class EnchantConsoleCommands : MonoBehaviour
     private string Enchant(EnchantData enchant)
     {
         Weapon weapon = GetComponent<ActorArsenal>().ActiveWeapon;
-        if (weapon == null || enchant == null)
+        if (weapon == null || !weapon.TryGetComponent(out WeaponEnchants enchants) || enchant == null)
             throw new InvalidOperationException("Нет выбранного оружия или такого зачарования.");
-        if (!weapon.AddEnchant(enchant))
+        if (!enchants.AddEnchant(enchant))
             throw new InvalidOperationException("Нет свободного слота чар или повтор запрещён.");
         return "Добавлено: " + enchant.DisplayName;
     }
@@ -19,7 +19,10 @@ public sealed class EnchantConsoleCommands : MonoBehaviour
     private string SetWeaponRarity(EItemRarity rarity)
     {
         Weapon weapon = GetComponent<ActorArsenal>().ActiveWeapon;
-        if (weapon == null || !weapon.SetRarity(rarity))
+        if (weapon == null)
+            throw new InvalidOperationException("Нет выбранного оружия.");
+        bool changed = weapon.TryGetComponent(out WeaponEnchants enchants) ? enchants.SetRarity(rarity) : weapon.SetRarity(rarity);
+        if (!changed)
             throw new InvalidOperationException("Нет оружия или в нём больше чар, чем допускает эта редкость.");
         return "Редкость: " + rarity;
     }
@@ -28,9 +31,9 @@ public sealed class EnchantConsoleCommands : MonoBehaviour
     private string ClearWeaponEnchants()
     {
         Weapon weapon = GetComponent<ActorArsenal>().ActiveWeapon;
-        if (weapon == null)
-            throw new InvalidOperationException("Нет выбранного оружия.");
-        weapon.SetEnchants(Array.Empty<EnchantData>());
+        if (weapon == null || !weapon.TryGetComponent(out WeaponEnchants enchants))
+            throw new InvalidOperationException("Нет выбранного оружия с поддержкой чар.");
+        enchants.SetEnchants(Array.Empty<EnchantData>());
         return "Зачарования сняты.";
     }
 }

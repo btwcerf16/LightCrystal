@@ -64,6 +64,7 @@ public sealed class ActorArsenal : MonoBehaviour
 
         if (ActiveWeapon != null)
         {
+            ActiveWeapon.EndPrimaryUse();
             ActiveWeapon.Drop();
             ActiveWeapon.gameObject.SetActive(false);
         }
@@ -152,6 +153,9 @@ public sealed class ActorArsenal : MonoBehaviour
             return;
 
         Weapon previousActiveWeapon = ActiveWeapon;
+        if (previousIndex == _activeWeaponIndex || newIndex == _activeWeaponIndex)
+            previousActiveWeapon?.EndPrimaryUse();
+
         Weapon weapon = _weapons[newIndex];
         _weapons[newIndex] = _weapons[previousIndex];
         _weapons[previousIndex] = weapon;

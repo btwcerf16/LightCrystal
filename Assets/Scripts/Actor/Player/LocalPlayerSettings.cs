@@ -9,7 +9,64 @@ public sealed class LocalPlayerSettings : ScriptableObject
     [SerializeField] private string[] _spellBindings = new string[0];
     [SerializeField] private string[] _cancelCastBindings = new string[0];
 
+    private const string VolumeKey = "Audio.MasterVolume";
+    private const float DefaultVolume = 0.65f;
+    private const string WindVolumeKey = "Audio.WindVolume";
+    private const string NicknameKey = "Player.Nickname";
+    private const string PerformanceStatsKey = "HUD.PerformanceStats";
+    public const int NicknameLimit = 20;
+
+    public static string Nickname => PlayerPrefs.GetString(NicknameKey);
+    public static bool ShowPerformanceStats => PlayerPrefs.GetInt(PerformanceStatsKey) != 0;
+
+    public static string CleanNickname(string nickname)
+    {
+        var clean = new System.Text.StringBuilder(NicknameLimit);
+        foreach (char character in nickname)
+        {
+            if (char.IsControl(character) || char.IsSurrogate(character) || character == '<' || character == '>')
+                continue;
+            if (clean.Length == NicknameLimit)
+                break;
+            clean.Append(character);
+        }
+        return clean.ToString().Trim();
+    }
+
+    public static void SetNickname(string nickname)
+    {
+        PlayerPrefs.SetString(NicknameKey, CleanNickname(nickname));
+        PlayerPrefs.Save();
+    }
+
+    public static void SetShowPerformanceStats(bool show)
+    {
+        PlayerPrefs.SetInt(PerformanceStatsKey, show ? 1 : 0);
+        PlayerPrefs.Save();
+    }
+    public static float WindVolume => Mathf.Clamp01(PlayerPrefs.GetFloat(WindVolumeKey, 0.35f));
+    public static event Action<float> WindVolumeChanged;
+
+    public static void SetWindVolume(float volume)
+    {
+        volume = Mathf.Clamp01(volume);
+        PlayerPrefs.SetFloat(WindVolumeKey, volume);
+        WindVolumeChanged?.Invoke(volume);
+    }
+
     private string _character = "";
+
+    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+    private static void LoadVolume()
+    {
+        AudioListener.volume = Mathf.Clamp01(PlayerPrefs.GetFloat(VolumeKey, DefaultVolume));
+    }
+
+    public static void SetVolume(float volume)
+    {
+        AudioListener.volume = Mathf.Clamp01(volume);
+        PlayerPrefs.SetFloat(VolumeKey, AudioListener.volume);
+    }
 
     public void Load(int inventorySize, int arsenalSize, int spellSize = 0, string character = null)
     {

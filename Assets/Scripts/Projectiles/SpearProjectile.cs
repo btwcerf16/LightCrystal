@@ -40,7 +40,7 @@ public sealed class SpearProjectile : Projectile
             return;
         _hitDistance = Vector2.Distance(_origin, collider.ClosestPoint(_origin));
         if (DamageCalculator.DealCriticalDamage(target, Data.Damage, Data.DamageType, Data.Attacker) > 0f && _source != null)
-            _source.NotifyHit(target);
+            _source.NotifyHit(target, EAttackType.Range);
         if (_hitTargets.Count >= _targetLimit + ExtraPiercing)
             ReturnToOwner();
     }

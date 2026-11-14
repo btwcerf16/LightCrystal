@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 52f3c8f01866498b8d5f7301d8746641, type: 3}
+  m_Name: StatisticalError
+  m_EditorClassIdentifier: Assembly-CSharp::EffectSpellConfig
+  SpellName: "Статистическая погрешность"
+  SpellDescription: "Эдвард списывает следующий удар на погрешность. Урон полностью поглощается и даёт 3 стака эмпирического обучения."
+  StatsDescription: ""
+  IsPassive: 0
+  CooldownTime: 0
+  SanityCost: 10
+  CastTime: 0
+  SpriteIcon: {fileID: 21300000, guid: 81b8839d8777418185544f183d18f2f1, type: 3}
+  Effect: {fileID: 11400000, guid: 73efec26cfef4d739224b611abac09e3, type: 2}

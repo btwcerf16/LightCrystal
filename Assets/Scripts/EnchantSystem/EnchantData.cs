@@ -11,6 +11,13 @@ public abstract class EnchantData : ScriptableObject
     public float EpicValue;
     public float MythicalValue;
     public float LegendaryValue;
+    [Min(0f)] public float BaseCooldown;
+    [Min(0f)] public float CooldownReductionPerRarity;
+
+    public float GetCooldown(EItemRarity rarity)
+    {
+        return Mathf.Max(0f, BaseCooldown - CooldownReductionPerRarity * (int)rarity);
+    }
 
     public float GetValue(EItemRarity rarity)
     {

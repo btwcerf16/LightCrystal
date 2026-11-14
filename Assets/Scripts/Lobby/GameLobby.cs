@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -82,6 +83,25 @@ public sealed class GameLobby : NetworkBehaviour
 
     public void SelectCharacter(int index) => SelectCharacterRpc(index);
     public void SetReady(bool ready, int characterIndex = -1) => SetReadyRpc(ready, characterIndex);
+
+    public string GetPlayerName(ulong clientId)
+    {
+        int index = FindPlayer(clientId);
+        return index >= 0 ? _players[index].DisplayName : $"Player{clientId + 1}";
+    }
+
+    public void SetNickname(string nickname) => SetNicknameRpc(new FixedString64Bytes(LocalPlayerSettings.CleanNickname(nickname)));
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+    private void SetNicknameRpc(FixedString64Bytes nickname, RpcParams rpc = default)
+    {
+        int index = FindPlayer(rpc.Receive.SenderClientId);
+        if (index < 0) return;
+        LobbyPlayer player = _players[index];
+        player.Nickname = new FixedString64Bytes(LocalPlayerSettings.CleanNickname(nickname.ToString()));
+        if (!_players[index].Equals(player))
+            _players[index] = player;
+    }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     private void SelectCharacterRpc(int characterIndex, RpcParams rpc = default)

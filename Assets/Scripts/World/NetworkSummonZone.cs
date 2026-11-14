@@ -57,12 +57,12 @@ public sealed class NetworkSummonZone : NetworkBehaviour
         _waitForWave = waitForWave;
     }
 
-    public void SummonEvent()
+    public NetworkObject SummonEvent()
     {
         if (!IsServer || !IsSpawned)
-            return;
+            return null;
         ProcessZone(NetworkManager.ServerTime.Time);
-        CreateEvent();
+        return CreateEvent();
     }
 
     private bool HasPlayer()
@@ -80,7 +80,7 @@ public sealed class NetworkSummonZone : NetworkBehaviour
         return false;
     }
 
-    private void CreateEvent()
+    private NetworkObject CreateEvent()
     {
         Crystal crystal = FindFirstObjectByType<Crystal>();
         ShopSpawnArea area = FindFirstObjectByType<ShopSpawnArea>();
@@ -89,14 +89,16 @@ public sealed class NetworkSummonZone : NetworkBehaviour
         {
             Debug.LogError("Не удалось создать событие на карте вдали от кристалла.", this);
             NetworkObject.Despawn();
-            return;
+            return null;
         }
 
+        NetworkObject summonedEvent;
         if (Random.value < _enchanterChance)
         {
             NetworkEnchanter enchanter = Instantiate(_enchanterPrefab, position, Quaternion.identity);
             enchanter.SetCapacity(Capacity);
             enchanter.NetworkObject.Spawn();
+            summonedEvent = enchanter.NetworkObject;
         }
         else
         {
@@ -104,7 +106,9 @@ public sealed class NetworkSummonZone : NetworkBehaviour
             shop.SetCapacity(Capacity);
             shop.NetworkObject.Spawn();
             shop.Initialize();
+            summonedEvent = shop.NetworkObject;
         }
         NetworkObject.Despawn();
+        return summonedEvent;
     }
 }

@@ -13,6 +13,7 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
     public NetworkStatValue MoveSpeed;
     public NetworkStatValue AttackSpeed;
     public NetworkStatValue CooldownReduction;
+    public NetworkStatValue SpellCooldownReduction;
     public NetworkStatValue PhysicalDamage;
     public NetworkStatValue PhysicalDamageMultiplier;
     public NetworkStatValue MagicDamageMultiplier;
@@ -23,12 +24,12 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
     public NetworkStatValue ForceResistance;
     public NetworkStatValue MadnessResistance;
     public NetworkStatValue EffectResistance;
-    public NetworkStatValue Stability;
     public NetworkStatValue CameraDistance;
     public NetworkStatValue CastSpeed;
     public NetworkStatValue ProjectileSpeed;
     public NetworkStatValue ProjectileSpeedMultiplier;
     public NetworkStatValue ProjectileRange;
+    public NetworkStatValue ProjectileRangeMultiplier;
     public NetworkStatValue ProjectilePiercing;
     public NetworkStatValue SanityCostReduction;
     public NetworkStatValue CriticalChance;
@@ -46,6 +47,7 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
         MoveSpeed = new NetworkStatValue(stats.MoveSpeed);
         AttackSpeed = new NetworkStatValue(stats.AttackSpeed);
         CooldownReduction = new NetworkStatValue(stats.CooldownReduction);
+        SpellCooldownReduction = new NetworkStatValue(stats.SpellCooldownReduction);
         PhysicalDamage = new NetworkStatValue(stats.PhysicalDamage);
         PhysicalDamageMultiplier = new NetworkStatValue(stats.PhysicalDamageMultiplier);
         MagicDamageMultiplier = new NetworkStatValue(stats.MagicDamageMultiplier);
@@ -56,12 +58,12 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
         ForceResistance = new NetworkStatValue(stats.ForceResistance);
         MadnessResistance = new NetworkStatValue(stats.MadnessResistance);
         EffectResistance = new NetworkStatValue(stats.EffectResistance);
-        Stability = new NetworkStatValue(stats.Stability);
         CameraDistance = new NetworkStatValue(stats.CameraDistance);
         CastSpeed = new NetworkStatValue(stats.CastSpeed);
         ProjectileSpeed = new NetworkStatValue(stats.ProjectileSpeed);
         ProjectileSpeedMultiplier = new NetworkStatValue(stats.ProjectileSpeedMultiplier);
         ProjectileRange = new NetworkStatValue(stats.ProjectileRange);
+        ProjectileRangeMultiplier = new NetworkStatValue(stats.ProjectileRangeMultiplier);
         ProjectilePiercing = new NetworkStatValue(stats.ProjectilePiercing);
         SanityCostReduction = new NetworkStatValue(stats.SanityCostReduction);
         CriticalChance = new NetworkStatValue(stats.CriticalChance);
@@ -80,6 +82,7 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
         serializer.SerializeValue(ref MoveSpeed);
         serializer.SerializeValue(ref AttackSpeed);
         serializer.SerializeValue(ref CooldownReduction);
+        serializer.SerializeValue(ref SpellCooldownReduction);
         serializer.SerializeValue(ref PhysicalDamage);
         serializer.SerializeValue(ref PhysicalDamageMultiplier);
         serializer.SerializeValue(ref MagicDamageMultiplier);
@@ -90,12 +93,12 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
         serializer.SerializeValue(ref ForceResistance);
         serializer.SerializeValue(ref MadnessResistance);
         serializer.SerializeValue(ref EffectResistance);
-        serializer.SerializeValue(ref Stability);
         serializer.SerializeValue(ref CameraDistance);
         serializer.SerializeValue(ref CastSpeed);
         serializer.SerializeValue(ref ProjectileSpeed);
         serializer.SerializeValue(ref ProjectileSpeedMultiplier);
         serializer.SerializeValue(ref ProjectileRange);
+        serializer.SerializeValue(ref ProjectileRangeMultiplier);
         serializer.SerializeValue(ref ProjectilePiercing);
         serializer.SerializeValue(ref SanityCostReduction);
         serializer.SerializeValue(ref CriticalChance);
@@ -114,6 +117,7 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
             && MoveSpeed.Equals(other.MoveSpeed)
             && AttackSpeed.Equals(other.AttackSpeed)
             && CooldownReduction.Equals(other.CooldownReduction)
+            && SpellCooldownReduction.Equals(other.SpellCooldownReduction)
             && PhysicalDamage.Equals(other.PhysicalDamage)
             && PhysicalDamageMultiplier.Equals(other.PhysicalDamageMultiplier)
             && MagicDamageMultiplier.Equals(other.MagicDamageMultiplier)
@@ -124,12 +128,12 @@ public struct NetworkActorStatsSnapshot : INetworkSerializable, IEquatable<Netwo
             && ForceResistance.Equals(other.ForceResistance)
             && MadnessResistance.Equals(other.MadnessResistance)
             && EffectResistance.Equals(other.EffectResistance)
-            && Stability.Equals(other.Stability)
             && CameraDistance.Equals(other.CameraDistance)
             && CastSpeed.Equals(other.CastSpeed)
             && ProjectileSpeed.Equals(other.ProjectileSpeed)
             && ProjectileSpeedMultiplier.Equals(other.ProjectileSpeedMultiplier)
             && ProjectileRange.Equals(other.ProjectileRange)
+            && ProjectileRangeMultiplier.Equals(other.ProjectileRangeMultiplier)
             && ProjectilePiercing.Equals(other.ProjectilePiercing)
             && SanityCostReduction.Equals(other.SanityCostReduction)
             && CriticalChance.Equals(other.CriticalChance)

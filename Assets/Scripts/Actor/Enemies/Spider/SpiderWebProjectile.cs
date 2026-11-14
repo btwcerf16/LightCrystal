@@ -1,3 +1,4 @@
+using Unity.Netcode;
 using UnityEngine;
 public sealed class SpiderWebProjectile : Projectile
 {
@@ -9,6 +10,7 @@ public sealed class SpiderWebProjectile : Projectile
         PlayerInputReader player = target.GetComponentInParent<PlayerInputReader>();
         if (player != null && !player.GetComponent<ActorHealth>().IsDead)
             player.GetComponent<EffectHandler>().AddEffect(Data.EffectOnHit);
+        NetworkWorldAudio.Play(GetComponent<NetworkObject>().NetworkManager, WorldSoundId.SpiderWebImpact, target.ClosestPoint(transform.position));
         base.OnHit(target);
     }
 }

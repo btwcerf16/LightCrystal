@@ -3,9 +3,8 @@ using UnityEngine;
 public sealed class ToggleSpell : Spell
 {
     private Effect _effect;
-    public override float SanityCost => base.SanityCost;
     public override bool IsToggled => _effect != null && GetComponent<EffectHandler>().HasEffect(_effect.EffectData);
-    public override bool CanCast(SpellCastData data) => IsToggled || GetComponent<ActorSanity>().CurrentSanity > 0f;
+    public override bool CanCast(SpellCastData data) => IsToggled || ((ToggleSpellConfig)SpellData).SanityPerSecond == 0f || GetComponent<ActorSanity>().CurrentSanity > 0f;
 
     protected override void Cast(SpellCastData data)
     {
@@ -23,7 +22,7 @@ public sealed class ToggleSpell : Spell
         EffectHandler effects = GetComponent<EffectHandler>();
         float cost = ((ToggleSpellConfig)SpellData).SanityPerSecond * (1f - _ownerStats.SanityCostReduction.Value) * Time.deltaTime;
         if (GetComponent<ActorHealth>().IsDead || effects.IsStunned || effects.IsSilenced ||
-            !GetComponent<ActorSanity>().TrySpendSanity(cost))
+            (cost > 0f && !GetComponent<ActorSanity>().TrySpendSanity(cost)))
             StopEffect();
     }
 

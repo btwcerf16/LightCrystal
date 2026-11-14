@@ -6,12 +6,8 @@ public sealed class PlayerFacing : MonoBehaviour
 
     private void LateUpdate()
     {
-        bool isFacingRight = _handTransform.localPosition.x >= 0f;
-
-        if (isFacingRight)
-            _bodyVisual.localRotation = Quaternion.Euler(0f, 0f, _bodyVisual.localEulerAngles.z);
-        else
-            _bodyVisual.localRotation = Quaternion.Euler(0f, 180f, _bodyVisual.localEulerAngles.z);
+        float facingAngle = _handTransform.localPosition.x >= 0f ? 0f : 180f;
+        _bodyVisual.localRotation = Quaternion.Euler(0f, facingAngle, 0f);
     }
 
 }

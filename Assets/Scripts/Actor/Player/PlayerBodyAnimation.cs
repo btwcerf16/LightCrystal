@@ -2,7 +2,9 @@ using UnityEngine;
 
 public sealed class PlayerBodyAnimation : MonoBehaviour
 {
-    [SerializeField] private Animator _animator;
+    [SerializeField] private Transform _modelRoot;
+    private Animator _animator;
+    private ActorVisuals _visuals;
     [SerializeField] private SpellRangePreview _reviveZone;
     [SerializeField] private DownedEffectData _downedEffect;
     private Vector3 _previousPosition;
@@ -12,9 +14,22 @@ public sealed class PlayerBodyAnimation : MonoBehaviour
 
     private void Awake()
     {
+        _visuals = GetComponent<ActorVisuals>();
         _effects = GetComponent<EffectHandler>();
         _vitals = GetComponent<NetworkActorVitals>();
         _previousPosition = transform.position;
+    }
+
+    public void SetModel(Animator modelPrefab)
+    {
+        if (_animator != null)
+        {
+            _animator.gameObject.SetActive(false);
+            Destroy(_animator.gameObject);
+        }
+
+        _animator = Instantiate(modelPrefab, _modelRoot);
+        _visuals.SetRenderers(_animator.GetComponentsInChildren<SpriteRenderer>(true));
     }
 
     private void OnEnable()
@@ -32,12 +47,14 @@ public sealed class PlayerBodyAnimation : MonoBehaviour
             _reviveZone.Show(_downedEffect.ReviveRadius);
         else
             _reviveZone.Hide();
+        if (_animator == null)
+            return;
+
         _animator.SetBool("IsDowned", downed);
         _animator.SetFloat("ReviveProgress", downed ? _vitals.ReviveProgress : 0f, 0.1f, Time.deltaTime);
         bool stunned = _effects != null && _effects.IsStunned;
         if (!stunned && offset.sqrMagnitude > 0.000001f)
             _movingUntil = Time.time + 0.12f;
         _animator.SetBool("IsMoving", !stunned && Time.time < _movingUntil);
-        _animator.speed = stunned && !downed ? 0f : 1f;
     }
 }

@@ -20,13 +20,14 @@ public sealed class ActorStats : MonoBehaviour
     public Stat MoveSpeed { get; private set; }
     public Stat AttackSpeed { get; private set; }
     public Stat CooldownReduction { get; private set; }
+    public Stat SpellCooldownReduction { get; private set; }
 
-    public Stat Stability { get; private set; }
     public Stat CameraDistance { get; private set; }
     public Stat CastSpeed { get; private set; }
     public Stat ProjectileSpeed { get; private set; }
     public Stat ProjectileSpeedMultiplier { get; private set; }
     public Stat ProjectileRange { get; private set; }
+    public Stat ProjectileRangeMultiplier { get; private set; }
     public Stat ProjectilePiercing { get; private set; }
     public Stat SanityCostReduction { get; private set; }
     public Stat CriticalChance { get; private set; }
@@ -67,13 +68,14 @@ public sealed class ActorStats : MonoBehaviour
         MoveSpeed = new Stat(_config.MoveSpeed, 0f);
         AttackSpeed = new Stat(_config.AttackSpeed, 0f);
         CooldownReduction = new Stat(_config.CooldownReduction, 0f, 0.9f);
+        SpellCooldownReduction = new Stat(_config.SpellCooldownReduction, 0f, 0.9f);
 
-        Stability = new Stat(_config.Stability, 0f, 360f);
         CameraDistance = new Stat(_config.CameraDistance, 0.1f);
         CastSpeed = new Stat(_config.CastSpeed, 0.01f);
         ProjectileSpeed = new Stat(_config.ProjectileSpeed, 0f);
         ProjectileSpeedMultiplier = new Stat(_config.ProjectileSpeedMultiplier, 0f);
         ProjectileRange = new Stat(_config.ProjectileRange, 0f);
+        ProjectileRangeMultiplier = new Stat(1f, 0f);
         ProjectilePiercing = new Stat(_config.ProjectilePiercing, 0f);
         SanityCostReduction = new Stat(_config.SanityCostReduction, 0f, 1f);
         CriticalChance = new Stat(_config.CriticalChance, 0f, 1f);
@@ -106,7 +108,7 @@ public sealed class ActorStats : MonoBehaviour
         MoveSpeed.SetBaseValue(config.MoveSpeed);
         AttackSpeed.SetBaseValue(config.AttackSpeed);
         CooldownReduction.SetBaseValue(config.CooldownReduction);
-        Stability.SetBaseValue(config.Stability);
+        SpellCooldownReduction.SetBaseValue(config.SpellCooldownReduction);
         CameraDistance.SetBaseValue(config.CameraDistance);
         CastSpeed.SetBaseValue(config.CastSpeed);
         ProjectileSpeed.SetBaseValue(config.ProjectileSpeed);
@@ -126,6 +128,16 @@ public sealed class ActorStats : MonoBehaviour
         ForceResistance.SetBaseValue(config.ForceResistance);
         MadnessResistance.SetBaseValue(config.MadnessResistance);
         EffectResistance.SetBaseValue(config.EffectResistance);
+    }
+
+    public float GetProjectileSpeed(float baseSpeed)
+    {
+        return Mathf.Max(0.01f, (baseSpeed + ProjectileSpeed.Value) * ProjectileSpeedMultiplier.Value);
+    }
+
+    public float GetProjectileRange(float baseRange)
+    {
+        return Mathf.Max(0f, (baseRange + ProjectileRange.Value) * ProjectileRangeMultiplier.Value);
     }
 
     public void SetTargetPriority(int priority)

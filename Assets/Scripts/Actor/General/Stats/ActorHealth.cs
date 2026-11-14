@@ -24,6 +24,7 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
     public bool IsDead { get; private set; }
     public float ReviveProgress { get; internal set; }
     public SanityShield Shield { get; internal set; }
+    internal Action AbsorbNextHit { get; set; }
 
     private void Awake()
     {
@@ -42,6 +43,9 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
         _stats.MaxHealth.ValueChanged -= OnMaxHealthChanged;
     }
 
+    public bool AcceptsDamageFrom(ActorStats attacker) => _damageSourceMask.value == -1 ||
+        (attacker != null && (_damageSourceMask.value & (1 << attacker.gameObject.layer)) != 0);
+
     public float TakeDamage(float amount, EDamageType damageType, ActorStats attacker = null)
     {
         return TakeDamage(amount, damageType, attacker, false);
@@ -51,13 +55,18 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
     {
         if (amount <= 0f || IsDead || (_effects != null && (_effects.Status & EActorStatus.Invulnerable) != 0))
             return 0f;
-        if (_damageSourceMask.value != -1 && (attacker == null
-            || (_damageSourceMask.value & (1 << attacker.gameObject.layer)) == 0))
+        if (!AcceptsDamageFrom(attacker))
             return 0f;
 
         amount = DamageCalculator.CalculateDamage(amount, damageType, attacker, _stats);
         if (amount <= 0f)
             return 0f;
+
+        if (AbsorbNextHit != null)
+        {
+            AbsorbNextHit.Invoke();
+            return 0f;
+        }
 
         float incomingDamage = amount;
         if (Shield != null)
@@ -66,6 +75,9 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
         float previousHealth = CurrentHealth;
         CurrentHealth = Mathf.Max(CurrentHealth - amount, 0f);
         float dealtDamage = previousHealth - CurrentHealth + absorbedDamage;
+        Enemy enemy = GetComponent<Enemy>();
+        if (dealtDamage > 0f && attacker != null && enemy != null)
+            enemy.RecordGoldContributor(attacker);
 
         HealthChanged?.Invoke(CurrentHealth, MaxHealth);
         DamageReceived?.Invoke(dealtDamage, damageType, critical);
@@ -80,17 +92,15 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
         if (CurrentHealth <= 0f)
         {
             Kill();
-            Enemy enemy = GetComponent<Enemy>();
             if (attacker != null && attacker.gameObject != gameObject && enemy != null)
             {
-                enemy.GiveGold(attacker.GetComponent<ActorWallet>());
                 ActorHealth killer = attacker.GetComponent<ActorHealth>();
                 if (killer != null)
                     killer.EnemyKilled?.Invoke(this);
             }
         }
 
-        if (attacker != null && attacker.gameObject != gameObject && GetComponent<Enemy>() != null)
+        if (attacker != null && attacker.gameObject != gameObject && enemy != null)
             attacker.GetComponent<ActorHealth>()?.EnemyHit?.Invoke(this);
         return dealtDamage;
     }

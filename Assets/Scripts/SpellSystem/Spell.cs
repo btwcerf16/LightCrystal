@@ -9,7 +9,6 @@ public abstract class Spell : MonoBehaviour
     protected ActorStats _ownerStats;
     private NetworkObject _networkObject;
     private ActorSanity _ownerSanity;
-    private Inventory _inventory;
     private EffectHandler _ownerEffects;
 
     public SpellConfig SpellData { get; private set; }
@@ -47,9 +46,7 @@ public abstract class Spell : MonoBehaviour
         {
             if (HasFreeCooldowns)
                 return 0f;
-            float reduction = _ownerStats.CooldownReduction.Value;
-            if (_inventory != null)
-                reduction += _inventory.SpellCooldownReduction;
+            float reduction = _ownerStats.CooldownReduction.Value + _ownerStats.SpellCooldownReduction.Value;
             return SpellData.CooldownTime * (1f - Mathf.Clamp(reduction, 0f, 0.9f));
         }
     }
@@ -68,7 +65,6 @@ public abstract class Spell : MonoBehaviour
     {
         _owner = owner;
         _ownerStats = owner.GetComponent<ActorStats>();
-        _inventory = owner.GetComponent<Inventory>();
         _networkObject = owner.GetComponent<NetworkObject>();
         _ownerSanity = owner.GetComponent<ActorSanity>();
         _ownerEffects = owner.GetComponent<EffectHandler>();

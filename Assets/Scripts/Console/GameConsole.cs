@@ -385,6 +385,9 @@ public sealed class GameConsole : NetworkBehaviour
             throw new System.InvalidOperationException("На карте не нашлось точки для спавна.");
 
         Enemy instance = NetworkManager.GetComponent<NetworkObjectPool>().GetObject(enemy, position, Quaternion.identity);
+        WaveDirector director = NetworkManager.GetComponent<WaveDirector>();
+        if (director != null)
+            instance.SetGoldDropMultiplier(director.GoldDropMultiplier);
         instance.SetMainTarget(crystal.transform);
         instance.SetTemporaryTarget(transform);
         instance.GetComponent<NetworkObject>().Spawn();

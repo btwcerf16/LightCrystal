@@ -16,7 +16,11 @@ public sealed class PlayerStatsUI : NetworkBehaviour
     private Text _resources;
     private RectTransform _pinnedPanel;
     private int _pinnedCount;
-    private readonly List<(string Key, RectTransform Rect, Toggle Favorite, Toggle Pinned, Text Value)> _rows = new();
+    private bool _showAdvanced;
+    private Image _mainTab;
+    private Image _advancedTab;
+    private RectTransform _footer;
+    private readonly List<(string Key, RectTransform Rect, Toggle Favorite, Toggle Pinned, Text Value, bool Main)> _rows = new();
     private readonly Color _textColor = HudStyle.Text;
 
     private void Awake()
@@ -62,13 +66,16 @@ public sealed class PlayerStatsUI : NetworkBehaviour
         title.fontSize = 20;
         Label(_panel, "CloseHint", "TAB — закрыть", 570f, 20f, 170f, 28f, TextAnchor.MiddleRight);
         _resources = Label(_panel, "Resources", "", 20f, 56f, 720f, 28f, TextAnchor.MiddleLeft);
-        Label(_panel, "Names", "Параметр", 92f, 98f, 290f, 24f, TextAnchor.MiddleLeft);
-        Label(_panel, "Base", "База", 392f, 98f, 95f, 24f, TextAnchor.MiddleRight);
-        Label(_panel, "Bonus", "Бонус", 497f, 98f, 95f, 24f, TextAnchor.MiddleRight);
-        Label(_panel, "Total", "Итог", 602f, 98f, 138f, 24f, TextAnchor.MiddleRight);
+        _showAdvanced = false;
+        _mainTab = Tab("Основные", 20f, false);
+        _advancedTab = Tab("Дополнительные", 188f, true);
+        Label(_panel, "Names", "Параметр", 92f, 138f, 290f, 24f, TextAnchor.MiddleLeft);
+        Label(_panel, "Base", "База", 392f, 138f, 95f, 24f, TextAnchor.MiddleRight);
+        Label(_panel, "Bonus", "Бонус", 497f, 138f, 95f, 24f, TextAnchor.MiddleRight);
+        Label(_panel, "Total", "Итог", 602f, 138f, 138f, 24f, TextAnchor.MiddleRight);
 
-        Label(_panel, "FavoriteHeader", "Вверх", 16f, 98f, 36f, 24f, TextAnchor.MiddleCenter).fontSize = 10;
-        Label(_panel, "PinnedHeader", "HUD", 52f, 98f, 32f, 24f, TextAnchor.MiddleCenter).fontSize = 10;
+        Label(_panel, "FavoriteHeader", "Вверх", 16f, 138f, 36f, 24f, TextAnchor.MiddleCenter).fontSize = 10;
+        Label(_panel, "PinnedHeader", "HUD", 52f, 138f, 32f, 24f, TextAnchor.MiddleCenter).fontSize = 10;
         _pinnedPanel = Rect("PinnedStats", _canvas.transform);
         _pinnedPanel.anchorMin = _pinnedPanel.anchorMax = _pinnedPanel.pivot = new Vector2(1f, 0.5f);
         _pinnedPanel.anchoredPosition = new Vector2(-24f, 0f);
@@ -90,6 +97,7 @@ public sealed class PlayerStatsUI : NetworkBehaviour
             (nameof(ActorStats.AttackSpeed), "Скорость атаки", stats.AttackSpeed, false),
             (nameof(ActorStats.MoveSpeed), "Скорость движения", stats.MoveSpeed, false),
             (nameof(ActorStats.CooldownReduction), "Сокращение перезарядки", stats.CooldownReduction, true),
+            (nameof(ActorStats.SpellCooldownReduction), "Сокращение перезарядки заклинаний", stats.SpellCooldownReduction, true),
             (nameof(ActorStats.MaxHealth), "Максимум здоровья", stats.MaxHealth, false),
             (nameof(ActorStats.ReviveSpeed), "Скорость помощи союзникам", stats.ReviveSpeed, false),
             (nameof(ActorStats.HealthRegeneration), "Восстановление HP/с", stats.HealthRegeneration, false),
@@ -103,18 +111,17 @@ public sealed class PlayerStatsUI : NetworkBehaviour
             (nameof(ActorStats.MagicLifeSteal), "Магический вампиризм", stats.MagicLifeSteal, true),
             (nameof(ActorStats.ViewDistance), "Дальность обзора", stats.ViewDistance, false),
             (nameof(ActorStats.ViewAngle), "Угол обзора", stats.ViewAngle, false),
-            (nameof(ActorStats.Stability), "Стабилизация, градусы", stats.Stability, false),
             (nameof(ActorStats.CameraDistance), "Отдаление камеры", stats.CameraDistance, false),
             (nameof(ActorStats.CastSpeed), "Скорость каста", stats.CastSpeed, false),
             (nameof(ActorStats.ProjectileSpeed), "Бонус скорости снаряда", stats.ProjectileSpeed, false),
             (nameof(ActorStats.ProjectileSpeedMultiplier), "Множитель скорости снаряда", stats.ProjectileSpeedMultiplier, false),
             (nameof(ActorStats.ProjectileRange), "Бонус дальности снаряда", stats.ProjectileRange, false),
+            (nameof(ActorStats.ProjectileRangeMultiplier), "Множитель дальности снаряда", stats.ProjectileRangeMultiplier, false),
             (nameof(ActorStats.ProjectilePiercing), "Пронзания снаряда", stats.ProjectilePiercing, false),
             (nameof(ActorStats.SanityCostReduction), "Снижение затрат рассудка", stats.SanityCostReduction, true),
             (nameof(ActorStats.CriticalChance), "Шанс крита", stats.CriticalChance, true),
             (nameof(ActorStats.CriticalDamageMultiplier), "Критический урон", stats.CriticalDamageMultiplier, true)
         };
-        _panel.sizeDelta = new Vector2(760f, 170f + rows.Length * 28f);
         for (int i = 0; i < rows.Length; i++)
         {
             var row = rows[i];
@@ -125,7 +132,10 @@ public sealed class PlayerStatsUI : NetworkBehaviour
             Toggle pinned = Checkbox(line, "Pinned", 56f);
             Text pinnedText = Label(_pinnedPanel, row.Key, "", 0f, 0f, 328f, 28f, TextAnchor.MiddleLeft);
             pinnedText.gameObject.AddComponent<LayoutElement>().preferredHeight = 28f;
-            _rows.Add((row.Key, line, favorite, pinned, pinnedText));
+            bool main = row.Stat == stats.PhysicalDamage || row.Stat == stats.AttackSpeed || row.Stat == stats.MoveSpeed ||
+                row.Stat == stats.MaxHealth || row.Stat == stats.MaxSanity || row.Stat == stats.PhysicalResistance ||
+                row.Stat == stats.MagicResistance;
+            _rows.Add((row.Key, line, favorite, pinned, pinnedText, main));
             favorite.onValueChanged.AddListener(value => SaveSelection("Favorite", row.Key, value));
             pinned.onValueChanged.AddListener(value => SaveSelection("Pinned", row.Key, value));
             Label(line, row.Name, row.Name, 92f, 0f, 290f, 24f, TextAnchor.MiddleLeft);
@@ -145,7 +155,9 @@ public sealed class PlayerStatsUI : NetworkBehaviour
             _subscriptions.Add((row.Stat, handler));
             handler(row.Stat.Value);
         }
-        Label(_panel, "Footer", "Вверх — приоритет в списке. HUD — показать справа.", 20f, _panel.sizeDelta.y - 30f, 720f, 20f, TextAnchor.MiddleLeft).fontSize = 12;
+        Text footer = Label(_panel, "Footer", "Вверх — приоритет в списке. HUD — показать справа.", 20f, 0f, 720f, 20f, TextAnchor.MiddleLeft);
+        footer.fontSize = 12;
+        _footer = footer.rectTransform;
         _vitals.Changed += UpdateResources;
         UpdateResources(_vitals.State);
         _input.StatsToggled += Toggle;
@@ -183,14 +195,38 @@ public sealed class PlayerStatsUI : NetworkBehaviour
         _pinnedCount = 0;
         foreach (bool favorite in new[] { true, false })
             foreach (var row in _rows)
-                if (row.Favorite.isOn == favorite)
-                    row.Rect.anchoredPosition = new Vector2(0f, -130f - position++ * 28f);
+                if (row.Main != _showAdvanced && row.Favorite.isOn == favorite)
+                    row.Rect.anchoredPosition = new Vector2(0f, -170f - position++ * 28f);
+        _panel.sizeDelta = new Vector2(760f, 210f + position * 28f);
+        _footer.anchoredPosition = new Vector2(20f, 30f - _panel.sizeDelta.y);
+        _mainTab.color = _showAdvanced ? HudStyle.Slot : HudStyle.Line;
+        _advancedTab.color = _showAdvanced ? HudStyle.Line : HudStyle.Slot;
         foreach (var row in _rows)
         {
+            row.Rect.gameObject.SetActive(row.Main != _showAdvanced);
             row.Value.gameObject.SetActive(row.Pinned.isOn);
             if (row.Pinned.isOn) _pinnedCount++;
         }
         _pinnedPanel.gameObject.SetActive(_pinnedCount > 0);
+    }
+
+    private Image Tab(string title, float x, bool advanced)
+    {
+        RectTransform rect = Rect(title, _panel);
+        rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0f, 1f);
+        rect.anchoredPosition = new Vector2(x, -94f);
+        rect.sizeDelta = new Vector2(156f, 30f);
+        Image background = rect.gameObject.AddComponent<Image>();
+        Button button = rect.gameObject.AddComponent<Button>();
+        button.targetGraphic = background;
+        button.navigation = new Navigation { mode = Navigation.Mode.None };
+        button.onClick.AddListener(() =>
+        {
+            _showAdvanced = advanced;
+            RefreshRows();
+        });
+        Label(rect, "Title", title, 0f, 0f, 156f, 30f, TextAnchor.MiddleCenter);
+        return background;
     }
 
     private Toggle Checkbox(Transform parent, string name, float x)

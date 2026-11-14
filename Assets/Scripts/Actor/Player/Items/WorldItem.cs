@@ -37,6 +37,7 @@ public class WorldItem : NetworkBehaviour, ITooltipSource
         }
     }
 
+    public event System.Action Purchased;
     public bool IsForSale => _isForSale.Value;
     public int Price => ItemPrefab != null ? Mathf.Max(0, ItemPrefab.Price) : 0;
     public int ItemId => _itemId.Value;
@@ -108,7 +109,7 @@ public class WorldItem : NetworkBehaviour, ITooltipSource
             return;
 
         _rarity.Value = item.Rarity;
-        _enchants.Value = item is Weapon weapon ? weapon.GetEnchantState() : default;
+        _enchants.Value = item.TryGetComponent(out WeaponEnchants enchants) ? enchants.GetEnchantState() : default;
         _isForSale.Value = isForSale;
         _itemId.Value = item.ItemId;
         _uid.Value = item.Uid != 0 ? item.Uid : NetworkManager.GetComponent<ItemUidGenerator>().GenerateUid();
@@ -118,11 +119,14 @@ public class WorldItem : NetworkBehaviour, ITooltipSource
     {
         if (!IsServer || !CanBePicked)
             return false;
-        if (IsForSale && (wallet == null || !wallet.TrySpend(Price)))
+        bool wasForSale = IsForSale;
+        if (wasForSale && (wallet == null || !wallet.TrySpend(Price)))
             return false;
 
         _isForSale.Value = false;
         HideWorldItem();
+        if (wasForSale)
+            Purchased?.Invoke();
         return true;
     }
 

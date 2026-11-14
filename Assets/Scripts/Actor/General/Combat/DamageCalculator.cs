@@ -16,7 +16,12 @@ public static class DamageCalculator
 
     public static float DealCriticalDamage(IDamageable target, float damage, EDamageType type, ActorStats attacker)
     {
-        damage = RollCriticalDamage(damage, attacker, out bool critical);
+        return DealCriticalDamage(target, damage, type, attacker, out _);
+    }
+
+    public static float DealCriticalDamage(IDamageable target, float damage, EDamageType type, ActorStats attacker, out bool critical)
+    {
+        damage = RollCriticalDamage(damage, attacker, out critical);
         return target is ActorHealth health ? health.TakeDamage(damage, type, attacker, critical)
             : target.TakeDamage(damage, type, attacker);
     }

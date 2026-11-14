@@ -29,6 +29,11 @@ public abstract class Item : MonoBehaviour, ITooltipSource
     public int Price => _price;
     public ulong Uid { get; private set; }
     public virtual float BaseCooldown => _cooldown;
+    protected float GetReducedCooldown(float duration)
+    {
+        float reduction = _ownerStats != null ? _ownerStats.CooldownReduction.Value : 0f;
+        return duration * (1f - Mathf.Clamp(reduction, 0f, 0.9f));
+    }
     public virtual float GetRange(ActorStats owner) => 0f;
     public string Description => TooltipText.Format(this, _description);
     public string StatsDescription => TooltipText.Format(this, _statsDescription);
@@ -61,8 +66,7 @@ public abstract class Item : MonoBehaviour, ITooltipSource
             !_ownerNetworkObject.NetworkManager.IsServer || CooldownRemaining > 0f || !CanUse())
             return false;
 
-        float cdr = _ownerStats != null ? _ownerStats.CooldownReduction.Value : 0f;
-        CooldownDuration = BaseCooldown * (1f - Mathf.Clamp(cdr, 0f, 0.9f));
+        CooldownDuration = GetReducedCooldown(BaseCooldown);
         CooldownEndsAt = _ownerNetworkObject.NetworkManager.ServerTime.Time + CooldownDuration;
         Use();
         return true;

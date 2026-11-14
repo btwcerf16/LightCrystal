@@ -20,7 +20,14 @@ public sealed class LobbyMenuUI : MonoBehaviour
     private GameLobby _lobby;
     private Font _font;
     private GameObject _entry;
+    private GameObject _modeSelection;
+    private GameObject _friendsMenu;
     private GameObject _room;
+    private RectTransform _crystal;
+    private Image _crystalGlow;
+    private readonly Image[] _crystalParticles = new Image[12];
+    private Texture2D _glowTexture;
+    private Sprite _glowSprite;
     private InputField _address;
     private Text _status;
     private Text _roster;
@@ -74,24 +81,42 @@ public sealed class LobbyMenuUI : MonoBehaviour
         Button(background, "Выход", new Vector2(784, 436), new Vector2(128, 48), Quit, quiet: true);
 
         _entry = Rect("Connection", background, Vector2.zero, new Vector2(1696, 704)).gameObject;
-        Label(_entry.transform, "Собрать отряд", new Vector2(-528, 208), new Vector2(640, 80), 64, Paper, TextAnchor.MiddleLeft);
-        Label(_entry.transform, "Создай комнату или подключись к друзьям", new Vector2(-528, 128), new Vector2(640, 48), 28, Secondary, TextAnchor.MiddleLeft);
-        Button(_entry.transform, "Создать комнату", new Vector2(-608, 32), new Vector2(480, 64), () => _connection.CreateLobby(), primary: true);
-        Label(_entry.transform, "Адрес хоста", new Vector2(-688, -64), new Vector2(320, 40), 24, Secondary, TextAnchor.MiddleLeft);
-        RectTransform address = Rect("HostAddress", _entry.transform, new Vector2(-688, -120), new Vector2(320, 64));
+        BuildCrystal(_entry.transform);
+        _modeSelection = Rect("GameMode", _entry.transform, Vector2.zero, Vector2.zero).gameObject;
+        _friendsMenu = Rect("Friends", _entry.transform, Vector2.zero, Vector2.zero).gameObject;
+        Label(_modeSelection.transform, "Выбор режима", new Vector2(-528, 154), new Vector2(640, 80), 58, Paper, TextAnchor.MiddleLeft);
+        Button(_modeSelection.transform, "Одиночное", new Vector2(-608, 44), new Vector2(480, 64), () => _connection.CreateLobby(singlePlayer: true), primary: true);
+        Button(_modeSelection.transform, "С друзьями", new Vector2(-608, -40), new Vector2(480, 64), () => ShowFriendsMenu(true));
+        Label(_friendsMenu.transform, "С друзьями", new Vector2(-528, 154), new Vector2(640, 80), 58, Paper, TextAnchor.MiddleLeft);
+        Button(_friendsMenu.transform, "Создать комнату", new Vector2(-608, 44), new Vector2(480, 64), () => _connection.CreateLobby(), primary: true);
+        Label(_friendsMenu.transform, "IP-адрес хоста", new Vector2(-688, -38), new Vector2(320, 40), 24, Secondary, TextAnchor.MiddleLeft);
+        RectTransform address = Rect("HostAddress", _friendsMenu.transform, new Vector2(-688, -92), new Vector2(320, 64));
         Paint(address, new Color32(38, 44, 40, 255));
         _address = address.gameObject.AddComponent<InputField>();
         Text addressText = Label(address, "127.0.0.1", Vector2.zero, new Vector2(288, 56), 28, Paper, TextAnchor.MiddleLeft);
         _address.textComponent = addressText;
-        _address.text = "127.0.0.1";
+        _address.text = "";
+        _address.placeholder = Label(address, "Например, 127.0.0.1", Vector2.zero, new Vector2(288, 56), 20, Secondary, TextAnchor.MiddleLeft);
         _address.characterLimit = 45;
-        Button(_entry.transform, "Подключиться", new Vector2(-392, -120), new Vector2(240, 64), () => _connection.Connect(_address.text));
-        _cancelConnection = Button(_entry.transform, "Отменить подключение", new Vector2(-608, -216), new Vector2(480, 48), () => _connection.Leave(), quiet: true);
+        Button(_friendsMenu.transform, "Подключиться", new Vector2(-392, -92), new Vector2(240, 64), () => _connection.Connect(_address.text));
+        Button(_friendsMenu.transform, "Назад", new Vector2(-760, -184), new Vector2(176, 48), () => ShowFriendsMenu(false), quiet: true);
+        Label(_entry.transform, "Ник", new Vector2(-688, -226), new Vector2(320, 32), 24, Secondary, TextAnchor.MiddleLeft);
+        RectTransform nicknameRect = Rect("Nickname", _entry.transform, new Vector2(-608, -268), new Vector2(480, 56));
+        Paint(nicknameRect, new Color32(38, 44, 40, 255));
+        InputField nickname = nicknameRect.gameObject.AddComponent<InputField>();
+        nickname.textComponent = Label(nicknameRect, "", Vector2.zero, new Vector2(448, 48), 26, Paper, TextAnchor.MiddleLeft);
+        nickname.textComponent.supportRichText = false;
+        nickname.placeholder = Label(nicknameRect, "Введите ник", Vector2.zero, new Vector2(448, 48), 22, Secondary, TextAnchor.MiddleLeft);
+        nickname.characterLimit = LocalPlayerSettings.NicknameLimit;
+        nickname.SetTextWithoutNotify(LocalPlayerSettings.Nickname);
+        nickname.onEndEdit.AddListener(value =>
+        {
+            LocalPlayerSettings.SetNickname(value);
+            nickname.SetTextWithoutNotify(LocalPlayerSettings.Nickname);
+        });
+        _cancelConnection = Button(_entry.transform, "Отменить подключение", new Vector2(-608, -184), new Vector2(480, 48), () => _connection.Leave(), quiet: true);
         _cancelConnection.gameObject.SetActive(false);
-        Image crystal = Paint(Rect("Crystal", _entry.transform, new Vector2(480, 64), new Vector2(256, 384)), Color.white);
-        crystal.sprite = _crystalSprite;
-        crystal.preserveAspect = true;
-        crystal.raycastTarget = false;
+        ShowFriendsMenu(false);
         _status = Label(background, "", new Vector2(0, -436), new Vector2(1696, 48), 24, Secondary, TextAnchor.MiddleLeft);
 
         _room = Rect("CharacterSelection", background, Vector2.zero, new Vector2(1696, 704)).gameObject;
@@ -103,9 +128,14 @@ public sealed class LobbyMenuUI : MonoBehaviour
         RectTransform selection = Rect("Selected", _room.transform, new Vector2(-96, -128), new Vector2(12, 12));
         Paint(selection, Accent).raycastTarget = false;
         selection.localRotation = Quaternion.Euler(0, 0, 45);
-        _className = Label(_room.transform, "", new Vector2(656, 176), new Vector2(384, 144), 40, Paper, TextAnchor.MiddleLeft);
-        _description = Label(_room.transform, "", new Vector2(656, -24), new Vector2(384, 224), 28, Secondary, TextAnchor.UpperLeft);
-        _description.lineSpacing = 1.2f;
+        RectTransform namePlate = Rect("HeroName", _room.transform, new Vector2(656, 196), new Vector2(384, 144));
+        Paint(namePlate, new Color32(34, 41, 37, 255)).raycastTarget = false;
+        _className = Label(namePlate, "", Vector2.zero, new Vector2(352, 136), 40, Paper, TextAnchor.MiddleLeft);
+
+        RectTransform descriptionPlate = Rect("HeroDescription", _room.transform, new Vector2(656, -11), new Vector2(384, 254));
+        Paint(descriptionPlate, new Color32(28, 34, 30, 255)).raycastTarget = false;
+        _description = Label(descriptionPlate, "", Vector2.zero, new Vector2(352, 230), 26, Secondary, TextAnchor.UpperLeft);
+        _description.lineSpacing = 1.1f;
         _spellTooltip = HoverTooltipUI.Create(transform, "LobbySpellTooltipCanvas", "LobbySpellTooltip");
         for (int i = 0; i < _spellIcons.Length; i++)
         {
@@ -125,12 +155,70 @@ public sealed class LobbyMenuUI : MonoBehaviour
         _next = Button(_room.transform, ">", new Vector2(356, 48), new Vector2(48, 64), () => _snap.SnapToNext(), quiet: true);
         _ready = Button(_room.transform, "Готов", new Vector2(656, -272), new Vector2(384, 64), () => _lobby.SetReady(!_localReady, _selected), primary: true);
         _readyLabel = _ready.GetComponentInChildren<Text>();
-        Button(_room.transform, "Покинуть комнату", new Vector2(-712, -272), new Vector2(272, 48), () => _connection.Leave(), quiet: true);
+        Button(_room.transform, "Назад в меню", new Vector2(-712, -272), new Vector2(272, 48), () => _connection.Leave(), quiet: true);
         Label(_room.transform, "< / >   или перетаскивание", new Vector2(-96, -216), new Vector2(672, 40), 24, Secondary);
         Button(_room.transform, "Характеристики [Tab]", new Vector2(-96, -280), new Vector2(400, 48), ToggleStats, quiet: true);
         BuildStatsPanel(canvas);
         UpdateClassDescription();
         _room.SetActive(false);
+    }
+
+    private void ShowFriendsMenu(bool show)
+    {
+        _modeSelection.SetActive(!show);
+        _friendsMenu.SetActive(show);
+    }
+
+    private void BuildCrystal(Transform parent)
+    {
+        const int size = 96;
+        _glowTexture = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        _glowTexture.wrapMode = TextureWrapMode.Clamp;
+        Color32[] pixels = new Color32[size * size];
+        for (int y = 0; y < size; y++)
+        for (int x = 0; x < size; x++)
+        {
+            Vector2 point = new Vector2(x, y) * (2f / (size - 1)) - Vector2.one;
+            float intensity = 1f - Mathf.Clamp01(point.magnitude);
+            pixels[y * size + x] = new Color32(255, 255, 255, (byte)(255f * intensity * intensity));
+        }
+        _glowTexture.SetPixels32(pixels);
+        _glowTexture.Apply(false, true);
+        _glowSprite = Sprite.Create(_glowTexture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
+
+        _crystalGlow = Paint(Rect("CrystalGlow", parent, new Vector2(480, 64), new Vector2(880, 740)), Color.clear);
+        _crystalGlow.sprite = _glowSprite;
+        _crystalGlow.raycastTarget = false;
+        for (int i = 0; i < _crystalParticles.Length; i++)
+        {
+            Image particle = Paint(Rect("CrystalParticle", parent, Vector2.zero, Vector2.one * (3f + i % 3)), Accent);
+            particle.raycastTarget = false;
+            particle.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
+            _crystalParticles[i] = particle;
+        }
+
+        Image crystal = Paint(Rect("Crystal", parent, new Vector2(480, 64), new Vector2(256, 384)), Color.white);
+        crystal.sprite = _crystalSprite;
+        crystal.preserveAspect = true;
+        crystal.raycastTarget = false;
+        _crystal = crystal.rectTransform;
+        AnimateCrystal(0f);
+    }
+
+    private void AnimateCrystal(float time)
+    {
+        float rise = Mathf.Sin(time * 1.3f) * 14f;
+        _crystal.anchoredPosition = new Vector2(480, 64 + rise);
+        _crystal.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(time * 0.8f) * 2.5f);
+        _crystalGlow.rectTransform.anchoredPosition = _crystal.anchoredPosition;
+        _crystalGlow.color = new Color(0.34f, 0.7f, 0.8f, 0.27f + Mathf.Sin(time * 1.3f) * 0.06f);
+        for (int i = 0; i < _crystalParticles.Length; i++)
+        {
+            float progress = Mathf.Repeat(time * (0.16f + i % 3 * 0.02f) + i * 0.173f, 1f);
+            float x = (i * 137 % 277) - 138f + Mathf.Sin(time * 1.1f + i) * 11f;
+            _crystalParticles[i].rectTransform.anchoredPosition = new Vector2(480f + x, -90f + 330f * progress + rise);
+            _crystalParticles[i].color = new Color(0.58f, 0.83f, 0.86f, Mathf.Sin(progress * Mathf.PI) * 0.55f);
+        }
     }
 
     private void BuildCarousel()
@@ -291,6 +379,7 @@ public sealed class LobbyMenuUI : MonoBehaviour
             ("Скорость атаки", stats.AttackSpeed, false),
             ("Скорость движения", stats.MoveSpeed, false),
             ("Сокращение перезарядки", stats.CooldownReduction, true),
+            ("Сокращение перезарядки заклинаний", stats.SpellCooldownReduction, true),
             ("Физическая защита", stats.PhysicalResistance, true),
             ("Магическая защита", stats.MagicResistance, true),
             ("Сопротивление отбрасыванию", stats.ForceResistance, true),
@@ -300,7 +389,6 @@ public sealed class LobbyMenuUI : MonoBehaviour
             ("Магический вампиризм", stats.MagicLifeSteal, true),
             ("Дальность обзора", stats.ViewDistance, false),
             ("Угол обзора", stats.ViewAngle, false),
-            ("Стабилизация, градусы", stats.Stability, false),
             ("Отдаление камеры", stats.CameraDistance, false),
             ("Скорость каста", stats.CastSpeed, false),
             ("Бонус скорости снаряда", stats.ProjectileSpeed, false),
@@ -349,7 +437,10 @@ public sealed class LobbyMenuUI : MonoBehaviour
             _lobby = GameLobby.Instance;
             _selectionSynced = false;
             _localReady = false;
-            if (_lobby != null) _lobby.Changed += RefreshRoom;
+            if (_lobby != null)
+                _lobby.Changed += RefreshRoom;
+            else
+                ShowFriendsMenu(false);
             RefreshRoom();
         }
         if (_lobby == null)
@@ -358,8 +449,14 @@ public sealed class LobbyMenuUI : MonoBehaviour
             _statsPanel.SetActive(false);
             _entry.SetActive(true);
             _room.SetActive(false);
-            _cancelConnection.gameObject.SetActive(NetworkManager.Singleton.IsListening);
-            _status.text = NetworkManager.Singleton.IsListening ? "Подключение…" : _connection.Error;
+            bool connecting = NetworkManager.Singleton.IsListening;
+            _cancelConnection.gameObject.SetActive(connecting);
+            if (connecting)
+            {
+                _modeSelection.SetActive(false);
+                _friendsMenu.SetActive(false);
+            }
+            _status.text = connecting ? "Подключение…" : _connection.Error;
             return;
         }
         if (Keyboard.current == null) return;
@@ -376,6 +473,8 @@ public sealed class LobbyMenuUI : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (_entry != null && _entry.activeInHierarchy)
+            AnimateCrystal(Time.unscaledTime);
         if (_room == null || !_room.activeSelf) return;
         if (_hoveredSpell >= 0 && Pointer.current != null) _spellTooltip.Move(Pointer.current.position.ReadValue());
         for (int i = 0; i < _cards.Length; i++)
@@ -400,13 +499,14 @@ public sealed class LobbyMenuUI : MonoBehaviour
             if (i > 0) _roster.text += "\n\n";
             string className = _characters[player.CharacterIndex].DisplayName;
             if (className.Length > 18) className = className.Substring(0, 17) + "…";
-            _roster.text += "Player" + (player.ClientId + 1) + "\n" + className + " · " + state;
+            _roster.text += player.DisplayName + "\n" + className + " · " + state;
             if (player.ClientId == NetworkManager.Singleton.LocalClientId)
             {
                 _localReady = player.IsReady;
                 if (!_selectionSynced)
                 {
                     _selectionSynced = true;
+                    StartCoroutine(PublishNickname());
                     StartCoroutine(ShowInitialSelection());
                 }
             }
@@ -416,8 +516,17 @@ public sealed class LobbyMenuUI : MonoBehaviour
         _previous.interactable = _next.interactable = canChoose;
         bool available = _lobby.IsCharacterAvailable(_selected, NetworkManager.Singleton.LocalClientId);
         _ready.interactable = !_lobby.IsStarting && !_isMoving && available;
-        _readyLabel.text = !available ? "Класс занят" : _localReady ? "Не готов" : "Готов";
-        _status.text = _lobby.IsStarting ? "Все готовы. Загружаем карту…" : !available ? "Этот класс уже выбран другим игроком" : _localReady ? "Ожидание остальных игроков" : "Карта запустится, когда все будут готовы";
+        bool singlePlayer = _connection.IsSinglePlayer;
+        _readyLabel.text = singlePlayer ? "Начать игру" : !available ? "Класс занят" : _localReady ? "Не готов" : "Готов";
+        _status.text = _lobby.IsStarting ? "Загружаем карту…" : singlePlayer ? "" : !available ? "Этот класс уже выбран другим игроком" : _localReady ? "Ожидание остальных игроков" : "Карта запустится, когда все будут готовы";
+    }
+
+    private IEnumerator PublishNickname()
+    {
+        GameLobby lobby = _lobby;
+        yield return null;
+        if (lobby != null && lobby.IsSpawned && lobby == _lobby)
+            lobby.SetNickname(LocalPlayerSettings.Nickname);
     }
 
     private IEnumerator ShowInitialSelection()
@@ -443,6 +552,8 @@ public sealed class LobbyMenuUI : MonoBehaviour
     private void OnDestroy()
     {
         if (_lobby != null) _lobby.Changed -= RefreshRoom;
+        Destroy(_glowSprite);
+        Destroy(_glowTexture);
     }
 
     private static void Quit()

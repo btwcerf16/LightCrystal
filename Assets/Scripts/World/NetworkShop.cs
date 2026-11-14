@@ -3,12 +3,14 @@ using Unity.Netcode;
 using UnityEngine;
 
 [RequireComponent(typeof(NetworkObject), typeof(Shop))]
-public class NetworkShop : NetworkBehaviour
+public class NetworkShop : NetworkBehaviour, IWaveEvent
 {
     private Shop _shop;
     private float _capacity;
     [SerializeField, Min(0.1f)] private float _lifetime = 60f;
     private double _expiresAt;
+    private bool _wasUsed;
+    public event System.Action<bool> Finished;
 
     [SerializeField] private List<WorldItem> _worldItems = new();
 
@@ -17,6 +19,7 @@ public class NetworkShop : NetworkBehaviour
         if (IsServer)
         {
             _shop = GetComponent<Shop>();
+            _wasUsed = false;
             PlayerHUD.NotifyPlayers(NetworkManager, "Появился торговец", new Color32(245, 205, 106, 255));
         }
     }
@@ -39,17 +42,28 @@ public class NetworkShop : NetworkBehaviour
 
     private void Update()
     {
-        if (IsSpawned && IsServer && _expiresAt > 0 && NetworkManager.ServerTime.Time >= _expiresAt)
-            NetworkObject.Despawn();
+        if (!IsSpawned || !IsServer || NetworkManager.ShutdownInProgress || _expiresAt <= 0
+            || NetworkManager.ServerTime.Time < _expiresAt)
+            return;
+
+        _expiresAt = 0;
+        if (_worldItems.Count > 0)
+            Finished?.Invoke(_wasUsed);
+        NetworkObject.Despawn();
     }
 
     public override void OnNetworkDespawn()
     {
-        if (!IsServer || NetworkManager.ShutdownInProgress)
+        Finished = null;
+        _expiresAt = 0;
+        if (!IsServer)
             return;
         foreach (WorldItem item in _worldItems)
         {
-            if (item != null && item.IsSpawned && item.IsForSale)
+            if (item == null)
+                continue;
+            item.Purchased -= MarkUsed;
+            if (!NetworkManager.ShutdownInProgress && item.IsSpawned && item.IsForSale)
                 item.NetworkObject.Despawn();
         }
     }
@@ -58,9 +72,14 @@ public class NetworkShop : NetworkBehaviour
     {
         _worldItems = _shop.GetItems();
         foreach (WorldItem worldItem in _worldItems)
+        {
+            worldItem.Purchased += MarkUsed;
             worldItem.NetworkObject.Spawn();
+        }
         _expiresAt = NetworkManager.ServerTime.Time + _lifetime;
     }
+
+    private void MarkUsed() => _wasUsed = true;
 
     public void SetCapacity(float capacity)
     {

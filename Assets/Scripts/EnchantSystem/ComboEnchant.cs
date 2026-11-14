@@ -5,7 +5,7 @@ public sealed class ComboEnchant : Enchant
     private float _expiresAt;
     public int Count { get; private set; }
 
-    public override void OnHit(IDamageable target)
+    public override void OnHit(IDamageable target, EAttackType attackType, UnityEngine.Vector2 impactPoint)
     {
         Count += Stacks;
         _expiresAt = Time.time + ((ComboEnchantData)Data).ResetDelay;

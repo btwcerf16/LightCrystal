@@ -106,7 +106,7 @@ public class NetworkPlayerInventory: NetworkBehaviour
             int itemId = isOccupied ? item.ItemId : 0;
             ulong uid = isOccupied ? item.Uid : 0;
             EItemRarity rarity = isOccupied ? item.Rarity : EItemRarity.Common;
-            EnchantState enchants = item is Weapon enchantedWeapon ? enchantedWeapon.GetEnchantState() : default;
+            EnchantState enchants = item != null && item.TryGetComponent(out WeaponEnchants weaponEnchants) ? weaponEnchants.GetEnchantState() : default;
             float cooldownDuration = isOccupied ? item.CooldownDuration : 0f;
             double cooldownEndsAt = isOccupied ? item.CooldownEndsAt : 0d;
 

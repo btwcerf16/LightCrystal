@@ -11,7 +11,7 @@ public struct ProjectileData
     public ActorStats Attacker;
     public Weapon SourceWeapon;
     public EffectData EffectOnHit;
-    public bool IsArrow;
     public bool IgnoreItemEffects;
     public bool StatsApplied;
+    public bool IsArrow;
 }

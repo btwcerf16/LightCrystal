@@ -22,7 +22,6 @@ MonoBehaviour:
   <MoveSpeed>k__BackingField: 5
   <AttackSpeed>k__BackingField: 1
   <CooldownReduction>k__BackingField: 0
-  <Stability>k__BackingField: 0
   <CameraDistance>k__BackingField: 1
   <CastSpeed>k__BackingField: 1
   <ProjectileSpeed>k__BackingField: 12

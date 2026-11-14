@@ -41,6 +41,6 @@ public sealed class EmbeddedArrow : Effect
         GetComponent<EffectHandler>().RemoveEffect(this);
         _health.TakeDamage(damage, EDamageType.Pure, _attacker);
         if (_weapon != null && _weapon.OwnerStats == _attacker)
-            _weapon.NotifyHit(_health);
+            _weapon.NotifyHit(_health, EAttackType.Range);
     }
 }

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f5a41a0f5e1b48ccbc4ddd26a64ff45a, type: 3}
+  m_Name: DeepReflection
+  m_EditorClassIdentifier: Assembly-CSharp::ItemBuffData
+  EffectName: "Глубокое размышление"
+  EffectDuration: 5
+  EffectDescription: "Эдвард сужает обзор и сосредотачивается на цели."
+  SpriteIcon: {fileID: 21300000, guid: ae74f5b4379547f293539d8708b6aff6, type: 3}
+  EffectColor: {r: 0.5, g: 0.8, b: 0.95, a: 1}
+  IsBuff: 1
+  IsPermanent: 1
+  Status: 0
+  CanPurged: 1
+  Stackable: 0
+  RestartOnReapply: 1
+  ViewDistance: 3
+  ViewAngleMultiplier: 0.3
+  MoveSpeedMultiplier: 0.5
+  ProjectileSpeed: 1
+  ProjectileSpeedMultiplier: 1
+  ProjectileRange: 2
+  ProjectileRangeMultiplier: 1

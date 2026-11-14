@@ -15,7 +15,9 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
         public EffectData Data;
         public double EndsAt;
         public RectTransform Rect;
-        public Text Timer;
+        public RectTransform ElapsedFill;
+        public Text StackLabel;
+        public int Count;
         public bool IsPresent;
     }
 
@@ -96,10 +98,11 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
         {
             EffectView view = _views[i];
             view.Rect.anchoredPosition = new Vector2(-i * 56f, 0f);
-            if (view.IsPresent)
+            if (view.IsPresent && !view.Data.IsPermanent)
             {
                 float remaining = Mathf.Max(0f, (float)(view.EndsAt - NetworkManager.ServerTime.Time));
-                view.Timer.text = view.Data.IsPermanent ? "" : Mathf.CeilToInt(remaining).ToString();
+                float fraction = Mathf.Clamp01(remaining / Mathf.Max(0.01f, view.Data.EffectDuration));
+                view.ElapsedFill.anchorMin = new Vector2(0f, fraction);
             }
         }
         _viewport.gameObject.SetActive(_views.Count > 0);
@@ -112,9 +115,9 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
         }
 
         Vector2 pointer = Pointer.current.position.ReadValue();
-        if (_hovered != null && IsUnderPointer(_hovered, pointer))
+        if (_hovered != null && _hovered.IsPresent && IsUnderPointer(_hovered, pointer))
         {
-            _tooltip.Move(pointer);
+            ShowTooltip(_hovered, pointer);
             return;
         }
 
@@ -123,7 +126,7 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
         {
             if (_views[i].IsPresent && IsUnderPointer(_views[i], pointer))
             {
-                ShowTooltip(_views[i]);
+                ShowTooltip(_views[i], pointer);
                 break;
             }
         }
@@ -138,7 +141,10 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
     private void RefreshEffects()
     {
         foreach (EffectView view in _views)
+        {
             view.IsPresent = false;
+            view.Count = 0;
+        }
 
         for (int i = 0; i < _effects.Count; i++)
         {
@@ -147,21 +153,28 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
             if (data == null)
                 continue;
 
-            EffectView view = _views.Find(candidate => candidate.InstanceId == slot.InstanceId);
+            EffectView view = _views.Find(candidate => data.Stackable
+                ? candidate.Data == data
+                : candidate.InstanceId == slot.InstanceId);
             if (view == null)
             {
                 view = CreateView(slot.InstanceId, data);
                 _views.Add(view);
             }
+            view.EndsAt = view.IsPresent ? System.Math.Max(view.EndsAt, slot.EndsAt) : slot.EndsAt;
             view.IsPresent = true;
-            view.EndsAt = slot.EndsAt;
+            view.Count++;
         }
 
         for (int i = _views.Count - 1; i >= 0; i--)
         {
             EffectView view = _views[i];
             if (view.IsPresent)
+            {
+                view.Rect.gameObject.SetActive(true);
+                view.StackLabel.text = view.Count.ToString();
                 continue;
+            }
             if (_hovered != null && !_hovered.IsPresent)
             {
                 view.Rect.gameObject.SetActive(false);
@@ -174,13 +187,13 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
 
     private EffectView CreateView(int instanceId, EffectData data)
     {
-        RectTransform rect = Rect("Effect_" + instanceId, _row, new Vector2(48f, 56f));
+        RectTransform rect = Rect("Effect_" + instanceId, _row, new Vector2(48f, 48f));
         Background(rect, HudStyle.Surface, true);
         Outline border = rect.gameObject.AddComponent<Outline>();
         border.effectColor = GetBorderColor(data);
         border.effectDistance = new Vector2(2f, -2f);
-        RectTransform iconRect = Rect("Icon", rect, new Vector2(40f, 38f));
-        iconRect.anchoredPosition = new Vector2(-4f, -3f);
+        RectTransform iconRect = Rect("Icon", rect, new Vector2(40f, 40f));
+        iconRect.anchoredPosition = new Vector2(-4f, -4f);
         if (data.SpriteIcon != null)
         {
             Image icon = iconRect.gameObject.AddComponent<Image>();
@@ -195,13 +208,20 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
             letter.alignment = TextAnchor.MiddleCenter;
             letter.color = data.EffectColor;
         }
-        Text timer = Label("Time", rect, 12, new Vector2(48f, 16f));
-        timer.rectTransform.anchoredPosition = new Vector2(0f, -40f);
-        timer.alignment = TextAnchor.MiddleCenter;
-        return new EffectView { InstanceId = instanceId, Data = data, Rect = rect, Timer = timer };
+        RectTransform elapsedFill = Rect("Elapsed", iconRect, Vector2.zero);
+        elapsedFill.anchorMin = new Vector2(0f, 1f);
+        elapsedFill.anchorMax = Vector2.one;
+        Background(elapsedFill, new Color(0f, 0f, 0f, 0.65f), false);
+        Text stackLabel = Label("Stacks", rect, 16, new Vector2(38f, 38f));
+        stackLabel.rectTransform.anchoredPosition = new Vector2(-4f, -5f);
+        stackLabel.alignment = TextAnchor.LowerRight;
+        stackLabel.fontStyle = FontStyle.Bold;
+        Outline stackOutline = stackLabel.gameObject.AddComponent<Outline>();
+        stackOutline.effectColor = Color.black;
+        return new EffectView { InstanceId = instanceId, Data = data, Rect = rect, ElapsedFill = elapsedFill, StackLabel = stackLabel };
     }
 
-    private void ShowTooltip(EffectView view)
+    private void ShowTooltip(EffectView view, Vector2 pointer)
     {
         _hovered = view;
         _tooltip.SetBorderColor(GetBorderColor(view.Data));
@@ -209,7 +229,12 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
         string description = view.Data.FormatText(view.Data.EffectDescription);
         string stats = view.Data.FormatText(view.Data.EffectStats);
         string body = string.IsNullOrEmpty(stats) ? description : description + "\n\n" + stats;
-        _tooltip.Show(view, view.Data.EffectName, body, Pointer.current.position.ReadValue());
+        if (!view.Data.IsPermanent)
+        {
+            float remaining = Mathf.Max(0f, (float)(view.EndsAt - NetworkManager.ServerTime.Time));
+            body += $"\n\nОсталось {Mathf.CeilToInt(remaining)} с";
+        }
+        _tooltip.Show(view, view.Data.EffectName, body, pointer);
     }
 
     private Color GetBorderColor(EffectData data)

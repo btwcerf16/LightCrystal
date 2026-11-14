@@ -6,6 +6,7 @@ public sealed class NetworkTrap : NetworkBehaviour
 {
     [SerializeField] private Animator _warningAnimator;
     [SerializeField] private ParticleSystem _triggerEffectPrefab;
+    [SerializeField] private WorldSoundId _triggerSound = WorldSoundId.None;
     private readonly NetworkVariable<Vector3> _warningData = new();
     private Trap _trap;
 
@@ -54,6 +55,7 @@ public sealed class NetworkTrap : NetworkBehaviour
         if (_triggerEffectPrefab != null)
             PlayTriggerEffectRpc(transform.position, _trap.Radius);
 
+        NetworkWorldAudio.Play(NetworkManager, _triggerSound, transform.position);
         NetworkManager.GetComponent<NetworkObjectPool>().ReturnObject(NetworkObject);
     }
 

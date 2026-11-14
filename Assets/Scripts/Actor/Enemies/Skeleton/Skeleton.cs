@@ -150,14 +150,16 @@ public sealed class Skeleton : Enemy
         ProjectileData data = new ProjectileData
         {
             Direction = _shotDirection,
-            IsArrow = true,
             Damage = Stats.PhysicalDamage.Value,
             LayerMask = _targetMask,
             DamageType = EDamageType.Physical,
+            IsArrow = true,
             Attacker = Stats
         };
         arrow.Launch(data);
-        arrow.GetComponent<NetworkObject>().Spawn();
+        NetworkObject arrowObject = arrow.GetComponent<NetworkObject>();
+        arrowObject.Spawn();
+        NetworkWorldAudio.Play(arrowObject.NetworkManager, WorldSoundId.SkeletonBowRelease, _muzzle.position);
     }
 
     public void FinishAttack()

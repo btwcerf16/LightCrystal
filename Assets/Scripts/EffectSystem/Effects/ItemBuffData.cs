@@ -10,6 +10,15 @@ public sealed class ItemBuffData : EffectData
     public float CameraDistance;
     public float MadnessResistance;
     public bool FreeSpellCooldowns;
+    public float ViewDistance;
+    public float ViewAngleMultiplier = 1f;
+    public float MoveSpeedMultiplier = 1f;
+    public float ProjectileSpeed;
+    public float ProjectileSpeedBonus;
+    public float ProjectileSpeedMultiplier = 1f;
+    public float ProjectileRange;
+    public float ProjectileRangeMultiplier = 1f;
+    public float ProjectilePiercing;
     public float CriticalChancePercent => CriticalChance * 100f;
     public float CameraDistancePercent => CameraDistance * 100f;
     public float MadnessResistancePercent => MadnessResistance * 100f;

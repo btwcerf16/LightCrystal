@@ -7,6 +7,9 @@ public sealed class NetworkPlayerArsenal : NetworkBehaviour
     private NetworkList<NetworkInventorySlot> _slots;
     private readonly NetworkVariable<int> _activeWeaponIndex = new NetworkVariable<int>(0,
         NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
+    private readonly NetworkVariable<float> _weaponCharge = new(-1f);
+
+    public float WeaponCharge => IsServer ? _arsenal.ActiveWeapon?.ChargeProgress ?? -1f : _weaponCharge.Value;
 
     private ActorArsenal _arsenal;
     private ActorHand _hand;
@@ -21,6 +24,12 @@ public sealed class NetworkPlayerArsenal : NetworkBehaviour
         _hand = GetComponentInChildren<ActorHand>();
         _slots = new NetworkList<NetworkInventorySlot>(readPerm: NetworkVariableReadPermission.Everyone,
             writePerm: NetworkVariableWritePermission.Server);
+    }
+
+    private void LateUpdate()
+    {
+        if (IsSpawned && IsServer)
+            _weaponCharge.Value = WeaponCharge;
     }
 
     public override void OnNetworkSpawn()
@@ -77,7 +86,7 @@ public sealed class NetworkPlayerArsenal : NetworkBehaviour
             int itemId = isOccupied ? weapon.ItemId : 0;
             ulong uid = isOccupied ? weapon.Uid : 0;
             EItemRarity rarity = isOccupied ? weapon.Rarity : EItemRarity.Common;
-            EnchantState enchants = weapon is Weapon enchantedWeapon ? enchantedWeapon.GetEnchantState() : default;
+            EnchantState enchants = weapon != null && weapon.TryGetComponent(out WeaponEnchants weaponEnchants) ? weaponEnchants.GetEnchantState() : default;
             float cooldownDuration = isOccupied ? weapon.CooldownDuration : 0f;
             double cooldownEndsAt = isOccupied ? weapon.CooldownEndsAt : 0d;
 
