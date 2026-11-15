@@ -284,7 +284,7 @@ TextMesh:
   m_FontSize: 48
   m_FontStyle: 0
   m_RichText: 1
-  m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Font: {fileID: 12800000, guid: 167076a3b3434566a9e428189c6823cd, type: 3}
   m_Color:
     serializedVersion: 2
     rgba: 4283617786

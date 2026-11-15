@@ -31,16 +31,19 @@ public sealed class SummonZone : MonoBehaviour
             _visual.transform.localScale = new Vector3(_radius * 2f, _radius * 2f, 1f);
     }
 
-    public void Process(float deltaTime, bool occupied)
+    public void Process(float deltaTime, bool occupied, bool isWaveEvent)
     {
         if (IsComplete || deltaTime <= 0f)
             return;
-        deltaTime = Mathf.Min(deltaTime, Mathf.Max(0f, _duration - _elapsed));
-        _elapsed += deltaTime;
+        if (!isWaveEvent)
+        {
+            deltaTime = Mathf.Min(deltaTime, Mathf.Max(0f, _duration - _elapsed));
+            _elapsed += deltaTime;
+        }
         if (occupied)
             _filledTime += deltaTime;
         Capacity = Mathf.Clamp01(_filledTime / _fillDuration) * 100f;
-        IsComplete = Capacity >= 100f || _elapsed >= _duration;
+        IsComplete = Capacity >= 100f || (!isWaveEvent && _elapsed >= _duration);
     }
 
     public void SetVisuals(float capacity, float phase)

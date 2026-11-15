@@ -41,7 +41,7 @@ public sealed class PlayerStatsUI : NetworkBehaviour
         if (!IsSpawned || !IsClient || !IsOwner || !isActiveAndEnabled || _canvas != null)
             return;
         ActorStats stats = GetComponent<ActorStats>();
-        _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _font = HudStyle.PixelFont;
         _canvas = new GameObject("StatsCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
         _canvas.transform.SetParent(transform, false);
         _canvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;

@@ -10,6 +10,7 @@ public sealed class NetworkPlayerWallet : NetworkBehaviour
     private ActorWallet _wallet;
 
     public event Action<string> HintRequested;
+    public event Action<int, Vector2> CurrencyGainReceived;
 
     private void Awake()
     {
@@ -22,6 +23,7 @@ public sealed class NetworkPlayerWallet : NetworkBehaviour
         if (IsServer)
         {
             _wallet.CurrencyChanged += Publish;
+            _wallet.CurrencyGained += ShowCurrencyGainRpc;
             Publish(_wallet.Currency);
         }
         else
@@ -32,6 +34,7 @@ public sealed class NetworkPlayerWallet : NetworkBehaviour
     {
         _currency.OnValueChanged -= Receive;
         _wallet.CurrencyChanged -= Publish;
+        _wallet.CurrencyGained -= ShowCurrencyGainRpc;
     }
 
     private void Publish(int currency)
@@ -43,6 +46,12 @@ public sealed class NetworkPlayerWallet : NetworkBehaviour
     {
         if (!IsServer)
             _wallet.SetCurrency(current);
+    }
+
+    [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Server)]
+    private void ShowCurrencyGainRpc(int amount, Vector2 sourcePosition)
+    {
+        CurrencyGainReceived?.Invoke(amount, sourcePosition);
     }
 
     public void ShowInsufficientFunds()

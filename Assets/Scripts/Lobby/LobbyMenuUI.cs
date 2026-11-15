@@ -59,7 +59,7 @@ public sealed class LobbyMenuUI : MonoBehaviour
     private void Start()
     {
         _connection = NetworkManager.Singleton.GetComponent<LobbyConnection>();
-        _font = _menuFont != null ? _menuFont : Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _font = _menuFont != null ? _menuFont : HudStyle.PixelFont;
         if (EventSystem.current == null)
             new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
         RectTransform canvas = new GameObject("LobbyCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster)).GetComponent<RectTransform>();

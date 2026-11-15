@@ -22,7 +22,7 @@ public sealed class SceneTransition : MonoBehaviour
         gameObject.AddComponent<GraphicRaycaster>();
         _group = gameObject.AddComponent<CanvasGroup>();
         _group.blocksRaycasts = false;
-        if (LoadingProgressText != null) LoadingProgressText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        if (LoadingProgressText != null) LoadingProgressText.font = HudStyle.PixelFont;
     }
 
     public IEnumerator Cover()

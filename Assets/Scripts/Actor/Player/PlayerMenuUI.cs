@@ -46,7 +46,7 @@ public sealed class PlayerMenuUI : NetworkBehaviour
         if (!IsSpawned || !IsClient || !IsOwner || _canvas != null)
             return;
 
-        _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _font = HudStyle.PixelFont;
         if (EventSystem.current == null)
             new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
         _canvas = new GameObject("MenuCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));

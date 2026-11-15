@@ -15,9 +15,11 @@ public sealed class NetworkEnchanter : NetworkBehaviour, IWaveEvent
     private float _capacity = 50f;
     private double _expiresAt;
     private bool _wasUsed;
+    private bool _isWaveEvent;
     public event System.Action<bool> Finished;
     public int EventLevel => _eventLevel.Value;
     public void SetCapacity(float capacity) => _capacity = Mathf.Clamp(capacity, 0f, 100f);
+    public void SetWaveEvent() => _isWaveEvent = true;
 
     private void Awake()
     {
@@ -53,7 +55,7 @@ public sealed class NetworkEnchanter : NetworkBehaviour, IWaveEvent
                 }
                 _runes.Add(new NetworkRuneState { EnchantId = removesEnchant ? 0 : enchant.Id, SpriteIndex = Random.Range(0, _runeSprites.Length) });
             }
-            _expiresAt = _lifetime > 0f ? NetworkManager.ServerTime.Time + _lifetime : 0;
+            _expiresAt = !_isWaveEvent && _lifetime > 0f ? NetworkManager.ServerTime.Time + _lifetime : 0;
         }
         Sprite[] sprites = new Sprite[_runes.Count];
         EnchantData[] enchants = new EnchantData[_runes.Count];
@@ -82,6 +84,14 @@ public sealed class NetworkEnchanter : NetworkBehaviour, IWaveEvent
     {
         if (!IsSpawned || !IsServer || NetworkManager.ShutdownInProgress || _expiresAt <= 0
             || NetworkManager.ServerTime.Time < _expiresAt)
+            return;
+
+        Close();
+    }
+
+    public void Close()
+    {
+        if (!IsSpawned || !IsServer || NetworkManager.ShutdownInProgress)
             return;
 
         _expiresAt = 0;

@@ -207,6 +207,6 @@ public sealed class DarkenedDaggerWeapon : Weapon
             effects.AddEffect(_criticalSpeedEffect);
         }
         if (target.IsDead && target is ActorHealth health && health.GetComponent<Enemy>() != null)
-            OwnerStats.GetComponent<ActorWallet>().AddCurrency(5);
+            OwnerStats.GetComponent<ActorWallet>().AddCurrency(5, health.transform.position);
     }
 }

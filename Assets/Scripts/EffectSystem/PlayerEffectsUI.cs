@@ -46,7 +46,7 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
 
         _effects = GetComponent<NetworkEffectHandler>();
         _effects.EffectsChanged += MarkDirty;
-        _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _font = HudStyle.PixelFont;
         if (EventSystem.current == null)
             new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
 

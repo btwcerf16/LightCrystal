@@ -9,6 +9,7 @@ public sealed class PlayerHUD : NetworkBehaviour
     private ActorWallet _wallet;
     private NetworkPlayerWallet _networkWallet;
     private Text _currencyText;
+    private readonly object _currencyGainTweens = new();
     private Text _performanceText;
     private float _performanceElapsed;
     private int _performanceFrames;
@@ -25,6 +26,7 @@ public sealed class PlayerHUD : NetworkBehaviour
     private Text _waveTimerTitle;
     private bool _shownPaused;
     private int _shownSeconds = -1;
+    private int _shownWaveNumber;
     private WaveDirector _waveDirector;
     private ActorArsenal _arsenal;
     private NetworkPlayerArsenal _networkArsenal;
@@ -39,6 +41,8 @@ public sealed class PlayerHUD : NetworkBehaviour
     private readonly NetworkVariable<int> _combo = new(0,
         NetworkVariableReadPermission.Owner, NetworkVariableWritePermission.Server);
     private readonly NetworkVariable<double> _waveStartsAt = new(0,
+        NetworkVariableReadPermission.Owner, NetworkVariableWritePermission.Server);
+    private readonly NetworkVariable<int> _activeWaveNumber = new(0,
         NetworkVariableReadPermission.Owner, NetworkVariableWritePermission.Server);
 
     private readonly NetworkVariable<float> _pausedCalmRemaining = new(-1f,
@@ -68,6 +72,7 @@ public sealed class PlayerHUD : NetworkBehaviour
         _waveDirector.CalmStarted += PublishWaveTimer;
         _waveDirector.WaveStarted += PublishWaveTimer;
         _waveDirector.PauseChanged += PublishWaveTimer;
+        _waveDirector.CycleStopped += PublishWaveTimer;
         PublishWaveTimer();
     }
 
@@ -75,8 +80,10 @@ public sealed class PlayerHUD : NetworkBehaviour
     {
         if (!IsSpawned || !IsServer)
             return;
-        _pausedCalmRemaining.Value = _waveDirector.IsPaused ? _waveDirector.CalmTimeRemaining : -1f;
-        _waveStartsAt.Value = _waveDirector.CurrentState is CalmState
+        bool isCalm = _waveDirector.CurrentState is CalmState;
+        _activeWaveNumber.Value = _waveDirector.CurrentState is WaveStartState ? _waveDirector.WaveCount : 0;
+        _pausedCalmRemaining.Value = isCalm && _waveDirector.IsPaused ? _waveDirector.CalmTimeRemaining : -1f;
+        _waveStartsAt.Value = isCalm
             ? NetworkManager.ServerTime.Time + _waveDirector.CalmTimeRemaining : 0;
     }
 
@@ -95,20 +102,25 @@ public sealed class PlayerHUD : NetworkBehaviour
         }
         if (!IsSpawned || !IsOwner || _waveTimer == null)
             return;
+        int waveNumber = _activeWaveNumber.Value;
+        bool inWave = waveNumber > 0;
         bool paused = _pausedCalmRemaining.Value >= 0f;
         double remaining = paused ? _pausedCalmRemaining.Value : _waveStartsAt.Value - NetworkManager.ServerTime.Time;
-        bool visible = paused || (_waveStartsAt.Value > 0 && remaining > 0);
+        bool visible = inWave || paused || _waveStartsAt.Value > 0;
         _waveTimer.gameObject.SetActive(visible);
         if (!visible)
             return;
-        int seconds = Mathf.CeilToInt((float)remaining);
-        if (seconds == _shownSeconds && paused == _shownPaused)
+        int seconds = inWave ? 0 : Mathf.CeilToInt(Mathf.Max(0f, (float)remaining));
+        if (waveNumber == _shownWaveNumber && seconds == _shownSeconds && paused == _shownPaused)
             return;
+        _shownWaveNumber = waveNumber;
         _shownSeconds = seconds;
         _shownPaused = paused;
+        _waveTimerTitle.gameObject.SetActive(!inWave);
+        _waveTimerText.rectTransform.anchoredPosition = inWave ? Vector2.zero : new Vector2(0f, -10f);
         _waveTimerTitle.text = paused ? "Волны на паузе" : "До следующей волны";
-        _waveTimerText.text = paused && _waveStartsAt.Value == 0 ? "Пауза" : $"{seconds / 60:00}:{seconds % 60:00}";
-        _waveTimerText.color = !paused && seconds <= 5 ? new Color(1f, 0.48f, 0.3f) : HudStyle.Text;
+        _waveTimerText.text = inWave ? $"Волна {waveNumber}" : $"{seconds / 60:00}:{seconds % 60:00}";
+        _waveTimerText.color = !inWave && !paused && seconds <= 5 ? new Color(1f, 0.48f, 0.3f) : HudStyle.Text;
     }
 
     private void UpdatePerformanceStats()
@@ -356,6 +368,7 @@ public sealed class PlayerHUD : NetworkBehaviour
         _waveTimer.anchorMin = _waveTimer.anchorMax = _waveTimer.pivot = new Vector2(0.5f, 1f);
         _waveTimer.anchoredPosition = new Vector2(0f, -24f);
         _waveTimer.sizeDelta = new Vector2(176f, 64f);
+        _waveTimer.localScale = new Vector3(0.7f, 0.7f, 1f);
         Image background = _waveTimer.GetComponent<Image>();
         background.color = HudStyle.Surface;
         background.raycastTarget = false;
@@ -405,6 +418,7 @@ public sealed class PlayerHUD : NetworkBehaviour
         _currencyText.rectTransform.offsetMin = new Vector2(32f, 0f);
         _wallet.CurrencyChanged += UpdateCurrency;
         _networkWallet.HintRequested += ShowHint;
+        _networkWallet.CurrencyGainReceived += PlayCurrencyGain;
         UpdateCurrency(_wallet.Currency);
 
         _hintRect = Section("Hint", new Vector2(ArsenalWidth, Height + 38f), new Vector2(CenterWidth, 36f));
@@ -426,7 +440,7 @@ public sealed class PlayerHUD : NetworkBehaviour
         text.rectTransform.anchorMin = Vector2.zero;
         text.rectTransform.anchorMax = Vector2.one;
         text.rectTransform.offsetMin = text.rectTransform.offsetMax = Vector2.zero;
-        text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        text.font = HudStyle.PixelFont;
         text.fontSize = 18;
         text.color = color;
         text.alignment = TextAnchor.MiddleCenter;
@@ -437,6 +451,43 @@ public sealed class PlayerHUD : NetworkBehaviour
     private void UpdateCurrency(int currency)
     {
         _currencyText.text = currency.ToString();
+    }
+
+    private void PlayCurrencyGain(int amount, Vector2 sourcePosition)
+    {
+        if (_currencyIcon == null)
+            return;
+
+        int coinCount = Mathf.Min(amount, 12);
+        float coinScale = 0.28f / _currencyIcon.bounds.size.y;
+        for (int i = 0; i < coinCount; i++)
+        {
+            Vector2 arc = Vector2.up * (0.36f + 0.04f * (i % 3));
+            SpriteRenderer coin = new GameObject("Gold Gain Coin").AddComponent<SpriteRenderer>();
+            coin.transform.SetParent(transform, false);
+            coin.transform.localScale = Vector3.one * coinScale;
+            coin.sprite = _currencyIcon;
+            coin.sortingOrder = 5;
+            coin.enabled = false;
+
+            DOVirtual.Float(0f, 1f, 0.48f, progress =>
+                {
+                    coin.enabled = true;
+                    Vector2 destination = (Vector2)transform.position + Vector2.up * 0.15f;
+                    Vector2 position = Vector2.Lerp(sourcePosition, destination, progress) + arc * Mathf.Sin(progress * Mathf.PI);
+                    coin.transform.position = new Vector3(position.x, position.y, transform.position.z);
+                    coin.transform.localScale = Vector3.one * (coinScale * Mathf.Lerp(1f, 0.35f, progress));
+                })
+                .SetEase(Ease.InQuad)
+                .SetDelay(i * 0.045f)
+                .SetTarget(_currencyGainTweens)
+                .SetLink(coin.gameObject)
+                .OnKill(() =>
+                {
+                    if (coin != null)
+                        Destroy(coin.gameObject);
+                });
+        }
     }
 
     private void ShowHint(string message)
@@ -463,6 +514,7 @@ public sealed class PlayerHUD : NetworkBehaviour
             _waveDirector.CalmStarted -= PublishWaveTimer;
             _waveDirector.WaveStarted -= PublishWaveTimer;
             _waveDirector.PauseChanged -= PublishWaveTimer;
+            _waveDirector.CycleStopped -= PublishWaveTimer;
         }
         Hide();
     }
@@ -474,7 +526,11 @@ public sealed class PlayerHUD : NetworkBehaviour
         if (_wallet != null)
             _wallet.CurrencyChanged -= UpdateCurrency;
         if (_networkWallet != null)
+        {
             _networkWallet.HintRequested -= ShowHint;
+            _networkWallet.CurrencyGainReceived -= PlayCurrencyGain;
+        }
+        DOTween.Kill(_currencyGainTweens);
         _hintAnimation?.Kill();
         _comboPulse?.Kill();
         _comboFade?.Kill();

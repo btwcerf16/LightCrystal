@@ -66,7 +66,7 @@ public sealed class SpellUI : NetworkBehaviour
 
     private void CreatePanel()
     {
-        _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _font = HudStyle.PixelFont;
         _castSprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f));
         if (EventSystem.current == null)
             new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
@@ -136,11 +136,15 @@ public sealed class SpellUI : NetworkBehaviour
             bool passive = config != null && config.IsPassive;
             Text binding = HudStyle.Binding(card, "");
             binding.transform.parent.gameObject.SetActive(!passive);
-            RectTransform costBadge = Rect("CostBadge", card, new Vector2(width - 30f, -width + 19f), new Vector2(28f, 17f));
-            Image(costBadge, HudStyle.Surface, false);
-            Text cost = Label(costBadge, "Cost", "", Vector2.zero, costBadge.sizeDelta, 12);
+            UnityEngine.UI.Text cost = Label(card, "Cost", "", new Vector2(-4f, 3f), new Vector2(36f, 18f), 16);
+            RectTransform costRect = cost.rectTransform;
+            costRect.anchorMin = costRect.anchorMax = costRect.pivot = Vector2.right;
+            cost.alignment = TextAnchor.LowerRight;
+            UnityEngine.UI.Outline costOutline = cost.gameObject.AddComponent<UnityEngine.UI.Outline>();
+            costOutline.effectColor = Color.black;
+            costOutline.effectDistance = new Vector2(1f, -1f);
             cost.text = config != null && !passive ? config.SanityCost.ToString("0.#") : "";
-            costBadge.gameObject.SetActive(config != null && !passive);
+            cost.gameObject.SetActive(config != null && !passive);
             _slots.Add(new SlotView { Button = button, Binding = binding, Cost = cost, Timer = timer, Cooldown = cooldown.gameObject, CastFill = castFill, Border = border });
         }
         RefreshBindings();
@@ -194,7 +198,7 @@ public sealed class SpellUI : NetworkBehaviour
             bool affordable = toggled || _vitals.State.z >= spell.SanityCost;
             _slots[i].Cooldown.SetActive(!casting && remaining > 0f);
             _slots[i].Timer.text = remaining >= 1f ? Mathf.CeilToInt(remaining).ToString() : remaining.ToString("0.0");
-            _slots[i].Cost.color = affordable ? new Color(0.9f, 0.57f, 0.23f) : new Color(0.95f, 0.3f, 0.25f);
+            _slots[i].Cost.color = affordable ? new Color32(255, 227, 148, 255) : new Color32(255, 126, 114, 255);
             _slots[i].Button.interactable = !passive && !casting && remaining <= 0f && affordable && _vitals.State.x > 0f && !_input.IsMenuOpen && !_input.IsStatsOpen;
         }
     }

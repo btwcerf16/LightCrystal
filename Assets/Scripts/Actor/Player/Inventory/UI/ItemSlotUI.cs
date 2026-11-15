@@ -53,7 +53,7 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
         timer.anchorMax = Vector2.one;
         timer.offsetMin = timer.offsetMax = Vector2.zero;
         _cooldownText = timer.gameObject.AddComponent<Text>();
-        _cooldownText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _cooldownText.font = HudStyle.PixelFont;
         _cooldownText.fontSize = 18;
         _cooldownText.alignment = TextAnchor.MiddleCenter;
         _cooldownText.color = HudStyle.Text;

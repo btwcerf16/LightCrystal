@@ -25,7 +25,7 @@ public sealed class BossBarsUI : MonoBehaviour
     public void Initialize(NetworkManager manager)
     {
         _manager = manager;
-        _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _font = HudStyle.PixelFont;
         RectTransform panel = (RectTransform)transform;
         panel.anchorMin = panel.anchorMax = panel.pivot = new Vector2(0.5f, 1f);
         panel.anchoredPosition = new Vector2(0f, -98f);

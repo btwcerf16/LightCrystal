@@ -49,7 +49,7 @@ public sealed class EventNotificationsUI : MonoBehaviour
         _messageText.rectTransform.anchorMax = Vector2.one;
         _messageText.rectTransform.offsetMin = new Vector2(14f, 12f);
         _messageText.rectTransform.offsetMax = new Vector2(-14f, -12f);
-        _messageText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _messageText.font = HudStyle.PixelFont;
         _messageText.fontSize = 18;
         _messageText.color = HudStyle.Text;
         _messageText.alignment = TextAnchor.MiddleLeft;

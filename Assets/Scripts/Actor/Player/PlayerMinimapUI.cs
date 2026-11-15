@@ -9,6 +9,7 @@ public sealed class PlayerMinimapUI : MonoBehaviour
     private sealed class TargetMarker
     {
         public RectTransform Dot;
+        public Image RevealRing;
         public NetworkActorVitals Vitals;
         public ActorHealth Health;
         public Animator Animator;
@@ -33,6 +34,8 @@ public sealed class PlayerMinimapUI : MonoBehaviour
     private Texture2D _mapTexture;
     private Texture2D _dotTexture;
     private Sprite _dotSprite;
+    private Texture2D _revealRingTexture;
+    private Sprite _revealRingSprite;
     private ulong _revealedEventId;
     private double _eventRevealedUntil;
 
@@ -186,11 +189,53 @@ public sealed class PlayerMinimapUI : MonoBehaviour
             marker.Dot.gameObject.SetActive(visible);
             if (visible)
                 marker.Dot.anchoredPosition = MapPosition(target.transform.position);
+            if (marker.RevealRing != null || (visible && revealed))
+                UpdateEventRevealHighlight(marker, visible && revealed);
         }
         foreach (NetworkObject target in _removed)
             _targets.Remove(target);
         _crystalDot.SetAsLastSibling();
         _playerDot.SetAsLastSibling();
+    }
+
+    private void UpdateEventRevealHighlight(TargetMarker marker, bool show)
+    {
+        if (!show)
+        {
+            marker.RevealRing.gameObject.SetActive(false);
+            return;
+        }
+
+        if (marker.RevealRing == null)
+        {
+            if (_revealRingSprite == null)
+            {
+                const int textureSize = 32;
+                _revealRingTexture = new Texture2D(textureSize, textureSize, TextureFormat.RGBA32, false);
+                _revealRingTexture.filterMode = FilterMode.Bilinear;
+                _revealRingTexture.wrapMode = TextureWrapMode.Clamp;
+                Color32[] pixels = new Color32[textureSize * textureSize];
+                for (int y = 0; y < textureSize; y++)
+                    for (int x = 0; x < textureSize; x++)
+                    {
+                        float distanceSquared = new Vector2(x - 15.5f, y - 15.5f).sqrMagnitude;
+                        pixels[y * textureSize + x] = distanceSquared >= 121f && distanceSquared <= 225f ? Color.white : Color.clear;
+                    }
+                _revealRingTexture.SetPixels32(pixels);
+                _revealRingTexture.Apply(false, true);
+                _revealRingSprite = Sprite.Create(_revealRingTexture, new Rect(0f, 0f, textureSize, textureSize), new Vector2(0.5f, 0.5f));
+            }
+
+            marker.RevealRing = new GameObject("Event Reveal Ring", typeof(RectTransform), typeof(Image)).GetComponent<Image>();
+            marker.RevealRing.transform.SetParent(marker.Dot, false);
+            marker.RevealRing.sprite = _revealRingSprite;
+            marker.RevealRing.raycastTarget = false;
+        }
+
+        marker.RevealRing.gameObject.SetActive(true);
+        float pulse = Mathf.Repeat(Time.unscaledTime, 1f);
+        marker.RevealRing.rectTransform.sizeDelta = Vector2.one * Mathf.Lerp(11f, 16f, pulse);
+        marker.RevealRing.color = new Color(1f, 0.83f, 0.2f, 1f - pulse);
     }
 
     private RectTransform Marker(string markerName, Color color, float size)
@@ -251,5 +296,7 @@ public sealed class PlayerMinimapUI : MonoBehaviour
         if (_mapTexture != null) Destroy(_mapTexture);
         if (_dotSprite != null) Destroy(_dotSprite);
         if (_dotTexture != null) Destroy(_dotTexture);
+        if (_revealRingSprite != null) Destroy(_revealRingSprite);
+        if (_revealRingTexture != null) Destroy(_revealRingTexture);
     }
 }

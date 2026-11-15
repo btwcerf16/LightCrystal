@@ -24,12 +24,14 @@ public class NetworkShop : NetworkBehaviour, IWaveEvent
         }
     }
 
-    public void Initialize()
+    public void Initialize(bool closeOnNextWave = false)
     {
         if (!IsServer || !IsSpawned)
             return;
         _shop.Initialize(_capacity);
         SpawnItems();
+        if (!closeOnNextWave)
+            _expiresAt = NetworkManager.ServerTime.Time + _lifetime;
     }
 
     public void Initialize(EShopCategory category)
@@ -38,12 +40,21 @@ public class NetworkShop : NetworkBehaviour, IWaveEvent
             return;
         _shop.Initialize(category);
         SpawnItems();
+        _expiresAt = NetworkManager.ServerTime.Time + _lifetime;
     }
 
     private void Update()
     {
         if (!IsSpawned || !IsServer || NetworkManager.ShutdownInProgress || _expiresAt <= 0
             || NetworkManager.ServerTime.Time < _expiresAt)
+            return;
+
+        Close();
+    }
+
+    public void Close()
+    {
+        if (!IsSpawned || !IsServer || NetworkManager.ShutdownInProgress)
             return;
 
         _expiresAt = 0;
@@ -76,7 +87,6 @@ public class NetworkShop : NetworkBehaviour, IWaveEvent
             worldItem.Purchased += MarkUsed;
             worldItem.NetworkObject.Spawn();
         }
-        _expiresAt = NetworkManager.ServerTime.Time + _lifetime;
     }
 
     private void MarkUsed() => _wasUsed = true;

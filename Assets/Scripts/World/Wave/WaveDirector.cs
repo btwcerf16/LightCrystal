@@ -58,8 +58,10 @@ public class WaveDirector : MonoBehaviour
     public EnemyDatabase EnemyDatabase => _enemyDatabase;
     public event Action<Enemy> EnemyActivated;
     public event Action CalmStarted;
+    public event Action CalmEnded;
     public event Action WaveStarted;
     public event Action PauseChanged;
+    public event Action CycleStopped;
 
     private void Awake()
     {
@@ -207,7 +209,10 @@ public class WaveDirector : MonoBehaviour
             return;
         CalmTimeRemaining = Mathf.Max(0f, CalmTimeRemaining - Mathf.Max(0f, deltaTime));
         if (CalmTimeRemaining == 0f)
+        {
+            CalmEnded?.Invoke();
             _stateMachine.ChangeState(_waveState);
+        }
     }
 
     public void StartWave()
@@ -282,6 +287,7 @@ public class WaveDirector : MonoBehaviour
 
     public void Stop()
     {
+        bool wasInitialized = _isInitialized;
         _stateMachine.Stop();
         _isInitialized = false;
         WaveCount = 0;
@@ -302,6 +308,8 @@ public class WaveDirector : MonoBehaviour
         ActiveEnemies.Clear();
         WaveEnemies.Clear();
         CalmEnemies.Clear();
+        if (wasInitialized)
+            CycleStopped?.Invoke();
     }
 
     private void OnDestroy()

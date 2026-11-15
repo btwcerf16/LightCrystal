@@ -3,6 +3,9 @@ using UnityEngine.UI;
 
 public static class HudStyle
 {
+    private static Font _pixelFont;
+    public static Font PixelFont => _pixelFont ??= Resources.Load<Font>("Tiny5-Regular");
+
     public static readonly Color Surface = new Color32(22, 24, 25, 255);
     public static readonly Color Slot = new Color32(33, 36, 37, 255);
     public static readonly Color Line = new Color32(66, 71, 72, 255);
@@ -22,7 +25,7 @@ public static class HudStyle
         label.rectTransform.anchorMin = Vector2.zero;
         label.rectTransform.anchorMax = Vector2.one;
         label.rectTransform.offsetMin = label.rectTransform.offsetMax = Vector2.zero;
-        label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        label.font = PixelFont;
         label.fontSize = 12;
         label.alignment = TextAnchor.MiddleCenter;
         label.color = Text;

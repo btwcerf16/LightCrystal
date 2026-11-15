@@ -32,7 +32,7 @@ public sealed class ArsenalUI : NetworkBehaviour
         if (count <= 0)
             return;
 
-        _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _font = HudStyle.PixelFont;
         _slotBindings = GetComponent<PlayerSlotBindings>();
         int columns = Columns;
         int rows = Mathf.CeilToInt((float)count / columns);

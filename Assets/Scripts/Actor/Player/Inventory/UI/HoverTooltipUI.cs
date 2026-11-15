@@ -205,7 +205,7 @@ public sealed class HoverTooltipUI : MonoBehaviour
     {
         Text label = Rect(name, parent != null ? parent : _panel, Vector2.zero).gameObject.AddComponent<Text>();
         label.rectTransform.anchoredPosition = position;
-        label.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        label.font = HudStyle.PixelFont;
         label.fontSize = size;
         label.color = HudStyle.Text;
         label.alignment = TextAnchor.UpperLeft;

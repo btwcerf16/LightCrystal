@@ -12,9 +12,10 @@ public sealed class NetworkSummonZone : NetworkBehaviour
     private readonly NetworkVariable<double> _startedAt = new();
     private SummonZone _zone;
     private double _lastTick;
-    private bool _waitForWave;
+    private bool _isWaveEvent;
 
     public float Capacity => _capacity.Value;
+    public event System.Action<NetworkObject> EventSummoned;
 
     private void Awake()
     {
@@ -41,28 +42,25 @@ public sealed class NetworkSummonZone : NetworkBehaviour
             return;
 
         ProcessZone(now);
-        if (_zone.IsComplete && !_waitForWave)
+        if (_zone.IsComplete)
             CreateEvent();
     }
 
     private void ProcessZone(double now)
     {
-        _zone.Process((float)(now - _lastTick), HasPlayer());
+        _zone.Process((float)(now - _lastTick), HasPlayer(), _isWaveEvent);
         _lastTick = now;
         _capacity.Value = _zone.Capacity;
     }
 
-    public void SetWaitForWave(bool waitForWave)
-    {
-        _waitForWave = waitForWave;
-    }
+    public void SetWaveEvent() => _isWaveEvent = true;
 
-    public NetworkObject SummonEvent()
+    public void SummonEvent()
     {
         if (!IsServer || !IsSpawned)
-            return null;
+            return;
         ProcessZone(NetworkManager.ServerTime.Time);
-        return CreateEvent();
+        CreateEvent();
     }
 
     private bool HasPlayer()
@@ -80,7 +78,7 @@ public sealed class NetworkSummonZone : NetworkBehaviour
         return false;
     }
 
-    private NetworkObject CreateEvent()
+    private void CreateEvent()
     {
         Crystal crystal = FindFirstObjectByType<Crystal>();
         ShopSpawnArea area = FindFirstObjectByType<ShopSpawnArea>();
@@ -89,7 +87,7 @@ public sealed class NetworkSummonZone : NetworkBehaviour
         {
             Debug.LogError("Не удалось создать событие на карте вдали от кристалла.", this);
             NetworkObject.Despawn();
-            return null;
+            return;
         }
 
         NetworkObject summonedEvent;
@@ -97,6 +95,8 @@ public sealed class NetworkSummonZone : NetworkBehaviour
         {
             NetworkEnchanter enchanter = Instantiate(_enchanterPrefab, position, Quaternion.identity);
             enchanter.SetCapacity(Capacity);
+            if (_isWaveEvent)
+                enchanter.SetWaveEvent();
             enchanter.NetworkObject.Spawn();
             summonedEvent = enchanter.NetworkObject;
         }
@@ -105,10 +105,10 @@ public sealed class NetworkSummonZone : NetworkBehaviour
             NetworkShop shop = Instantiate(_shopPrefab, position, Quaternion.identity);
             shop.SetCapacity(Capacity);
             shop.NetworkObject.Spawn();
-            shop.Initialize();
+            shop.Initialize(closeOnNextWave: _isWaveEvent);
             summonedEvent = shop.NetworkObject;
         }
+        EventSummoned?.Invoke(summonedEvent);
         NetworkObject.Despawn();
-        return summonedEvent;
     }
 }

@@ -212,7 +212,7 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
 
         int share = Mathf.FloorToInt(weight * 3 * _goldDropMultiplier) / _goldContributors.Count;
         foreach (ActorWallet wallet in _goldContributors)
-            wallet.AddCurrency(share);
+            wallet.AddCurrency(share, transform.position);
     }
 
     private void OnDied()

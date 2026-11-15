@@ -35,7 +35,7 @@ public sealed class PlayerVitalsUI : NetworkBehaviour
         if (!isActiveAndEnabled || !IsSpawned || !IsClient || !IsOwner || _canvasObject != null)
             return;
 
-        _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _font = HudStyle.PixelFont;
         RectTransform panel = GetComponent<PlayerHUD>().VitalsPanel;
         _canvasObject = panel.gameObject;
         AddImage(panel, HudStyle.Surface);

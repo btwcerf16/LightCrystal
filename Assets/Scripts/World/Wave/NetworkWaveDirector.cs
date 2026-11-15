@@ -8,6 +8,8 @@ public sealed class NetworkWaveDirector : MonoBehaviour
     [SerializeField] private BossFightData _bossFightEffect;
     [SerializeField, Min(0f)] private float _zoneMinimumCrystalDistance = 30f;
     private NetworkSummonZone _summonZone;
+    private NetworkObject _currentWaveEvent;
+    private NetworkObject _nextWaveEvent;
     private NetworkManager _networkManager;
     private WaveDirector _director;
 
@@ -20,7 +22,9 @@ public sealed class NetworkWaveDirector : MonoBehaviour
         _networkManager.OnServerStopped += StopCycle;
         _director.EnemyActivated += SpawnEnemy;
         _director.CalmStarted += SpawnSummonZone;
-        _director.WaveStarted += SummonEvent;
+        _director.CalmEnded += SummonPendingEvent;
+        _director.WaveStarted += OnWaveStarted;
+        _director.CycleStopped += ClearWaveEvents;
     }
 
     private void Start()
@@ -62,30 +66,43 @@ public sealed class NetworkWaveDirector : MonoBehaviour
         if (area.TryGetPosition(crystal.transform.position, _zoneMinimumCrystalDistance, out Vector3 position))
         {
             _summonZone = Instantiate(_summonZonePrefab, position, Quaternion.identity);
-            _summonZone.SetWaitForWave(true);
+            _summonZone.SetWaveEvent();
+            _summonZone.EventSummoned += OnEventSummoned;
             _summonZone.NetworkObject.Spawn();
             return;
         }
         Debug.LogError("No summon zone position found inside the map", this);
     }
 
-    private void SummonEvent()
+    private void SummonPendingEvent()
     {
+        if (_summonZone != null && _summonZone.IsSpawned)
+            _summonZone.SummonEvent();
+    }
+
+    private void OnWaveStarted()
+    {
+        if (_currentWaveEvent != null && _currentWaveEvent.TryGetComponent(out IWaveEvent waveEvent))
+            waveEvent.Close();
+        _currentWaveEvent = _nextWaveEvent;
+        _nextWaveEvent = null;
+        if (_currentWaveEvent != null)
+            TryRevealEvent(_currentWaveEvent);
+
         if (_director.IsBossWave)
             foreach (NetworkClient client in _networkManager.ConnectedClientsList)
                 if (client.PlayerObject != null)
                     ApplyBossFightEffect(client.PlayerObject.gameObject);
-        if (_summonZone != null && _summonZone.IsSpawned)
-        {
-            NetworkObject spawnedEvent = _summonZone.SummonEvent();
-            if (spawnedEvent != null && spawnedEvent.TryGetComponent(out IWaveEvent waveEvent))
-                TrackEvent(spawnedEvent, waveEvent);
-        }
-        _summonZone = null;
     }
 
-    private void TrackEvent(NetworkObject spawnedEvent, IWaveEvent waveEvent)
+    private void OnEventSummoned(NetworkObject spawnedEvent)
     {
+        _summonZone.EventSummoned -= OnEventSummoned;
+        _summonZone = null;
+        if (!spawnedEvent.TryGetComponent(out IWaveEvent waveEvent))
+            return;
+
+        _nextWaveEvent = spawnedEvent;
         void OnFinished(bool wasUsed)
         {
             waveEvent.Finished -= OnFinished;
@@ -93,12 +110,30 @@ public sealed class NetworkWaveDirector : MonoBehaviour
         }
 
         waveEvent.Finished += OnFinished;
+        TryRevealEvent(spawnedEvent);
+    }
+
+    private void TryRevealEvent(NetworkObject spawnedEvent)
+    {
         if (!_director.TryConsumeEventReveal())
             return;
 
         double revealedUntil = _networkManager.ServerTime.Time + 10d;
         foreach (NetworkClient client in _networkManager.ConnectedClientsList)
             client.PlayerObject?.GetComponent<PlayerHUD>()?.RevealWaveEventRpc(spawnedEvent.NetworkObjectId, revealedUntil);
+    }
+
+    private void ClearWaveEvents()
+    {
+        if (_summonZone != null)
+        {
+            _summonZone.EventSummoned -= OnEventSummoned;
+            if (_summonZone.IsSpawned && _networkManager.IsServer && !_networkManager.ShutdownInProgress)
+                _summonZone.NetworkObject.Despawn();
+        }
+        _summonZone = null;
+        _currentWaveEvent = null;
+        _nextWaveEvent = null;
     }
 
     public void ApplyBossFightEffect(GameObject player)
@@ -128,7 +163,6 @@ public sealed class NetworkWaveDirector : MonoBehaviour
         ClearBossFightEffect();
         _director.enabled = false;
         _director.Stop();
-        _summonZone = null;
     }
 
     private void OnDisable()
@@ -138,7 +172,10 @@ public sealed class NetworkWaveDirector : MonoBehaviour
         _networkManager.OnServerStopped -= StopCycle;
         _director.EnemyActivated -= SpawnEnemy;
         _director.CalmStarted -= SpawnSummonZone;
-        _director.WaveStarted -= SummonEvent;
+        _director.CalmEnded -= SummonPendingEvent;
+        _director.WaveStarted -= OnWaveStarted;
+        _director.CycleStopped -= ClearWaveEvents;
+        ClearWaveEvents();
         _director.enabled = false;
     }
 }

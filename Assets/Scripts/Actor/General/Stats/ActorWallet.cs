@@ -7,6 +7,7 @@ public sealed class ActorWallet : MonoBehaviour
 
     public int Currency { get; private set; }
     public event Action<int> CurrencyChanged;
+    public event Action<int, Vector2> CurrencyGained;
 
     private void Awake()
     {
@@ -26,10 +27,14 @@ public sealed class ActorWallet : MonoBehaviour
         return true;
     }
 
-    public void AddCurrency(int amount)
+    public void AddCurrency(int amount, Vector2? sourcePosition = null)
     {
-        if (amount > 0)
-            SetCurrency(Currency + Mathf.Min(amount, int.MaxValue - Currency));
+        int gained = Mathf.Min(amount, int.MaxValue - Currency);
+        if (gained <= 0)
+            return;
+
+        SetCurrency(Currency + gained);
+        CurrencyGained?.Invoke(gained, sourcePosition ?? (Vector2)transform.position);
     }
 
     public void SetCurrency(int amount)

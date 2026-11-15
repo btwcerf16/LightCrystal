@@ -54,7 +54,7 @@ public sealed class GameConsole : NetworkBehaviour
 
         if (EventSystem.current == null)
             new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
-        _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _font = HudStyle.PixelFont;
         _canvas = new GameObject("ConsoleCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster));
         _canvas.transform.SetParent(transform, false);
         Canvas canvas = _canvas.GetComponent<Canvas>();

@@ -13,9 +13,10 @@ MonoBehaviour:
   m_Name: BlinkStun
   m_EditorClassIdentifier: Assembly-CSharp::StatusEffectData
   EffectName: "Дезориентация"
-  EffectDescription: "После телепортации нужно прийти в себя."
+  EffectDescription: "После телепортации студент оглушён и теряет дальность обзора."
   EffectDuration: 0.5
   IsBuff: 0
   Status: 1
   CanPurged: 1
   RestartOnReapply: 1
+  ViewDistanceMultiplier: 0

@@ -42,7 +42,7 @@ public sealed class TeamVitalsUI : NetworkBehaviour
         if (!isActiveAndEnabled || !IsSpawned || !IsClient || !IsOwner || _canvas != null)
             return;
 
-        _font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+        _font = HudStyle.PixelFont;
         _canvas = new GameObject("TeamVitalsCanvas", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler));
         _canvas.transform.SetParent(transform, false);
         _canvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
