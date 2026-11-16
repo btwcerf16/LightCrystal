@@ -1,41 +1,34 @@
-using UnityEngine;
-
-public sealed class ToggleSpell : Spell
+public abstract class ToggleSpell : Spell
 {
-    private Effect _effect;
-    public override bool IsToggled => _effect != null && GetComponent<EffectHandler>().HasEffect(_effect.EffectData);
-    public override bool CanCast(SpellCastData data) => IsToggled || ((ToggleSpellConfig)SpellData).SanityPerSecond == 0f || GetComponent<ActorSanity>().CurrentSanity > 0f;
+    private bool _isToggled;
+    public virtual bool IsToggled => _isToggled;
 
-    protected override void Cast(SpellCastData data)
+    protected sealed override void Cast(SpellCastData data)
     {
         if (IsToggled)
-            StopEffect();
-        else
-            _effect = GetComponent<EffectHandler>().AddEffect(((ToggleSpellConfig)SpellData).Effect);
-
-    }
-
-    private void Update()
-    {
-        if (!IsToggled)
+        {
+            StopToggle();
             return;
-        EffectHandler effects = GetComponent<EffectHandler>();
-        float cost = ((ToggleSpellConfig)SpellData).SanityPerSecond * (1f - _ownerStats.SanityCostReduction.Value) * Time.deltaTime;
-        if (GetComponent<ActorHealth>().IsDead || effects.IsStunned || effects.IsSilenced ||
-            (cost > 0f && !GetComponent<ActorSanity>().TrySpendSanity(cost)))
-            StopEffect();
+        }
+
+        _isToggled = true;
+        OnToggleChanged(true);
     }
 
-    private void StopEffect()
+    protected virtual void OnToggleChanged(bool isToggled) { }
+
+    protected void StopToggle()
     {
-        if (_effect != null)
-            GetComponent<EffectHandler>().RemoveEffect(_effect);
-        _effect = null;
+        if (!_isToggled)
+            return;
+
+        _isToggled = false;
+        OnToggleChanged(false);
     }
 
     public override void Deactivate()
     {
-        StopEffect();
+        StopToggle();
         base.Deactivate();
     }
 }

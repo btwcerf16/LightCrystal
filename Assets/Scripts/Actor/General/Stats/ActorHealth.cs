@@ -51,7 +51,7 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
         return TakeDamage(amount, damageType, attacker, false);
     }
 
-    public float TakeDamage(float amount, EDamageType damageType, ActorStats attacker, bool critical)
+    public float TakeDamage(float amount, EDamageType damageType, ActorStats attacker, bool critical, bool isMelee = false)
     {
         if (amount <= 0f || IsDead || (_effects != null && (_effects.Status & EActorStatus.Invulnerable) != 0))
             return 0f;
@@ -74,7 +74,8 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
         float absorbedDamage = incomingDamage - amount;
         float previousHealth = CurrentHealth;
         CurrentHealth = Mathf.Max(CurrentHealth - amount, 0f);
-        float dealtDamage = previousHealth - CurrentHealth + absorbedDamage;
+        float healthLost = previousHealth - CurrentHealth;
+        float dealtDamage = healthLost + absorbedDamage;
         Enemy enemy = GetComponent<Enemy>();
         if (dealtDamage > 0f && attacker != null && enemy != null)
             enemy.RecordGoldContributor(attacker);
@@ -86,7 +87,13 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
         {
             ActorHealth attackerHealth = attacker.GetComponent<ActorHealth>();
             if (attackerHealth != null)
+            {
                 attackerHealth.DamageDealt?.Invoke(dealtDamage);
+                float lifeSteal = damageType == EDamageType.Magic ? attacker.MagicLifeSteal.Value
+                    : isMelee && damageType == EDamageType.Physical ? attacker.PhysicalLifeSteal.Value : 0f;
+                if (healthLost > 0f && lifeSteal > 0f && (enemy != null) != attacker.TryGetComponent<Enemy>(out _))
+                    attackerHealth.Heal(healthLost * lifeSteal);
+            }
         }
 
         if (CurrentHealth <= 0f)

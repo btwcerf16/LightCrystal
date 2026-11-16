@@ -113,7 +113,7 @@ public sealed class GlassShardsWeapon : Weapon
             IDamageable hitTarget = targetCollider.GetComponentInParent<IDamageable>();
             if (hitTarget == null || hitTarget.IsDead || _meleeHitTargets.Contains(hitTarget))
                 continue;
-            if (DamageCalculator.DealCriticalDamage(hitTarget, _damage, EDamageType.Physical, OwnerStats) <= 0f)
+            if (ActorArsenal.DealWeaponDamage(hitTarget, _damage, EDamageType.Physical, OwnerStats, isMelee: true) <= 0f)
                 continue;
             _meleeHitTargets.Add(hitTarget);
             NotifyMeleeHit(hitTarget, targetCollider.ClosestPoint(attackPosition));

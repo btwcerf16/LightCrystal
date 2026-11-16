@@ -13,7 +13,8 @@ public abstract class Projectile : MonoBehaviour
     private float _remainingLifetime;
     private bool _isFlying;
     private bool _hasFinishedFlight;
-    protected bool IsFlying => _isFlying;
+    private CircleCollider2D _hitbox;
+    protected internal bool IsFlying => _isFlying;
 
     protected ProjectileData Data { get; private set; }
     protected int ExtraPiercing { get; private set; }
@@ -26,6 +27,12 @@ public abstract class Projectile : MonoBehaviour
 
     public virtual void Launch(ProjectileData projectileData)
     {
+        if (_hitbox == null)
+        {
+            _hitbox = gameObject.AddComponent<CircleCollider2D>();
+            _hitbox.isTrigger = true;
+            _hitbox.radius = _collisionRadius;
+        }
         ExtraPiercing = 0;
         _hitTargets.Clear();
         if (projectileData.Attacker != null && !projectileData.StatsApplied)
@@ -126,7 +133,7 @@ public abstract class Projectile : MonoBehaviour
                 Finish();
                 return;
             }
-            float dealtDamage = DamageCalculator.DealCriticalDamage(damageableTarget, Data.Damage, Data.DamageType, Data.Attacker);
+            float dealtDamage = ActorArsenal.DealWeaponDamage(damageableTarget, Data.Damage, Data.DamageType, Data.Attacker);
             if (dealtDamage > 0f)
             {
                 if (!damageableTarget.IsDead && Data.EffectOnHit != null)
@@ -149,7 +156,7 @@ public abstract class Projectile : MonoBehaviour
     protected virtual void OnLifetimeExpired() => Finish();
     protected void StopFlight() => _isFlying = false;
 
-    protected void Finish()
+    protected internal void Finish()
     {
         if (_hasFinishedFlight)
             return;

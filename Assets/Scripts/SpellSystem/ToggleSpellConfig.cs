@@ -5,5 +5,5 @@ public sealed class ToggleSpellConfig : SpellConfig
 {
     public EffectData Effect;
     [Min(0f)] public float SanityPerSecond;
-    public override Spell AddSpell(GameObject owner) => owner.AddComponent<ToggleSpell>();
+    public override Spell AddSpell(GameObject owner) => owner.AddComponent<ToggleEffectSpell>();
 }

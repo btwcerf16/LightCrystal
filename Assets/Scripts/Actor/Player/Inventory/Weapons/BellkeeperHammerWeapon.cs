@@ -135,7 +135,7 @@ public sealed class BellkeeperHammerWeapon : Weapon
             IDamageable target = hit.GetComponentInParent<IDamageable>();
             if (target == null || _hitTargets.Contains(target))
                 continue;
-            if (DamageCalculator.DealCriticalDamage(target, CurrentDamage, EDamageType.Physical, OwnerStats) <= 0f)
+            if (ActorArsenal.DealWeaponDamage(target, CurrentDamage, EDamageType.Physical, OwnerStats, isMelee: true) <= 0f)
                 continue;
             _hitTargets.Add(target);
             PlayImpact();

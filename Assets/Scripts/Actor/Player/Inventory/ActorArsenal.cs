@@ -14,8 +14,22 @@ public sealed class ActorArsenal : MonoBehaviour
     public event Action<int, Weapon> ActiveWeaponChanged;
     public event Action ContentsChanged;
     public event Action<IDamageable> MeleeHit;
+    internal delegate float WeaponHitResolver(IDamageable target, float damage, EDamageType damageType, out bool critical, bool isMelee);
+    internal WeaponHitResolver ResolveWeaponHit { get; set; }
 
     public void NotifyMeleeHit(IDamageable target) => MeleeHit?.Invoke(target);
+
+    internal static float DealWeaponDamage(IDamageable target, float damage, EDamageType damageType, ActorStats attacker, bool isMelee = false)
+    {
+        return DealWeaponDamage(target, damage, damageType, attacker, out _, isMelee);
+    }
+
+    internal static float DealWeaponDamage(IDamageable target, float damage, EDamageType damageType, ActorStats attacker, out bool critical, bool isMelee = false)
+    {
+        if (attacker != null && attacker.TryGetComponent(out ActorArsenal arsenal) && arsenal.ResolveWeaponHit != null)
+            return arsenal.ResolveWeaponHit(target, damage, damageType, out critical, isMelee);
+        return DamageCalculator.DealCriticalDamage(target, damage, damageType, attacker, out critical, isMelee);
+    }
     public event Action<int, int> SlotChangeRequested;
     public event Action<int> WeaponSelectionRequested;
     public event Action<int> WeaponDropRequested;

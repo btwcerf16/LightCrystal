@@ -8,8 +8,8 @@ public abstract class Spell : MonoBehaviour
     protected GameObject _owner;
     protected ActorStats _ownerStats;
     private NetworkObject _networkObject;
-    private ActorSanity _ownerSanity;
-    private EffectHandler _ownerEffects;
+    protected ActorSanity _ownerSanity;
+    protected EffectHandler _ownerEffects;
 
     public SpellConfig SpellData { get; private set; }
     public bool IsActive { get; private set; }
@@ -21,8 +21,8 @@ public abstract class Spell : MonoBehaviour
     private float _castRemaining;
     public float CastProgress => _isCasting ? Mathf.Clamp01(1f - _castRemaining / SpellData.CastTime) : -1f;
     public float CastTime => SpellData.CastTime / _ownerStats.CastSpeed.Value;
-    public virtual bool IsToggled => false;
-    public virtual float SanityCost => SpellData.SanityCost * (1f - _ownerStats.SanityCostReduction.Value);
+    public virtual float SanityCost => GetReducedSanityCost(SpellData.SanityCost);
+    protected float GetReducedSanityCost(float baseCost) => baseCost * (1f - _ownerStats.SanityCostReduction.Value);
     private bool HasFreeCooldowns
     {
         get

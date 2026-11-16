@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bfea018cb97ffe1b78e9c0965024ed2b, type: 3}
+  m_Name: NyxGrace
+  m_EditorClassIdentifier: Assembly-CSharp::NyxGraceConfig
+  SpellName: "Грация"
+  SpellDescription: "Никс бьёт ногой перед собой, сбивает снаряды и отпрыгивает назад."
+  StatsDescription: "Физический урон: {Damage:0.##}\nОглушение: 0,5 с"
+  IsPassive: 0
+  CooldownTime: 5
+  SanityCost: 8
+  CastTime: 0
+  SpriteIcon: {fileID: 21300000, guid: b55e93f8adf8c814aa62f93a9fae300d, type: 3}
+  Damage: 2
+  HopSpeed: 11
+  HopDuration: 0.24
+  Stun: {fileID: 11400000, guid: 52e96962b582479a9098113ed1ce2962, type: 2}
+  WavePrefab: {fileID: 1332558693726375035, guid: 930456ab98183fa415bef4438df6bff2, type: 3}

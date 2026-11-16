@@ -9,6 +9,7 @@ public sealed class NetworkSpellHolder : NetworkBehaviour
     private SpellHolder _holder;
     private PlayerBodyAnimation _bodyAnimation;
     private readonly NetworkVariable<int> _characterIndex = new(0);
+    private readonly NetworkVariable<uint> _toggledSpellSlots = new();
     private int _initialCharacter;
     public CharacterConfig Character { get; private set; }
     public void SetInitialCharacter(int index) => _initialCharacter = index;
@@ -42,6 +43,7 @@ public sealed class NetworkSpellHolder : NetworkBehaviour
         {
             _cooldowns.Clear();
             _castProgress.Clear();
+            _toggledSpellSlots.Value = 0;
             for (int i = 0; i < _holder.Count; i++)
             {
                 _cooldowns.Add(0);
@@ -102,16 +104,31 @@ public sealed class NetworkSpellHolder : NetworkBehaviour
         return index >= 0 && index < _castProgress.Count ? _castProgress[index] : -1f;
     }
 
+    public bool IsSpellToggled(int index)
+    {
+        if (index < 0 || index >= _holder.Spells.Count || _holder.Spells[index] is not ToggleSpell toggle)
+            return false;
+        if (!IsSpawned || IsServer)
+            return toggle.IsToggled;
+        return index < 32 && (_toggledSpellSlots.Value & (1u << index)) != 0;
+    }
+
     private void Update()
     {
         if (!IsSpawned || !IsServer)
             return;
+        uint toggledSpellSlots = 0;
         for (int i = 0; i < _castProgress.Count; i++)
         {
-            float progress = i < _holder.Spells.Count && _holder.Spells[i] != null ? _holder.Spells[i].CastProgress : -1f;
+            Spell spell = i < _holder.Spells.Count ? _holder.Spells[i] : null;
+            float progress = spell != null ? spell.CastProgress : -1f;
             if (_castProgress[i] != progress)
                 _castProgress[i] = progress;
+            if (i < 32 && spell is ToggleSpell { IsToggled: true })
+                toggledSpellSlots |= 1u << i;
         }
+        if (_toggledSpellSlots.Value != toggledSpellSlots)
+            _toggledSpellSlots.Value = toggledSpellSlots;
     }
 
     private void RequestCancelCast() => CancelCastRpc();

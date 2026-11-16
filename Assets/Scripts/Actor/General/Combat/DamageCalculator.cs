@@ -3,26 +3,31 @@ using UnityEngine;
 
 public static class DamageCalculator
 {
-    public static float RollCriticalDamage(float damage, ActorStats attacker)
+    public static float RollCriticalDamage(float damage, ActorStats attacker, float additionalCriticalChance = 0f)
     {
-        return RollCriticalDamage(damage, attacker, out _);
+        return RollCriticalDamage(damage, attacker, additionalCriticalChance, out _);
     }
 
-    private static float RollCriticalDamage(float damage, ActorStats attacker, out bool critical)
+    private static float RollCriticalDamage(float damage, ActorStats attacker, float additionalCriticalChance, out bool critical)
     {
-        critical = attacker != null && UnityEngine.Random.value < attacker.CriticalChance.Value;
+        critical = false;
+        if (attacker == null)
+            return damage;
+
+        float criticalChance = Mathf.Clamp01(attacker.CriticalChance.Value + additionalCriticalChance);
+        critical = UnityEngine.Random.value < criticalChance || criticalChance >= 1f;
         return critical ? damage * attacker.CriticalDamageMultiplier.Value : damage;
     }
 
-    public static float DealCriticalDamage(IDamageable target, float damage, EDamageType type, ActorStats attacker)
+    public static float DealCriticalDamage(IDamageable target, float damage, EDamageType type, ActorStats attacker, bool isMelee = false, float additionalCriticalChance = 0f)
     {
-        return DealCriticalDamage(target, damage, type, attacker, out _);
+        return DealCriticalDamage(target, damage, type, attacker, out _, isMelee, additionalCriticalChance);
     }
 
-    public static float DealCriticalDamage(IDamageable target, float damage, EDamageType type, ActorStats attacker, out bool critical)
+    public static float DealCriticalDamage(IDamageable target, float damage, EDamageType type, ActorStats attacker, out bool critical, bool isMelee = false, float additionalCriticalChance = 0f)
     {
-        damage = RollCriticalDamage(damage, attacker, out critical);
-        return target is ActorHealth health ? health.TakeDamage(damage, type, attacker, critical)
+        damage = RollCriticalDamage(damage, attacker, additionalCriticalChance, out critical);
+        return target is ActorHealth health ? health.TakeDamage(damage, type, attacker, critical, isMelee)
             : target.TakeDamage(damage, type, attacker);
     }
 

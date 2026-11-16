@@ -124,7 +124,7 @@ public sealed class DarkenedDaggerWeapon : Weapon
             IDamageable hitTarget = targetCollider.GetComponentInParent<IDamageable>();
             if (hitTarget == null || hitTarget.IsDead || _meleeHitTargets.Contains(hitTarget))
                 continue;
-            if (DamageCalculator.DealCriticalDamage(hitTarget, _damage, EDamageType.Physical, OwnerStats, out bool critical) <= 0f)
+            if (ActorArsenal.DealWeaponDamage(hitTarget, _damage, EDamageType.Physical, OwnerStats, out bool critical, isMelee: true) <= 0f)
                 continue;
             _meleeHitTargets.Add(hitTarget);
             OnMeleeDamage(hitTarget, critical);

@@ -180,14 +180,7 @@ public sealed class SpellUI : NetworkBehaviour
                 continue;
             }
             bool passive = spell.SpellData.IsPassive;
-            bool toggled = spell.IsToggled;
-            if (spell.SpellData is ToggleSpellConfig toggle)
-            {
-                NetworkEffectHandler effects = GetComponent<NetworkEffectHandler>();
-                for (int j = 0; j < effects.Count; j++)
-                    if (effects.GetData(effects.GetEffect(j).EffectIndex) == toggle.Effect)
-                        toggled = true;
-            }
+            bool toggled = _networkHolder != null ? _networkHolder.IsSpellToggled(i) : spell is ToggleSpell { IsToggled: true };
             _slots[i].Border.effectColor = toggled ? new Color(0.4f, 0.9f, 0.5f) : HudStyle.Line;
             float remaining = passive ? 0f : spell.CooldownRemaining;
             float progress = _networkHolder != null ? _networkHolder.GetCastProgress(i) : spell.CastProgress;

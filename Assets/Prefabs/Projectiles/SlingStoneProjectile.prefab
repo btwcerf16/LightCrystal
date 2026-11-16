@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: 5027646864068170231}
   m_Layer: 0
   m_Name: SlingStoneProjectile
-  m_TagString: Untagged
+  m_TagString: Projectile
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
