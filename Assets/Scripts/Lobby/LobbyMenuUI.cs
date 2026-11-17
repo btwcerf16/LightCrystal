@@ -38,6 +38,7 @@ public sealed class LobbyMenuUI : MonoBehaviour
     private Button _previous;
     private Button _next;
     private Button _cancelConnection;
+    private Toggle _recordRun;
     private ScrollRect _scroll;
     private ScrollSnap _snap;
     private RectTransform[] _cards;
@@ -155,6 +156,7 @@ public sealed class LobbyMenuUI : MonoBehaviour
         _next = Button(_room.transform, ">", new Vector2(356, 48), new Vector2(48, 64), () => _snap.SnapToNext(), quiet: true);
         _ready = Button(_room.transform, "Готов", new Vector2(656, -272), new Vector2(384, 64), () => _lobby.SetReady(!_localReady, _selected), primary: true);
         _readyLabel = _ready.GetComponentInChildren<Text>();
+        BuildRecordRunToggle();
         Button(_room.transform, "Назад в меню", new Vector2(-712, -272), new Vector2(272, 48), () => _connection.Leave(), quiet: true);
         Label(_room.transform, "< / >   или перетаскивание", new Vector2(-96, -216), new Vector2(672, 40), 24, Secondary);
         Button(_room.transform, "Характеристики [Tab]", new Vector2(-96, -280), new Vector2(400, 48), ToggleStats, quiet: true);
@@ -486,11 +488,29 @@ public sealed class LobbyMenuUI : MonoBehaviour
         }
     }
 
+    private void BuildRecordRunToggle()
+    {
+        LocalPlayerSettings.RecordRunStatistics = false;
+        RectTransform row = Rect("RecordRun", _room.transform, new Vector2(656, -331), new Vector2(384, 40));
+        _recordRun = row.gameObject.AddComponent<UnityEngine.UI.Toggle>();
+        _recordRun.targetGraphic = Paint(row, new Color32(28, 34, 30, 255));
+        RectTransform box = Rect("Box", row, new Vector2(-165, 0), new Vector2(20, 20));
+        Paint(box, Secondary).raycastTarget = false;
+        RectTransform check = Rect("Check", box, Vector2.zero, new Vector2(12, 12));
+        _recordRun.graphic = Paint(check, Ink);
+        _recordRun.graphic.raycastTarget = false;
+        Label(row, "Записывать статистику забега", new Vector2(16, 0), new Vector2(310, 40), 20, Paper, TextAnchor.MiddleLeft).raycastTarget = false;
+        _recordRun.SetIsOnWithoutNotify(false);
+        _recordRun.onValueChanged.AddListener(value => LocalPlayerSettings.RecordRunStatistics = value);
+    }
+
     private void RefreshRoom()
     {
         if (_room == null || _lobby == null) return;
         _entry.SetActive(false);
         _room.SetActive(true);
+        _recordRun.gameObject.SetActive(_lobby.IsServer);
+        _recordRun.interactable = !_lobby.IsStarting;
         _roster.text = "";
         for (int i = 0; i < _lobby.Count; i++)
         {

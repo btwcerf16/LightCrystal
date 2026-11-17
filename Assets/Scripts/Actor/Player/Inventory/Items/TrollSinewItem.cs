@@ -2,9 +2,9 @@ using UnityEngine;
 
 public sealed class TrollSinewItem : Item
 {
-    [SerializeField] private float _projectileSpeed = 10f;
+    [SerializeField] private float _cameraDistanceBonus = 0.2f;
     public override string DisplayName => "Тетива из жил тролля";
-    public float ProjectileSpeedBonus => _projectileSpeed;
+    public float CameraDistanceBonus => _cameraDistanceBonus;
 
     public override void Equip()
     {
@@ -13,14 +13,14 @@ public sealed class TrollSinewItem : Item
         base.Equip();
         if (!IsServer)
             return;
-        _ownerStats.ProjectileSpeed.AddModifier(new StatModifier(_projectileSpeed, StatModifierType.Flat, this));
+        _ownerStats.CameraDistance.AddModifier(new StatModifier(_cameraDistanceBonus, StatModifierType.AdditivePercent, this));
     }
 
     public override void Drop()
     {
         if (IsServer)
         {
-            _ownerStats.ProjectileSpeed.RemoveModifiersFrom(this);
+            _ownerStats.CameraDistance.RemoveModifiersFrom(this);
         }
         base.Drop();
     }

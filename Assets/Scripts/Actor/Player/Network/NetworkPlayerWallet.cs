@@ -51,6 +51,8 @@ public sealed class NetworkPlayerWallet : NetworkBehaviour
     [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Server)]
     private void ShowCurrencyGainRpc(int amount, Vector2 sourcePosition)
     {
+        if (TryGetComponent(out WorldAudio audio))
+            audio.Play((int)WorldSoundId.GoldReceived, transform.position);
         CurrencyGainReceived?.Invoke(amount, sourcePosition);
     }
 

@@ -22,6 +22,7 @@ public class PlayerNetworkInteractions : NetworkBehaviour
     
 
     private bool _isSubscribed;
+    public event Action<Weapon, EAttackType> WeaponUseStarted;
 
     private void Awake()
     {
@@ -269,6 +270,7 @@ public class PlayerNetworkInteractions : NetworkBehaviour
             _lastInputType = EInputType.Primary;
             _lastUsedWeaponIndex = _actorArsenal.ActiveWeaponIndex;
             PlayWeaponActionRpc(_lastUsedWeaponIndex, EInputType.Primary);
+            WeaponUseStarted?.Invoke(_lastUsedWeapon, _lastUsedWeapon.PrimaryAttackType);
         }
     }
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
@@ -300,6 +302,7 @@ public class PlayerNetworkInteractions : NetworkBehaviour
             _lastInputType = EInputType.Secondary;
             _lastUsedWeaponIndex = _actorArsenal.ActiveWeaponIndex;
             PlayWeaponActionRpc(_lastUsedWeaponIndex, EInputType.Secondary);
+            WeaponUseStarted?.Invoke(_lastUsedWeapon, _lastUsedWeapon.SecondaryAttackType);
         }
     }
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]

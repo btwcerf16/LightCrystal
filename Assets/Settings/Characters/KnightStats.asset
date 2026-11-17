@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 95adb4702d2d3424585a08df57ee3685, type: 3}
   m_Name: KnightStats
   m_EditorClassIdentifier: Assembly-CSharp::ActorStatsConfig
+  <TargetPriority>k__BackingField: 3
   <ViewDistance>k__BackingField: 12
   <ViewAngle>k__BackingField: 120
   <MaxHealth>k__BackingField: 80

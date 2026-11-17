@@ -11,7 +11,6 @@ public sealed class RustySwordWeapon : Weapon
     [SerializeField] private Transform _attackPointThrust;
     [SerializeField, Min(0.01f)] private float _thrustPointSpacing = 0.8f;
     private ActorStats _stats;
-    private NetworkObject _owner;
     private readonly HashSet<IDamageable> _hitTargets = new HashSet<IDamageable>();
 
     public override string DisplayName => "Ржавый меч";
@@ -27,7 +26,6 @@ public sealed class RustySwordWeapon : Weapon
     private void Awake()
     {
         _stats = GetComponentInParent<ActorStats>();
-        _owner = GetComponentInParent<NetworkObject>();
     }
 
     public override void Use() { }
@@ -36,7 +34,6 @@ public sealed class RustySwordWeapon : Weapon
     {
         base.Equip();
         _stats = GetComponentInParent<ActorStats>();
-        _owner = GetComponentInParent<NetworkObject>();
         if (!_bonusApplied && _stats != null)
         {
             _stats.PhysicalDamage.AddModifier(new StatModifier(_damage, StatModifierType.Flat, this));
@@ -120,7 +117,7 @@ public sealed class RustySwordWeapon : Weapon
         Attack(position, CurrentDamage * SecondaryDamageMultiplier);
     }
 
-    private float CurrentDamage => _stats != null ? _stats.PhysicalDamage.Value : _damage;
+    private float CurrentDamage => PhysicalDamage;
 
     public void StartTrail()
     {
@@ -139,7 +136,7 @@ public sealed class RustySwordWeapon : Weapon
 
     private void Attack(Vector2 position, float damage)
     {
-        if (IsOwnerStunned || !IsEquipped || !_isAttacking || _owner == null || !_owner.IsSpawned || !_owner.NetworkManager.IsServer)
+        if (IsOwnerStunned || !IsEquipped || !_isAttacking || OwnerNetworkObject == null || !OwnerNetworkObject.IsSpawned || !OwnerNetworkObject.NetworkManager.IsServer)
             return;
 
         Collider2D[] targets = Physics2D.OverlapCircleAll(position, _attackRadius);
@@ -147,13 +144,13 @@ public sealed class RustySwordWeapon : Weapon
         {
             if (_hitTargets.Count >= TargetLimit)
                 return;
-            if (target.transform.root == transform.root)
+            if (target.transform.root == OwnerNetworkObject.transform.root)
                 continue;
 
             IDamageable damageable = target.GetComponentInParent<IDamageable>();
             if (damageable != null && _hitTargets.Add(damageable))
             {
-                float dealt = ActorArsenal.DealWeaponDamage(damageable, damage, EDamageType.Physical, _stats, isMelee: true);
+                float dealt = ActorArsenal.DealWeaponDamage(damageable, damage, EDamageType.Physical, OwnerStats, isMelee: true);
                 if (dealt > 0f)
                     NotifyMeleeHit(damageable, target.ClosestPoint(position));
                 else

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 35632b69847162f62db487dbbe3b04e1, type: 3}
+  m_Name: WaveEventDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::WaveEventDatabase
+  _events:
+  - Prefab: {fileID: 4217550918128061283, guid: bc6ffe39c2db17b48940021ae59f0824, type: 3}
+    WaveWeight: 50
+    StandaloneWeight: 70
+  - Prefab: {fileID: 5269882328658457228, guid: 5e708cd8d54c400478cd8b08cf312a51, type: 3}
+    WaveWeight: 30
+    StandaloneWeight: 30
+  - Prefab: {fileID: 7103984887849500154, guid: d6ed5b93114a49efacc1e7a0d23df8ea, type: 3}
+    WaveWeight: 20
+    StandaloneWeight: 0

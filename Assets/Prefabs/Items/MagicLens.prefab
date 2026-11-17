@@ -48,7 +48,9 @@ MonoBehaviour:
   _itemId: 17
   _rarity: 1
   _price: 35
-  _cooldown: 12
+  _cooldown: 15
   _description: "Магический кристалл, сквозь который цель будто на ладони."
-  _statsDescription: "Дальность снарядов: +{ProjectileRangeBonus:0.#}\nАктивно: +20% шанса крита и +30% дальности камеры на {Focus.EffectDuration:0.#} с."
+  _statsDescription: "Дальность снарядов: +{ProjectileRangeBonus:0.#}\nДальность камеры: +{CameraDistanceBonus:P0}\nАктивно: +{Focus.ViewAngleBonus:0.#}° к углу обзора и +{Focus.CastSpeedBonus:P0} к скорости каста на {Focus.EffectDuration:0.#} с."
+  _projectileRange: 2
+  _cameraDistanceBonus: 0.1
   _focus: {fileID: 11400000, guid: 93d0036fdb5c42808253d9f0a8dff478, type: 2}

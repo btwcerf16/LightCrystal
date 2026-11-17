@@ -160,7 +160,7 @@ public sealed class Spider : Enemy
             if (damageable == null || !_hitTargets.Add(damageable))
                 continue;
 
-            float damageDealt = DamageCalculator.DealCriticalDamage(damageable, Stats.PhysicalDamage.Value, EDamageType.Physical, Stats);
+            float damageDealt = DamageCalculator.DealCriticalDamage(damageable, Stats.PhysicalDamage.Value, EDamageType.Physical, Stats, isMelee: true);
             if (damageDealt > 0f && target.GetComponentInParent<PlayerInputReader>() != null)
                 target.GetComponentInParent<EffectHandler>().AddEffect(_webConfig.WebEffect);
         }

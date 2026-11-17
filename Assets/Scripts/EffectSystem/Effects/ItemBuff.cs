@@ -9,6 +9,8 @@ public sealed class ItemBuff : Effect
             owner.CriticalDamageMultiplier.AddModifier(new StatModifier(data.CriticalDamage, StatModifierType.Flat, this));
         if (data.AttackSpeed != 0f)
             owner.AttackSpeed.AddModifier(new StatModifier(data.AttackSpeed, StatModifierType.Flat, this));
+        if (data.CastSpeedBonus != 0f)
+            owner.CastSpeed.AddModifier(new StatModifier(data.CastSpeedBonus, StatModifierType.AdditivePercent, this));
         if (data.CriticalChance != 0f)
             owner.CriticalChance.AddModifier(new StatModifier(data.CriticalChance, StatModifierType.Flat, this));
         if (data.CameraDistance != 0f)
@@ -17,6 +19,8 @@ public sealed class ItemBuff : Effect
             owner.MadnessResistance.AddModifier(new StatModifier(data.MadnessResistance, StatModifierType.Flat, this));
         if (data.ViewDistance != 0f)
             owner.ViewDistance.AddModifier(new StatModifier(data.ViewDistance, StatModifierType.Flat, this));
+        if (data.ViewAngleBonus != 0f)
+            owner.ViewAngle.AddModifier(new StatModifier(data.ViewAngleBonus, StatModifierType.Flat, this));
         if (data.ViewAngleMultiplier != 1f)
             owner.ViewAngle.AddModifier(new StatModifier(data.ViewAngleMultiplier, StatModifierType.Multiplier, this));
         if (data.MoveSpeedMultiplier != 1f)
@@ -42,6 +46,7 @@ public sealed class ItemBuff : Effect
         owner.MoveSpeed.RemoveModifiersFrom(this);
         owner.CriticalDamageMultiplier.RemoveModifiersFrom(this);
         owner.AttackSpeed.RemoveModifiersFrom(this);
+        owner.CastSpeed.RemoveModifiersFrom(this);
         owner.CriticalChance.RemoveModifiersFrom(this);
         owner.CameraDistance.RemoveModifiersFrom(this);
         owner.MadnessResistance.RemoveModifiersFrom(this);

@@ -15,7 +15,7 @@ MonoBehaviour:
   EffectName: "Цель как на ладони"
   EffectDuration: 5
   EffectDescription: "Цель как на ладони"
-  EffectStats: "Шанс критического удара: +{CriticalChancePercent:0.#}%\nДальность камеры: +{CameraDistancePercent:0.#}%\nДлительность: {EffectDuration:0.#} с"
+  EffectStats: "Угол обзора: +{ViewAngleBonus:0.#}°\nСкорость каста: +{CastSpeedBonus:P0}\nДлительность: {EffectDuration:0.#} с"
   SpriteIcon: {fileID: 21300000, guid: f8a015b550094436b1f3edbf0bde9221, type: 3}
   EffectColor: {r: 0.6, g: 0.75, b: 1, a: 1}
   IsBuff: 1
@@ -25,5 +25,5 @@ MonoBehaviour:
   RestartOnReapply: 1
   TintActor: 0
   ActorTintStrength: 0.3
-  CriticalChance: 0.2
-  CameraDistance: 0.3
+  ViewAngleBonus: 45
+  CastSpeedBonus: 0.15

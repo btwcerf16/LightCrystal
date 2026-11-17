@@ -16,9 +16,8 @@ public sealed class ShopConsoleCommands : MonoBehaviour
             throw new ArgumentOutOfRangeException(nameof(capacity), "Мощность должна быть конечным неотрицательным числом.");
 
         NetworkShop shop = CreateShop();
-        shop.SetCapacity(capacity);
+        shop.ConfigureSpawn(capacity, isWaveEvent: false);
         shop.NetworkObject.Spawn();
-        shop.Initialize();
         return $"Создан магазин: {shop.GetComponent<Shop>().Category}, мощность {capacity}.";
     }
 

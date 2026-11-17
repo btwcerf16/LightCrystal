@@ -13,6 +13,8 @@ public sealed class ActorSanity : MonoBehaviour, ISanity, ILightSensitive
     public event Action<float, float> SanityChanged;
     public event Action SanityDepleted;
     public event Action<float> SanityDrained;
+    public event Action<float, bool> SanityLost;
+    public event Action<float> SanitySpent;
 
     public float CurrentSanity { get; private set; }
     public float MaxSanity => _stats.MaxSanity.Value;
@@ -50,10 +52,12 @@ public sealed class ActorSanity : MonoBehaviour, ISanity, ILightSensitive
     {
         if (IsInLight || !isActiveAndEnabled || (_health != null && _health.IsDead))
             return;
-        DrainSanity(_sanityDrainRate * deltaTime);
+        DrainSanity(_sanityDrainRate * deltaTime, fromDarkness: true);
     }
 
-    public float DrainSanity(float amount)
+    public float DrainSanity(float amount) => DrainSanity(amount, fromDarkness: false);
+
+    private float DrainSanity(float amount, bool fromDarkness)
     {
         if (amount <= 0f || IsSanityDepleted)
             return 0f;
@@ -71,7 +75,7 @@ public sealed class ActorSanity : MonoBehaviour, ISanity, ILightSensitive
             SanityDepleted?.Invoke();
 
         if (drainedSanity > 0f)
-            SanityDrained?.Invoke(drainedSanity);
+            NotifySanityLost(drainedSanity, fromDarkness);
         return drainedSanity;
     }
 
@@ -83,6 +87,7 @@ public sealed class ActorSanity : MonoBehaviour, ISanity, ILightSensitive
             return true;
 
         CurrentSanity -= amount;
+        SanitySpent?.Invoke(amount);
         SanityChanged?.Invoke(CurrentSanity, MaxSanity);
         if (CurrentSanity <= 0f)
             SanityDepleted?.Invoke();
@@ -120,7 +125,13 @@ public sealed class ActorSanity : MonoBehaviour, ISanity, ILightSensitive
         CurrentSanity = 0f;
         SanityChanged?.Invoke(CurrentSanity, MaxSanity);
         SanityDepleted?.Invoke();
-        SanityDrained?.Invoke(drainedSanity);
+        NotifySanityLost(drainedSanity, fromDarkness: false);
+    }
+
+    private void NotifySanityLost(float amount, bool fromDarkness)
+    {
+        SanityDrained?.Invoke(amount);
+        SanityLost?.Invoke(amount, fromDarkness);
     }
 
     private void OnMaxSanityChanged(float maxSanity)

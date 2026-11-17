@@ -19,7 +19,7 @@ MonoBehaviour:
   CooldownTime: 5
   SanityCost: 8
   CastTime: 0
-  SpriteIcon: {fileID: 21300000, guid: b55e93f8adf8c814aa62f93a9fae300d, type: 3}
+  SpriteIcon: {fileID: 21300000, guid: e2194b3782c34a16952205fb1d6e6691, type: 3}
   Damage: 2
   HopSpeed: 11
   HopDuration: 0.24

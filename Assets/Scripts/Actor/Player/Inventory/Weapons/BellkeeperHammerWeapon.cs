@@ -10,13 +10,12 @@ public sealed class BellkeeperHammerWeapon : Weapon
     [SerializeField, Min(0.01f)] private float _attackRadius = 0.55f;
     private ActorSanity _sanity;
     private EffectHandler _effects;
-    private NetworkObject _owner;
     private bool _isSlam;
     private bool _impactPlayed;
     private readonly HashSet<IDamageable> _hitTargets = new();
 
     public override string DisplayName => "Молот звонаря";
-    private float CurrentDamage => OwnerStats != null ? OwnerStats.PhysicalDamage.Value : _damage;
+    private float CurrentDamage => PhysicalDamage;
     public float HitDamage => DamageCalculator.CalculateDamage(CurrentDamage, EDamageType.Physical, OwnerStats, null);
     public float AbilityCooldown => GetReducedCooldown(BaseCooldown);
     public override string GetWeaponTooltip(bool detailed) => base.GetWeaponTooltip(detailed)
@@ -30,8 +29,7 @@ public sealed class BellkeeperHammerWeapon : Weapon
         base.Equip();
         _sanity = GetComponentInParent<ActorSanity>();
         _effects = GetComponentInParent<EffectHandler>();
-        _owner = GetComponentInParent<NetworkObject>();
-        if (!_bonusApplied && OwnerStats != null && _owner != null && _owner.IsSpawned && _owner.NetworkManager.IsServer)
+        if (!_bonusApplied && OwnerStats != null && OwnerNetworkObject != null && OwnerNetworkObject.IsSpawned && OwnerNetworkObject.NetworkManager.IsServer)
         {
             OwnerStats.PhysicalDamage.AddModifier(new StatModifier(_damage, StatModifierType.Flat, this));
             _bonusApplied = true;
@@ -73,9 +71,9 @@ public sealed class BellkeeperHammerWeapon : Weapon
 
     public override bool BeginSecondaryUse()
     {
-        if (!IsEquipped || !IsAvailable || IsOwnerStunned || _isAttacking || _owner == null || !_owner.IsSpawned)
+        if (!IsEquipped || !IsAvailable || IsOwnerStunned || _isAttacking || OwnerNetworkObject == null || !OwnerNetworkObject.IsSpawned)
             return false;
-        if (!_owner.NetworkManager.IsServer)
+        if (!OwnerNetworkObject.NetworkManager.IsServer)
         {
             BeginAttack("Slam", true);
             return true;
@@ -86,7 +84,7 @@ public sealed class BellkeeperHammerWeapon : Weapon
             : _sanity == null || _sanity.CurrentSanity < _sanityCost ? "Недостаточно рассудка" : null;
         if (error != null)
         {
-            _owner.GetComponent<NetworkPlayerWallet>().ShowHint(error);
+            OwnerNetworkObject.GetComponent<NetworkPlayerWallet>().ShowHint(error);
             return false;
         }
         return TryUse();
@@ -117,12 +115,12 @@ public sealed class BellkeeperHammerWeapon : Weapon
         if (_impactPlayed)
             return;
         _impactPlayed = true;
-        _owner.GetComponent<NetworkPlayerSetup>().PlayWeaponImpact(_isSlam);
+        OwnerNetworkObject.GetComponent<NetworkPlayerSetup>().PlayWeaponImpact(_isSlam);
     }
 
     public void Strike()
     {
-        if (!_isAttacking || IsOwnerStunned || !IsEquipped || _owner == null || !_owner.IsSpawned || !_owner.NetworkManager.IsServer)
+        if (!_isAttacking || IsOwnerStunned || !IsEquipped || OwnerNetworkObject == null || !OwnerNetworkObject.IsSpawned || !OwnerNetworkObject.NetworkManager.IsServer)
             return;
         if (_isSlam)
             PlayImpact();
@@ -130,7 +128,7 @@ public sealed class BellkeeperHammerWeapon : Weapon
         {
             if (_hitTargets.Count >= TargetLimit)
                 break;
-            if (hit.transform.root == transform.root)
+            if (hit.transform.root == OwnerNetworkObject.transform.root)
                 continue;
             IDamageable target = hit.GetComponentInParent<IDamageable>();
             if (target == null || _hitTargets.Contains(target))

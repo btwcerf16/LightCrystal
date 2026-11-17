@@ -13,6 +13,7 @@ public abstract class Item : MonoBehaviour, ITooltipSource
     [SerializeField, TextArea] private string _statsDescription;
 
     private NetworkObject _ownerNetworkObject;
+    protected NetworkObject OwnerNetworkObject => _ownerNetworkObject;
     protected ActorStats _ownerStats;
     protected bool _bonusApplied;
     private EffectHandler _ownerEffects;
@@ -81,9 +82,14 @@ public abstract class Item : MonoBehaviour, ITooltipSource
     public abstract void Use();
     public virtual void Equip()
     {
-        _ownerNetworkObject = GetComponentInParent<NetworkObject>();
-        _ownerStats = GetComponentInParent<ActorStats>();
-        _ownerEffects = GetComponentInParent<EffectHandler>();
+        BindOwner(transform);
+    }
+
+    protected void BindOwner(Transform owner)
+    {
+        _ownerStats = owner.GetComponentInParent<ActorStats>();
+        _ownerNetworkObject = owner.GetComponentInParent<NetworkObject>();
+        _ownerEffects = owner.GetComponentInParent<EffectHandler>();
         IsEquipped = true;
         gameObject.SetActive(true);
     }

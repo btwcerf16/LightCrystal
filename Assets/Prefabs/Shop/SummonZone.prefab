@@ -179,7 +179,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkSummonZone
   ShowTopMostFoldoutHeaderGroup: 1
-  _shopPrefab: {fileID: 3801610260901209035, guid: bc6ffe39c2db17b48940021ae59f0824, type: 3}
-  _enchanterPrefab: {fileID: 7065520716573070519, guid: 5e708cd8d54c400478cd8b08cf312a51, type: 3}
-  _enchanterChance: 0.3
+  _eventDatabase: {fileID: 11400000, guid: ee64db4815e8ebd21fd788b19aab29ec, type: 2}
   _minimumCrystalDistance: 30

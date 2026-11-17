@@ -4,9 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(NetworkObject), typeof(SummonZone))]
 public sealed class NetworkSummonZone : NetworkBehaviour
 {
-    [SerializeField] private NetworkShop _shopPrefab;
-    [SerializeField] private NetworkEnchanter _enchanterPrefab;
-    [SerializeField, Range(0f, 1f)] private float _enchanterChance = 0.3f;
+    [SerializeField] private WaveEventDatabase _eventDatabase;
     [SerializeField, Min(0f)] private float _minimumCrystalDistance = 30f;
     private readonly NetworkVariable<float> _capacity = new();
     private readonly NetworkVariable<double> _startedAt = new();
@@ -80,9 +78,17 @@ public sealed class NetworkSummonZone : NetworkBehaviour
 
     private void CreateEvent()
     {
+        NetworkObject prefab = _eventDatabase != null ? _eventDatabase.GetRandomPrefab(_isWaveEvent) : null;
+        if (prefab == null || !prefab.TryGetComponent<IWaveEvent>(out _))
+        {
+            Debug.LogError("В базе зоны призыва нужен префаб события с положительным весом.", this);
+            NetworkObject.Despawn();
+            return;
+        }
+
         Crystal crystal = FindFirstObjectByType<Crystal>();
         ShopSpawnArea area = FindFirstObjectByType<ShopSpawnArea>();
-        if (_shopPrefab == null || _enchanterPrefab == null || crystal == null || area == null
+        if (crystal == null || area == null
             || !area.TryGetPosition(crystal.transform.position, _minimumCrystalDistance, out Vector3 position))
         {
             Debug.LogError("Не удалось создать событие на карте вдали от кристалла.", this);
@@ -90,24 +96,9 @@ public sealed class NetworkSummonZone : NetworkBehaviour
             return;
         }
 
-        NetworkObject summonedEvent;
-        if (Random.value < _enchanterChance)
-        {
-            NetworkEnchanter enchanter = Instantiate(_enchanterPrefab, position, Quaternion.identity);
-            enchanter.SetCapacity(Capacity);
-            if (_isWaveEvent)
-                enchanter.SetWaveEvent();
-            enchanter.NetworkObject.Spawn();
-            summonedEvent = enchanter.NetworkObject;
-        }
-        else
-        {
-            NetworkShop shop = Instantiate(_shopPrefab, position, Quaternion.identity);
-            shop.SetCapacity(Capacity);
-            shop.NetworkObject.Spawn();
-            shop.Initialize(closeOnNextWave: _isWaveEvent);
-            summonedEvent = shop.NetworkObject;
-        }
+        NetworkObject summonedEvent = Instantiate(prefab, position, Quaternion.identity);
+        summonedEvent.GetComponent<IWaveEvent>().ConfigureSpawn(Capacity, _isWaveEvent);
+        summonedEvent.Spawn(destroyWithScene: true);
         EventSummoned?.Invoke(summonedEvent);
         NetworkObject.Despawn();
     }

@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemBuffData
   EffectName: "Эмпирическое обучение"
   EffectDescription: "Каждый стак даёт +0,03 к скорости атаки. Озарение расходует 20 стаков."
-  SpriteIcon: {fileID: 21300000, guid: a9f100290a284b778d90322dd0753be7, type: 3}
+  SpriteIcon: {fileID: 21300000, guid: f194c2d7af7d4a458da5bde31707819c, type: 3}
   EffectColor: {r: 0.5, g: 0.8, b: 0.95, a: 1}
   IsBuff: 1
   IsPermanent: 1

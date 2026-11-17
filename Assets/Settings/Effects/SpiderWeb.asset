@@ -28,6 +28,7 @@ MonoBehaviour:
   IsBuff: 0
   IsPermanent: 0
   Status: 0
+  AffectedByEffectResistance: 1
   CanPurged: 1
   Stackable: 1
   RestartOnReapply: 1

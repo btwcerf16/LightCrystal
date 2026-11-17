@@ -12,11 +12,13 @@ public abstract class Weapon : Item
     protected ActorHand _hand;
     protected bool _isAttacking;
     private Stat _animationSpeedStat;
+    private float? _physicalDamageOverride;
     public EAttackType PrimaryAttackType => _primaryAttackType;
     public EAttackType SecondaryAttackType => _secondaryAttackType;
     public virtual float ChargeProgress => -1f;
 
     public bool IsAvailable { get; private set; } = true;
+    public bool IsAttacking => _isAttacking;
     public delegate void TargetLimitModifier(ref int count);
     public event TargetLimitModifier ModifyTargetLimit;
     public event Action Equipped;
@@ -42,7 +44,7 @@ public abstract class Weapon : Item
         StateChanged?.Invoke();
     }
 
-    public ActorStats OwnerStats { get; private set; }
+    public ActorStats OwnerStats => _ownerStats;
     public event Action StateChanged;
     protected internal void NotifyStateChanged() => StateChanged?.Invoke();
 
@@ -109,20 +111,42 @@ public abstract class Weapon : Item
     public override void Equip()
     {
         base.Equip();
-        OwnerStats = GetComponentInParent<ActorStats>();
+        _physicalDamageOverride = null;
         _hand = GetComponentInParent<ActorHand>();
         Equipped?.Invoke();
         SetAttackType(_primaryAttackType);
     }
 
+    internal void BindForUse(ActorStats owner, ActorHand hand, float physicalDamage)
+    {
+        BindOwner(owner.transform);
+        _hand = hand;
+        _physicalDamageOverride = physicalDamage;
+        SetAttackType(_primaryAttackType);
+    }
+
+    protected float PhysicalDamage => _physicalDamageOverride ?? OwnerStats?.PhysicalDamage.Value ?? _damage;
+
+    internal void UnbindForUse()
+    {
+        CancelUse();
+        ClearAnimationSpeed();
+        base.Drop();
+    }
+
     public override void Drop()
     {
         Unequipped?.Invoke();
+        ClearAnimationSpeed();
+        base.Drop();
+    }
+
+    private void ClearAnimationSpeed()
+    {
         if (_animationSpeedStat != null)
             _animationSpeedStat.ValueChanged -= UpdateAnimationSpeed;
         _animationSpeedStat = null;
         UpdateAnimationSpeed(1f);
-        base.Drop();
     }
 
     protected void SetAttackType(EAttackType attackType)

@@ -4,6 +4,7 @@ using UnityEngine;
 public sealed class ItemBuffData : EffectData
 {
     public float AttackSpeed;
+    public float CastSpeedBonus;
     public float MoveSpeed;
     public float CriticalDamage;
     public float CriticalChance;
@@ -11,6 +12,7 @@ public sealed class ItemBuffData : EffectData
     public float MadnessResistance;
     public bool FreeSpellCooldowns;
     public float ViewDistance;
+    public float ViewAngleBonus;
     public float ViewAngleMultiplier = 1f;
     public float MoveSpeedMultiplier = 1f;
     public float ProjectileSpeed;

@@ -51,5 +51,7 @@ MonoBehaviour:
   _price: 45
   _cooldown: 0
   _description: "Когда-то высшая почесть гладиатора. Теперь потемневший кубок напоминает старое ведро."
-  _statsDescription: "Физическая защита: +{Resistance:P0}\nОбзор: −{ViewPenalty:P0}\nСкорость снарядов: −{ProjectileSpeedPenalty:P0}\nЗа каждые {GoldPerStep} золота: +{ResistancePerStep:P0} физической защиты\nНе более +{MaximumGoldResistance:P0} защиты от золота"
+  _statsDescription: "Физическая защита: +{Resistance:P0}\nОбзор: −{ViewPenalty:P0}\nПриоритет цели для врагов: +{TargetPriorityBonus}\nЗа каждые {GoldPerStep} золота: +{ResistancePerStep:P0} физической защиты\nНе более +{MaximumGoldResistance:P0} защиты от золота"
+  _targetPriorityBonus: 2
+  _goldPerStep: 60
 

@@ -19,5 +19,5 @@ MonoBehaviour:
   CooldownTime: 20
   SanityCost: 15
   CastTime: 0
-  SpriteIcon: {fileID: 21300000, guid: 5407197781bb494fb55b96c3dd1ba734, type: 3}
+  SpriteIcon: {fileID: 21300000, guid: 1642f2c9e3564988b05d6fac4001038c, type: 3}
   Effect: {fileID: 11400000, guid: 8cc2febb774c42a7b221cdedb7b8d421, type: 2}

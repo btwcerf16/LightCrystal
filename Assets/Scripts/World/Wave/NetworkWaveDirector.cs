@@ -38,6 +38,13 @@ public sealed class NetworkWaveDirector : MonoBehaviour
         if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name != "Arena01") return;
         _director.enabled = true;
         _director.Initialize(_networkManager.ConnectedClientsIds.Count);
+        if (_networkManager.IsServer && LocalPlayerSettings.RecordRunStatistics && _director.CurrentState != null)
+        {
+            LocalPlayerSettings.RecordRunStatistics = false;
+            GameObject recorder = new GameObject("Run Statistics");
+            recorder.transform.SetParent(transform, false);
+            recorder.AddComponent<RunStatisticsRecorder>().Begin(_networkManager, _director, GetComponent<GameDefeatController>());
+        }
     }
 
     [ConsoleCommand]

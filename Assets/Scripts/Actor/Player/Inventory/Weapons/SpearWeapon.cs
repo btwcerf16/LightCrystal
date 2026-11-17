@@ -15,12 +15,11 @@ public sealed class SpearWeapon : Weapon
     [SerializeField, Min(0f)] private float _closeCooldown = 5f;
     [SerializeField, Min(0f)] private float _farCooldown = 1f;
     private ActorSanity _sanity;
-    private NetworkObject _owner;
     private readonly HashSet<IDamageable> _hitTargets = new();
 
     public override float GetRange(ActorStats owner) => owner != null ? owner.GetProjectileRange(_throwRange) : Mathf.Max(0f, _throwRange);
     public override string DisplayName => "Походное копьё";
-    private float CurrentDamage => OwnerStats != null ? OwnerStats.PhysicalDamage.Value : _damage;
+    private float CurrentDamage => PhysicalDamage;
     public float PrimaryDamage => DamageCalculator.CalculateDamage(CurrentDamage, EDamageType.Physical, OwnerStats, null);
     public float ThrowDamage => PrimaryDamage * _throwMultiplier;
     public override string GetWeaponTooltip(bool detailed) => base.GetWeaponTooltip(detailed)
@@ -36,8 +35,7 @@ public sealed class SpearWeapon : Weapon
     {
         base.Equip();
         _sanity = GetComponentInParent<ActorSanity>();
-        _owner = GetComponentInParent<NetworkObject>();
-        if (!_bonusApplied && OwnerStats != null && _owner != null && _owner.IsSpawned && _owner.NetworkManager.IsServer)
+        if (!_bonusApplied && OwnerStats != null && OwnerNetworkObject != null && OwnerNetworkObject.IsSpawned && OwnerNetworkObject.NetworkManager.IsServer)
         {
             OwnerStats.PhysicalDamage.AddModifier(new StatModifier(_damage, StatModifierType.Flat, this));
             _bonusApplied = true;
@@ -82,15 +80,15 @@ public sealed class SpearWeapon : Weapon
     }
     public override bool BeginSecondaryUse()
     {
-        if (IsOwnerStunned || !IsEquipped || !IsAvailable || _isAttacking || _owner == null || !_owner.IsSpawned)
+        if (IsOwnerStunned || !IsEquipped || !IsAvailable || _isAttacking || OwnerNetworkObject == null || !OwnerNetworkObject.IsSpawned)
             return false;
-        if (_owner.NetworkManager.IsServer)
+        if (OwnerNetworkObject.NetworkManager.IsServer)
         {
             if (CooldownRemaining > 0f)
                 return false;
             if (_sanity == null || _sanity.CurrentSanity < _sanityCost)
             {
-                _owner.GetComponent<NetworkPlayerWallet>().ShowHint("Недостаточно рассудка");
+                OwnerNetworkObject.GetComponent<NetworkPlayerWallet>().ShowHint("Недостаточно рассудка");
                 return false;
             }
         }
@@ -108,10 +106,10 @@ public sealed class SpearWeapon : Weapon
 
     public void SetThrowCooldown(float distance)
     {
-        if (_owner == null || !_owner.IsSpawned || !_owner.NetworkManager.IsServer)
+        if (OwnerNetworkObject == null || !OwnerNetworkObject.IsSpawned || !OwnerNetworkObject.NetworkManager.IsServer)
             return;
         float cooldown = GetThrowCooldown(distance);
-        SetCooldown(cooldown, _owner.NetworkManager.ServerTime.Time + cooldown);
+        SetCooldown(cooldown, OwnerNetworkObject.NetworkManager.ServerTime.Time + cooldown);
         NotifyStateChanged();
     }
 
@@ -128,14 +126,14 @@ public sealed class SpearWeapon : Weapon
 
     public void StartThrust(int point)
     {
-        if (!_isAttacking || IsOwnerStunned || !IsAvailable || _owner == null || !_owner.IsSpawned || !_owner.NetworkManager.IsServer)
+        if (!_isAttacking || IsOwnerStunned || !IsAvailable || OwnerNetworkObject == null || !OwnerNetworkObject.IsSpawned || !OwnerNetworkObject.NetworkManager.IsServer)
             return;
         Vector2 position = _attackPoint.position + _attackPoint.right * ((point - 2) * _pointSpacing);
         foreach (Collider2D hit in Physics2D.OverlapCircleAll(position, _attackRadius))
         {
             if (_hitTargets.Count >= TargetLimit)
                 break;
-            if (hit.transform.root == transform.root)
+            if (hit.transform.root == OwnerNetworkObject.transform.root)
                 continue;
             IDamageable target = hit.GetComponentInParent<IDamageable>();
             if (target == null || _hitTargets.Contains(target))
@@ -150,16 +148,16 @@ public sealed class SpearWeapon : Weapon
 
     public void ThrowSpear()
     {
-        if (!_isAttacking || IsOwnerStunned || !IsAvailable || _owner == null || !_owner.IsSpawned || !_owner.NetworkManager.IsServer)
+        if (!_isAttacking || IsOwnerStunned || !IsAvailable || OwnerNetworkObject == null || !OwnerNetworkObject.IsSpawned || !OwnerNetworkObject.NetworkManager.IsServer)
             return;
         if (CooldownRemaining > 0f)
             return;
         if (_sanity == null || !_sanity.TrySpendSanity(_sanityCost))
         {
-            _owner.GetComponent<NetworkPlayerWallet>().ShowHint("Недостаточно рассудка");
+            OwnerNetworkObject.GetComponent<NetworkPlayerWallet>().ShowHint("Недостаточно рассудка");
             return;
         }
-        SpearProjectile projectile = _owner.NetworkManager.GetComponent<NetworkObjectPool>()
+        SpearProjectile projectile = OwnerNetworkObject.NetworkManager.GetComponent<NetworkObjectPool>()
             .GetObject(_projectilePrefab, _hand.Position, Quaternion.identity);
         projectile.SetSource(this);
         projectile.Launch(new ProjectileData

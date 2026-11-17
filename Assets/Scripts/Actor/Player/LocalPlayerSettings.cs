@@ -18,6 +18,7 @@ public sealed class LocalPlayerSettings : ScriptableObject
 
     public static string Nickname => PlayerPrefs.GetString(NicknameKey);
     public static bool ShowPerformanceStats => PlayerPrefs.GetInt(PerformanceStatsKey) != 0;
+    public static bool RecordRunStatistics { get; set; }
 
     public static string CleanNickname(string nickname)
     {

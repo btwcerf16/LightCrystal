@@ -1,34 +1,50 @@
+using Unity.Netcode;
 using UnityEngine;
 
 public sealed class NyxWeaponMasterySpell : ToggleSpell
 {
     private ActorArsenal _arsenal;
-    private ActorWallet _wallet;
+    private PlayerNetworkInteractions _interactions;
+    private NetworkObject _networkOwner;
+    private ActorHand _hand;
 
     public override void Activate()
     {
         base.Activate();
         _arsenal = _owner.GetComponent<ActorArsenal>();
-        _wallet = _owner.GetComponent<ActorWallet>();
-        _arsenal.ResolveWeaponHit = ResolveHit;
+        _interactions = _owner.GetComponent<PlayerNetworkInteractions>();
+        _networkOwner = _owner.GetComponent<NetworkObject>();
+        _hand = _owner.GetComponentInChildren<ActorHand>();
+        _interactions.WeaponUseStarted += OnWeaponUseStarted;
     }
 
     public override void Deactivate()
     {
-        if (_arsenal != null && _arsenal.ResolveWeaponHit == ResolveHit)
-            _arsenal.ResolveWeaponHit = null;
+        if (_interactions != null)
+            _interactions.WeaponUseStarted -= OnWeaponUseStarted;
         base.Deactivate();
     }
 
-    private float ResolveHit(IDamageable target, float damage, EDamageType damageType, out bool critical, bool isMelee)
+    private void OnWeaponUseStarted(Weapon attackingWeapon, EAttackType attackType)
     {
-        Enemy enemy = !IsToggled && !target.IsDead && target is ActorHealth health ? health.GetComponent<Enemy>() : null;
-        Transform enemyTarget = enemy != null ? enemy.CurrentTarget : null;
-        bool hiddenStrike = enemyTarget != null && !enemyTarget.IsChildOf(_owner.transform);
-        float additionalCriticalChance = hiddenStrike ? 1f - _ownerStats.CriticalChance.Value : 0f;
-        float dealt = DamageCalculator.DealCriticalDamage(target, damage, damageType, _ownerStats, out critical, isMelee, additionalCriticalChance);
-        if (hiddenStrike && dealt > 0f && target.IsDead)
-            _wallet.AddCurrency(((NyxWeaponMasteryConfig)SpellData).HiddenKillGold, enemy.transform.position);
-        return dealt;
+        if (!IsToggled || attackType != EAttackType.Melee || _ownerEffects.IsDowned)
+            return;
+
+        Weapon otherWeapon = _arsenal.GetWeapon(1 - _arsenal.ActiveWeaponIndex);
+        NyxWeaponMasteryConfig config = (NyxWeaponMasteryConfig)SpellData;
+        if (otherWeapon == null || !otherWeapon.IsAvailable || otherWeapon.PrimaryAttackType != EAttackType.Melee || config.ShadowPrefab == null)
+            return;
+
+        if (!_ownerSanity.TrySpendSanity(GetReducedSanityCost(config.FollowUpSanityCost)))
+            return;
+
+        Vector2 direction = _hand.AimDirection;
+        Vector3 position = _owner.transform.position + (Vector3)(Vector2.Perpendicular(direction) * 0.55f);
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+        NetworkObjectPool pool = _networkOwner.NetworkManager.GetComponent<NetworkObjectPool>();
+        WeaponAttackShadow shadow = pool.GetObject(config.ShadowPrefab, position, Quaternion.Euler(0f, 0f, angle));
+        float physicalDamage = _ownerStats.PhysicalDamage.CalculateValue(attackingWeapon, otherWeapon.Damage);
+        shadow.NetworkObject.Spawn(destroyWithScene: true);
+        shadow.Play(_networkOwner, otherWeapon.ItemId, _hand.CurrentOffset.magnitude, physicalDamage);
     }
 }

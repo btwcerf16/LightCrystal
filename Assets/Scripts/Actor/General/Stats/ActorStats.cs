@@ -8,6 +8,8 @@ public sealed class ActorStats : MonoBehaviour
 
     public int TargetPriority { get; private set; }
     public event Action<int> TargetPriorityChanged;
+    private int _baseTargetPriority;
+    private int _targetPriorityBonus;
 
     public Stat ViewDistance { get; private set; }
     public Stat ViewAngle { get; private set; }
@@ -56,7 +58,7 @@ public sealed class ActorStats : MonoBehaviour
             return;
         }
 
-        TargetPriority = _config.TargetPriority;
+        SetTargetPriority(_config.TargetPriority);
         ViewDistance = new Stat(_config.ViewDistance, 0f);
         ViewAngle = new Stat(_config.ViewAngle, 0f, 360f);
 
@@ -142,6 +144,19 @@ public sealed class ActorStats : MonoBehaviour
 
     public void SetTargetPriority(int priority)
     {
+        _baseTargetPriority = priority;
+        RefreshTargetPriority();
+    }
+
+    public void ChangeTargetPriorityBonus(int amount)
+    {
+        _targetPriorityBonus += amount;
+        RefreshTargetPriority();
+    }
+
+    private void RefreshTargetPriority()
+    {
+        int priority = _baseTargetPriority + _targetPriorityBonus;
         if (TargetPriority == priority)
             return;
         TargetPriority = priority;

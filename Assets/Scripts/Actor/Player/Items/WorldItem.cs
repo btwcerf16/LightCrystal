@@ -38,6 +38,7 @@ public class WorldItem : NetworkBehaviour, ITooltipSource
     }
 
     public event System.Action Purchased;
+    public event System.Action<WorldItem> PickedUp;
     public bool IsForSale => _isForSale.Value;
     public int Price => ItemPrefab != null ? Mathf.Max(0, ItemPrefab.Price) : 0;
     public int ItemId => _itemId.Value;
@@ -127,6 +128,7 @@ public class WorldItem : NetworkBehaviour, ITooltipSource
         HideWorldItem();
         if (wasForSale)
             Purchased?.Invoke();
+        PickedUp?.Invoke(this);
         return true;
     }
 

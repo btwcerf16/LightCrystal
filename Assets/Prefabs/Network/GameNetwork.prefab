@@ -210,6 +210,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0067d32b51fb41b5ab5939e7e8b0dbaf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkObjectPool
+  _additionalPooledPrefabs:
+  - {fileID: 7103984887849500154, guid: 6a3d897c181b43ddb77cd5ec6afbd984, type: 3}
 --- !u!114 &2121476101
 MonoBehaviour:
   m_ObjectHideFlags: 0

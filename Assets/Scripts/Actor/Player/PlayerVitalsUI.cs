@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,6 +14,8 @@ public sealed class PlayerVitalsUI : NetworkBehaviour
     private NetworkActorVitals _vitals;
     private GameObject _canvasObject;
     private RectTransform _healthFill;
+    private RectTransform _healthDamageFill;
+    private float _displayedHealth;
     private RectTransform _sanityFill;
     private Text _healthText;
     private Text _sanityText;
@@ -44,8 +47,14 @@ public sealed class PlayerVitalsUI : NetworkBehaviour
         border.effectDistance = new Vector2(1f, -1f);
 
         CreateBar(panel, "Health", "Здоровье", -8f, 26f, _healthColor, out _healthFill, out _healthText);
+        _healthDamageFill = CreateRect("DamageTrail", _healthFill.parent);
+        _healthDamageFill.SetAsFirstSibling();
+        Stretch(_healthDamageFill);
+        AddImage(_healthDamageFill, Color.white);
+
         CreateBar(panel, "Sanity", "Рассудок", -42f, 18f, _sanityColor, out _sanityFill, out _sanityText);
         _vitals.Changed += UpdateVitals;
+        _displayedHealth = _vitals.State.x;
         UpdateVitals(_vitals.State);
     }
 
@@ -56,6 +65,7 @@ public sealed class PlayerVitalsUI : NetworkBehaviour
         if (_canvasObject == null)
             return;
 
+        _healthDamageFill.DOKill();
         _canvasObject.SetActive(false);
         Destroy(_canvasObject);
         _canvasObject = null;
@@ -63,7 +73,24 @@ public sealed class PlayerVitalsUI : NetworkBehaviour
 
     private void UpdateVitals(Vector4 state)
     {
+        Vector2 previousFill = _healthFill.anchorMax;
         UpdateBar(_healthFill, _healthText, state.x, state.y);
+        Vector2 currentFill = _healthFill.anchorMax;
+        if (currentFill.x != previousFill.x)
+        {
+            _healthDamageFill.DOKill();
+            if (state.x < _displayedHealth && currentFill.x < previousFill.x)
+            {
+                _healthDamageFill.anchorMax = new Vector2(Mathf.Max(previousFill.x, _healthDamageFill.anchorMax.x), 1f);
+                _healthDamageFill.DOAnchorMax(currentFill, 0.4f).SetDelay(0.18f).SetEase(Ease.OutCubic).SetUpdate(true);
+            }
+            else
+            {
+                _healthDamageFill.anchorMax = currentFill;
+            }
+        }
+
+        _displayedHealth = state.x;
         UpdateBar(_sanityFill, _sanityText, state.z, state.w);
     }
 

@@ -156,7 +156,7 @@ public sealed class TrollBoss : Enemy, INamed
 
         _hitbox.enabled = true;
         NetworkWorldAudio.Play(_networkTransform.NetworkManager, WorldSoundId.TrollLanding, landingPoint);
-        HitArea(landingPoint, _landingRadius, _landingStun);
+        HitArea(landingPoint, _landingRadius, _landingStun, isMelee: false);
         yield return new WaitForSeconds(0.3f);
         _attackRoutine = null;
     }
@@ -168,12 +168,12 @@ public sealed class TrollBoss : Enemy, INamed
 
         Vector2 center = _hammerZone != null ? _hammerZone.position : _facing.TransformPoint(Vector3.right * 1.1f);
         NetworkWorldAudio.Play(_networkTransform.NetworkManager, WorldSoundId.TrollHammerImpact, center);
-        HitArea(center, _hammerRadius, null);
+        HitArea(center, _hammerRadius, null, isMelee: true);
         yield return new WaitForSeconds(0.4f);
         _attackRoutine = null;
     }
 
-    private void HitArea(Vector2 center, float radius, EffectData stun)
+    private void HitArea(Vector2 center, float radius, EffectData stun, bool isMelee)
     {
         DustRaised?.Invoke(center, Vector2.one * radius);
         _hitActors.Clear();
@@ -185,7 +185,7 @@ public sealed class TrollBoss : Enemy, INamed
                 !_hitActors.Add(target))
                 continue;
 
-            DamageCalculator.DealCriticalDamage(target, Stats.PhysicalDamage.Value, EDamageType.Physical, Stats);
+            DamageCalculator.DealCriticalDamage(target, Stats.PhysicalDamage.Value, EDamageType.Physical, Stats, isMelee);
             if (target.IsDead || !target.TryGetComponent(out PlayableActorMovement movement))
                 continue;
 

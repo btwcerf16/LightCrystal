@@ -14,6 +14,7 @@ public sealed class GameDefeatController : MonoBehaviour
     private int _downedPlayersCount;
     private bool _isMatchActive;
     private bool _isDefeated;
+    public event System.Action Defeated;
 
     private void OnEnable()
     {
@@ -88,6 +89,7 @@ public sealed class GameDefeatController : MonoBehaviour
         if (!_networkManager.IsServer || !_isMatchActive || _isDefeated)
             return;
         _isDefeated = true;
+        Defeated?.Invoke();
         WaveDirector waveDirector = GetComponent<WaveDirector>();
         int completedWaves = Mathf.Max(0, waveDirector.WaveCount - (waveDirector.CurrentState is WaveStartState ? 1 : 0));
         waveDirector.Stop();

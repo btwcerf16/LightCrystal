@@ -81,7 +81,7 @@ public class EffectHandler : MonoBehaviour
             return null;
 
         float duration = effectData.IsPermanent ? float.PositiveInfinity : effectData.EffectDuration;
-        if (!effectData.IsPermanent && !effectData.IsBuff && effectData.Status != EActorStatus.None)
+        if (!effectData.IsPermanent && !effectData.IsBuff && (effectData.Status != EActorStatus.None || effectData.AffectedByEffectResistance))
             duration *= 1f - Mathf.Clamp01(_ownerStats.EffectResistance.Value);
         if (duration <= 0f)
             return null;

@@ -15,14 +15,13 @@ public sealed class FirstDawnSwordWeapon : Weapon
     [SerializeField] private float _attackRadius = 0.45f;
     private ActorSanity _sanity;
     private EffectHandler _effects;
-    private NetworkObject _owner;
     private bool _isWave;
     private bool _waveReleased;
     private readonly HashSet<IDamageable> _hitTargets = new();
 
     public override float GetRange(ActorStats owner) => owner != null ? owner.GetProjectileRange(_waveRange) : Mathf.Max(0f, _waveRange);
     public override string DisplayName => "Осколок первого рассвета";
-    private float CurrentDamage => OwnerStats != null ? OwnerStats.PhysicalDamage.Value : _damage;
+    private float CurrentDamage => PhysicalDamage;
     public float HitDamage => DamageCalculator.CalculateDamage(CurrentDamage, EDamageType.Physical, OwnerStats, null);
     public float WaveDamage => DamageCalculator.CalculateDamage(_waveDamage, EDamageType.Magic, OwnerStats, null);
     public float AbilityCooldown => GetReducedCooldown(BaseCooldown);
@@ -38,8 +37,7 @@ public sealed class FirstDawnSwordWeapon : Weapon
         base.Equip();
         _sanity = GetComponentInParent<ActorSanity>();
         _effects = GetComponentInParent<EffectHandler>();
-        _owner = GetComponentInParent<NetworkObject>();
-        if (!_bonusApplied && OwnerStats != null && _owner != null && _owner.IsSpawned && _owner.NetworkManager.IsServer)
+        if (!_bonusApplied && OwnerStats != null && OwnerNetworkObject != null && OwnerNetworkObject.IsSpawned && OwnerNetworkObject.NetworkManager.IsServer)
         {
             OwnerStats.PhysicalDamage.AddModifier(new StatModifier(_damage, StatModifierType.Flat, this));
             _bonusApplied = true;
@@ -81,9 +79,9 @@ public sealed class FirstDawnSwordWeapon : Weapon
 
     public override bool BeginSecondaryUse()
     {
-        if (!IsEquipped || !IsAvailable || IsOwnerStunned || _isAttacking || _owner == null || !_owner.IsSpawned)
+        if (!IsEquipped || !IsAvailable || IsOwnerStunned || _isAttacking || OwnerNetworkObject == null || !OwnerNetworkObject.IsSpawned)
             return false;
-        if (!_owner.NetworkManager.IsServer)
+        if (!OwnerNetworkObject.NetworkManager.IsServer)
         {
             BeginAttack(true);
             return true;
@@ -94,7 +92,7 @@ public sealed class FirstDawnSwordWeapon : Weapon
             : _sanity == null || _sanity.CurrentSanity < _sanityCost ? "Недостаточно рассудка" : null;
         if (error != null)
         {
-            _owner.GetComponent<NetworkPlayerWallet>().ShowHint(error);
+            OwnerNetworkObject.GetComponent<NetworkPlayerWallet>().ShowHint(error);
             return false;
         }
         return TryUse();
@@ -117,7 +115,7 @@ public sealed class FirstDawnSwordWeapon : Weapon
     }
 
     private bool CanStrike => _isAttacking && IsEquipped && !IsOwnerStunned
-        && _owner != null && _owner.IsSpawned && _owner.NetworkManager.IsServer;
+        && OwnerNetworkObject != null && OwnerNetworkObject.IsSpawned && OwnerNetworkObject.NetworkManager.IsServer;
 
     public void Strike()
     {
@@ -127,7 +125,7 @@ public sealed class FirstDawnSwordWeapon : Weapon
         {
             if (_hitTargets.Count >= TargetLimit)
                 break;
-            if (hit.transform.root == transform.root)
+            if (hit.transform.root == OwnerNetworkObject.transform.root)
                 continue;
             IDamageable target = hit.GetComponentInParent<IDamageable>();
             if (target == null || _hitTargets.Contains(target))
@@ -144,7 +142,7 @@ public sealed class FirstDawnSwordWeapon : Weapon
         if (!CanStrike || !_isWave || _waveReleased)
             return;
         _waveReleased = true;
-        DawnWaveProjectile wave = _owner.NetworkManager.GetComponent<NetworkObjectPool>()
+        DawnWaveProjectile wave = OwnerNetworkObject.NetworkManager.GetComponent<NetworkObjectPool>()
             .GetObject(_wavePrefab, _hand.Position, Quaternion.identity);
         wave.SetSource(this, _stun, TargetLimit);
         wave.Launch(new ProjectileData

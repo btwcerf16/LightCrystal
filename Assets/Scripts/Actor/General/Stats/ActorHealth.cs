@@ -25,6 +25,21 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
     public float ReviveProgress { get; internal set; }
     public SanityShield Shield { get; internal set; }
     internal Action AbsorbNextHit { get; set; }
+    private event Func<Action> PrepareLethalHitRecovery;
+
+    internal bool TryRegisterLethalHitRecovery(Func<Action> handler)
+    {
+        if (handler == null || PrepareLethalHitRecovery != null)
+            return false;
+
+        PrepareLethalHitRecovery += handler;
+        return true;
+    }
+
+    internal void UnregisterLethalHitRecovery(Func<Action> handler)
+    {
+        PrepareLethalHitRecovery -= handler;
+    }
 
     private void Awake()
     {
@@ -73,8 +88,9 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
             amount = Shield.AbsorbDamage(amount);
         float absorbedDamage = incomingDamage - amount;
         float previousHealth = CurrentHealth;
-        CurrentHealth = Mathf.Max(CurrentHealth - amount, 0f);
-        float healthLost = previousHealth - CurrentHealth;
+        Action recover = amount > 0f && amount >= previousHealth ? PrepareLethalHitRecovery?.Invoke() : null;
+        CurrentHealth = recover != null ? Mathf.Min(1f, MaxHealth) : Mathf.Max(previousHealth - amount, 0f);
+        float healthLost = Mathf.Max(previousHealth - CurrentHealth, 0f);
         float dealtDamage = healthLost + absorbedDamage;
         Enemy enemy = GetComponent<Enemy>();
         if (dealtDamage > 0f && attacker != null && enemy != null)
@@ -109,6 +125,7 @@ public sealed class ActorHealth : MonoBehaviour, IDamageable
 
         if (attacker != null && attacker.gameObject != gameObject && enemy != null)
             attacker.GetComponent<ActorHealth>()?.EnemyHit?.Invoke(this);
+        recover?.Invoke();
         return dealtDamage;
     }
 

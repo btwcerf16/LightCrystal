@@ -6,7 +6,8 @@ using UnityEngine;
 public class NetworkShop : NetworkBehaviour, IWaveEvent
 {
     private Shop _shop;
-    private float _capacity;
+    private float? _capacity;
+    private bool _isWaveEvent;
     [SerializeField, Min(0.1f)] private float _lifetime = 60f;
     private double _expiresAt;
     private bool _wasUsed;
@@ -24,13 +25,13 @@ public class NetworkShop : NetworkBehaviour, IWaveEvent
         }
     }
 
-    public void Initialize(bool closeOnNextWave = false)
+    protected override void OnNetworkPostSpawn()
     {
-        if (!IsServer || !IsSpawned)
+        if (!IsServer || !_capacity.HasValue)
             return;
-        _shop.Initialize(_capacity);
+        _shop.Initialize(_capacity.Value);
         SpawnItems();
-        if (!closeOnNextWave)
+        if (!_isWaveEvent)
             _expiresAt = NetworkManager.ServerTime.Time + _lifetime;
     }
 
@@ -67,6 +68,8 @@ public class NetworkShop : NetworkBehaviour, IWaveEvent
     {
         Finished = null;
         _expiresAt = 0;
+        _capacity = null;
+        _isWaveEvent = false;
         if (!IsServer)
             return;
         foreach (WorldItem item in _worldItems)
@@ -91,8 +94,9 @@ public class NetworkShop : NetworkBehaviour, IWaveEvent
 
     private void MarkUsed() => _wasUsed = true;
 
-    public void SetCapacity(float capacity)
+    public void ConfigureSpawn(float capacity, bool isWaveEvent)
     {
         _capacity = capacity;
+        _isWaveEvent = isWaveEvent;
     }
 }

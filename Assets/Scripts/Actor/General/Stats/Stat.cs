@@ -86,14 +86,17 @@ public sealed class Stat
         RecalculateValue();
     }
 
-    private float CalculateValue()
+    internal float CalculateValue(object excludedSource = null, float additionalFlat = 0f)
     {
-        float flatBonus = 0f;
+        float flatBonus = additionalFlat;
         float additivePercent = 0f;
         float multiplier = 1f;
 
         foreach (StatModifier modifier in _modifiers)
         {
+            if (excludedSource != null && ReferenceEquals(modifier.Source, excludedSource))
+                continue;
+
             switch (modifier.Type)
             {
                 case StatModifierType.Flat:

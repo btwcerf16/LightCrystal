@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f3e67ac4b9ef4d3f8995c44959cb750d, type: 3}
+  m_Name: NyxPlanB
+  m_EditorClassIdentifier: Assembly-CSharp::NyxPlanBConfig
+  SpellName: "План Б"
+  SpellDescription: "Никс оглушает ближайших врагов, сбивает снаряды и телепортируется к кристаллу. Смертельный удар запускает способность автоматически и оставляет Никсу 1 HP, если хватает рассудка и готова автоперезарядка."
+  StatsDescription: "Оглушение: 1 с\nДальность прыжка: до {BlinkDistance:0.##}\nПерезарядка автосрабатывания: {AutoCooldown:0.##} с."
+  IsPassive: 0
+  CooldownTime: 15
+  SanityCost: 30
+  CastTime: 0
+  SpriteIcon: {fileID: 21300000, guid: 84f407379fbd4af3aee9152a987a279e, type: 3}
+  BlinkDistance: 4
+  AutoCooldown: 30
+  Stun: {fileID: 11400000, guid: 6ed531e5fdd340947afce7de8226555c, type: 2}
+  WavePrefab: {fileID: 1332558693726375035, guid: 204603bd210b44df804d35c672789c11, type: 3}

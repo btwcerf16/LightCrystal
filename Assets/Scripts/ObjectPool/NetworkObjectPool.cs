@@ -7,6 +7,7 @@ using UnityEngine;
 [DefaultExecutionOrder(-50)]
 public sealed class NetworkObjectPool : MonoBehaviour
 {
+    [SerializeField] private NetworkObject[] _additionalPooledPrefabs = Array.Empty<NetworkObject>();
     private NetworkManager _manager;
     private readonly Dictionary<uint, NetworkPoolHandler> _handlers = new();
 
@@ -23,9 +24,12 @@ public sealed class NetworkObjectPool : MonoBehaviour
 
     private void Register(GameObject prefab)
     {
-        if (prefab == null || (!prefab.TryGetComponent<Enemy>(out _) && !prefab.TryGetComponent<Projectile>(out _) && !prefab.TryGetComponent<Trap>(out _)))
+        if (prefab == null)
             return;
-        uint hash = prefab.GetComponent<NetworkObject>().PrefabIdHash;
+        NetworkObject networkPrefab = prefab.GetComponent<NetworkObject>();
+        if (networkPrefab == null || (!prefab.TryGetComponent<Enemy>(out _) && !prefab.TryGetComponent<Projectile>(out _) && !prefab.TryGetComponent<Trap>(out _) && Array.IndexOf(_additionalPooledPrefabs, networkPrefab) < 0))
+            return;
+        uint hash = networkPrefab.PrefabIdHash;
         if (_handlers.ContainsKey(hash))
             return;
         NetworkPoolHandler handler = new NetworkPoolHandler(prefab);

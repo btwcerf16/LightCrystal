@@ -1,9 +1,10 @@
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Spells/Nyx/Weapon Mastery")]
+[CreateAssetMenu(menuName = "Spells/Nyx/Shadow Attack")]
 public sealed class NyxWeaponMasteryConfig : SpellConfig
 {
-    [Min(0)] public int HiddenKillGold = 3;
+    [Min(0f)] public float FollowUpSanityCost = 5f;
+    public WeaponAttackShadow ShadowPrefab;
 
     public override Spell AddSpell(GameObject owner) => owner.AddComponent<NyxWeaponMasterySpell>();
 }

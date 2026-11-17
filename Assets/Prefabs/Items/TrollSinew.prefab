@@ -50,4 +50,5 @@ MonoBehaviour:
   _price: 30
   _cooldown: 0
   _description: "Прочнее любой другой. Наверное."
-  _statsDescription: "Скорость снарядов: +{ProjectileSpeedBonus:0.#}"
+  _statsDescription: "Дальность камеры: +{CameraDistanceBonus:P0}"
+  _cameraDistanceBonus: 0.2

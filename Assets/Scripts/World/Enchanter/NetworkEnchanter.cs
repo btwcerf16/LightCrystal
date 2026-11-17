@@ -18,8 +18,11 @@ public sealed class NetworkEnchanter : NetworkBehaviour, IWaveEvent
     private bool _isWaveEvent;
     public event System.Action<bool> Finished;
     public int EventLevel => _eventLevel.Value;
-    public void SetCapacity(float capacity) => _capacity = Mathf.Clamp(capacity, 0f, 100f);
-    public void SetWaveEvent() => _isWaveEvent = true;
+    public void ConfigureSpawn(float capacity, bool isWaveEvent)
+    {
+        _capacity = Mathf.Clamp(capacity, 0f, 100f);
+        _isWaveEvent = isWaveEvent;
+    }
 
     private void Awake()
     {

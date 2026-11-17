@@ -11,5 +11,6 @@ public enum WorldSoundId
     SpiderHiss = 7,
     SpiderWebSpit = 8,
     SpiderWebImpact = 9,
-    TrollTakeoff = 10
+    TrollTakeoff = 10,
+    GoldReceived = 11
 }

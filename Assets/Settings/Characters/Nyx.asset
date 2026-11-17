@@ -20,5 +20,7 @@ MonoBehaviour:
   Spells:
   - {fileID: 11400000, guid: 22e3d929534023ed73bfb3152ceec88c, type: 2}
   - {fileID: 11400000, guid: 533c3af246164bbea2e76813d8726bc5, type: 2}
+  - {fileID: 11400000, guid: 3e8e552112fa48249df29651c5ee850f, type: 2}
+  - {fileID: 11400000, guid: ca31ddd7c3f649b58a6fb32acc80eddd, type: 2}
   PlayerPrefab: {fileID: 247892929754694301, guid: 52671da2c5a17d44babb16e9f72faa55, type: 3}
   BeginningWeapon: {fileID: 8123400010000000011, guid: 4ac902ea29d44885a1a9b3fed62a6011, type: 3}

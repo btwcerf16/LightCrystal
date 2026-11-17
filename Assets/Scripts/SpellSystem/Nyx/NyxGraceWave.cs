@@ -6,6 +6,7 @@ public sealed class NyxGraceWave : NetworkBehaviour
 {
     [SerializeField, Min(0.1f)] private float _radius = 1.65f;
     [SerializeField, Min(0.05f)] private float _duration = 0.25f;
+    [SerializeField] private bool _fullCircle;
     [SerializeField] private Material _waveMaterial;
     private float _elapsed;
     private LineRenderer _wave;
@@ -21,7 +22,7 @@ public sealed class NyxGraceWave : NetworkBehaviour
         _wave.sharedMaterial = _waveMaterial;
         _wave.sortingOrder = 4;
         _wave.useWorldSpace = false;
-        _wave.positionCount = 13;
+        _wave.positionCount = _fullCircle ? 25 : 13;
         _wave.widthMultiplier = 0.38f;
         _wave.widthCurve = AnimationCurve.Linear(0f, 0f, 1f, 1f);
         DrawWave(0f);
@@ -42,9 +43,9 @@ public sealed class NyxGraceWave : NetworkBehaviour
     {
         const float sweepEndProgress = 0.75f;
         const float visualOffsetFromCaster = 0.1f;
-        float visualCenterOffset = visualOffsetFromCaster - _radius;
+        float visualCenterOffset = _fullCircle ? 0f : visualOffsetFromCaster - _radius;
         float sweepProgress = Mathf.Clamp01(progress / sweepEndProgress);
-        float leadingAngle = Mathf.Lerp(-90f, 90f, sweepProgress);
+        float leadingAngle = Mathf.Lerp(-90f, _fullCircle ? 270f : 90f, sweepProgress);
         float opacity = 1f - Mathf.InverseLerp(sweepEndProgress, 1f, progress);
         _wave.startColor = _wave.endColor = new Color(0.72f, 0.91f, 1f, opacity);
         for (int i = 0; i < _wave.positionCount; i++)

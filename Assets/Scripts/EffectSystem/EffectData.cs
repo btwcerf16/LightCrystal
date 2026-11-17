@@ -11,6 +11,8 @@ public abstract class EffectData : ScriptableObject
     public bool IsBuff;
     public bool IsPermanent;
     public EActorStatus Status;
+    [Tooltip("Also shorten this debuff with effect resistance when it has no status flag.")]
+    public bool AffectedByEffectResistance;
     public bool CanPurged = true;
     public bool Stackable;
     public bool RestartOnReapply = true;

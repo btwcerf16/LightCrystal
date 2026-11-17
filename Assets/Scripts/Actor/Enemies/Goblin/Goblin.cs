@@ -174,7 +174,7 @@ public sealed class Goblin : Enemy
             IDamageable damageable = target.GetComponentInParent<IDamageable>();
             if (damageable == null || !_hitTargets.Add(damageable))
                 continue;
-            if (DamageCalculator.DealCriticalDamage(damageable, Stats.PhysicalDamage.Value, EDamageType.Physical, Stats) > 0f)
+            if (DamageCalculator.DealCriticalDamage(damageable, Stats.PhysicalDamage.Value, EDamageType.Physical, Stats, isMelee: true) > 0f)
                 NetworkWorldAudio.Play(manager, WorldSoundId.GoblinDaggerHit, target.ClosestPoint(_attackPoint.position));
         }
     }

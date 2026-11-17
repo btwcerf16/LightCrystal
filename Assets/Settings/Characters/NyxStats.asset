@@ -18,6 +18,6 @@ MonoBehaviour:
   <MaxSanity>k__BackingField: 50
   <MoveSpeed>k__BackingField: 7
   <AttackSpeed>k__BackingField: 1
-  <TargetPriority>k__BackingField: 3
+  <TargetPriority>k__BackingField: 2
   <CriticalChance>k__BackingField: 0.2
   <CriticalDamageMultiplier>k__BackingField: 1.4

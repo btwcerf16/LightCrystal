@@ -110,5 +110,6 @@ MonoBehaviour:
   _price: 5
   _cooldown: 0
   _description: "Защищает, пока находится в инвентаре."
-  _statsDescription: "Физическое сопротивление: +{PhysicalResistancePercent:0.#}%"
-  _physicalResistance: 0.1
+  _statsDescription: "Физическое сопротивление: +{PhysicalResistancePercent:0.#} п. п.\nСопротивление эффектам: +{EffectResistancePercent:0.#} п. п."
+  _physicalResistance: 0.05
+  _effectResistance: 0.1
