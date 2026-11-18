@@ -4,6 +4,7 @@ using System;
 public abstract class Weapon : Item
 {
     [SerializeField] protected float _damage;
+    [SerializeField] protected LayerMask _targetMask = (1 << 8) | 1;
     [SerializeField] protected Transform _attackPoint;
     [SerializeField] protected Animator _animator;
     [SerializeField, Min(1)] private int _maxTargets = 1;

@@ -189,6 +189,18 @@ public sealed class PlayerStatsUI : NetworkBehaviour
         RefreshRows();
     }
 
+    private bool _pinnedStatsVisible = true;
+    public bool PinnedStatsVisible
+    {
+        get => _pinnedStatsVisible;
+        set
+        {
+            _pinnedStatsVisible = value;
+            if (_pinnedPanel != null)
+                _pinnedPanel.gameObject.SetActive(value && _pinnedCount > 0);
+        }
+    }
+
     private void RefreshRows()
     {
         int position = 0;
@@ -207,7 +219,7 @@ public sealed class PlayerStatsUI : NetworkBehaviour
             row.Value.gameObject.SetActive(row.Pinned.isOn);
             if (row.Pinned.isOn) _pinnedCount++;
         }
-        _pinnedPanel.gameObject.SetActive(_pinnedCount > 0);
+        _pinnedPanel.gameObject.SetActive(PinnedStatsVisible && _pinnedCount > 0);
     }
 
     private Image Tab(string title, float x, bool advanced)

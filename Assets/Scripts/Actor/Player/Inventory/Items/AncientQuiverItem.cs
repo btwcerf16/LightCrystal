@@ -83,7 +83,7 @@ public sealed class AncientQuiverItem : Item
             }
         if (!_target.IsDead) return;
         var affected = new HashSet<Enemy>();
-        foreach (Collider2D hit in Physics2D.OverlapCircleAll(_target.transform.position, _splashRadius))
+        foreach (Collider2D hit in Physics2D.OverlapCircleAll(_target.transform.position, _splashRadius, DamageCalculator.CombatLayers))
         {
             Enemy enemy = hit.GetComponentInParent<Enemy>();
             if (enemy != null && affected.Add(enemy) && !enemy.GetComponent<ActorHealth>().IsDead)

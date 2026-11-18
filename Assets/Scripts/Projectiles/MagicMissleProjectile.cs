@@ -31,7 +31,7 @@ public sealed class MagicMissleProjectile : Projectile
             _searchDelay = 0.2f;
             float nearest = _searchRadius * _searchRadius;
             _target = null;
-            foreach (Collider2D hit in Physics2D.OverlapCircleAll(transform.position, _searchRadius, Data.LayerMask))
+            foreach (Collider2D hit in Physics2D.OverlapCircleAll(transform.position, _searchRadius, (Data.LayerMask) & DamageCalculator.CombatLayers))
             {
                 Enemy enemy = hit.GetComponentInParent<Enemy>();
                 if (enemy == null)

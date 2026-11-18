@@ -250,6 +250,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SceneTransition
   _panel: {fileID: 5060885886626892130}
+  _crystalSprite: {fileID: 21300000, guid: 02310b102c2b41ccab93584572f813e7, type: 3}
   LoadingProgressText: {fileID: 3659913881913960670}
   LoadingProgressBar: {fileID: 4206098366883906732}
 --- !u!1 &5748020101518953596

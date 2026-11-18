@@ -19,6 +19,16 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
 
     public event Action BindingsChanged;
     public bool IsRebinding => _rebind != null;
+    public bool HasCharacter => _settings.HasCharacter;
+    public bool UseCharacterBindings => _settings.UseCharacterBindings;
+
+    public void SetUseCharacterBindings(bool enabled)
+    {
+        if (!IsSpawned || !IsOwner || !IsClient || !_input.IsMenuOpen || IsRebinding)
+            return;
+        _settings.SetUseCharacterBindings(enabled);
+        ResizeSpellBindings();
+    }
 
     private void Awake()
     {
@@ -77,7 +87,6 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
 
         inventory.SizeChanged += ResizeInventoryBindings;
         _spells.SpellsChanged += ResizeSpellBindings;
-        InputSystem.onDeviceChange += OnDeviceChanged;
     }
 
     private void ResizeInventoryBindings()
@@ -140,14 +149,6 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
         BindingsChanged?.Invoke();
     }
 
-    private void OnDeviceChanged(InputDevice device, InputDeviceChange change)
-    {
-        if (!IsSpawned || !IsOwner || !IsClient || !(device is Keyboard))
-            return;
-
-        if (change == InputDeviceChange.ConfigurationChanged || change == InputDeviceChange.Reconnected)
-            BindingsChanged?.Invoke();
-    }
 
     private InputAction CreateAction(ESlotBindingType type, int index, string path)
     {
@@ -187,7 +188,8 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
         InputAction action = GetAction(type, index);
         if (action == null)
             return "—";
-        string label = action.GetBindingDisplayString(0);
+        string label = InputControlPath.ToHumanReadableString(action.bindings[0].effectivePath,
+            InputControlPath.HumanReadableStringOptions.OmitDevice | InputControlPath.HumanReadableStringOptions.UseShortNames);
         return string.IsNullOrEmpty(label) ? "—" : label;
     }
 
@@ -257,17 +259,7 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
 
         CancelRebind();
         _settings.ResetBindings();
-        _actions.Disable();
-        for (int i = 0; i < _inventoryActions.Length; i++)
-            _inventoryActions[i].ApplyBindingOverride(0, _settings.GetBinding(false, i));
-        for (int i = 0; i < _arsenalActions.Length; i++)
-            _arsenalActions[i].ApplyBindingOverride(0, _settings.GetBinding(true, i));
-        for (int i = 0; i < _spellActions.Length; i++)
-            if (_spellActions[i] != null)
-                _spellActions[i].ApplyBindingOverride(0, _settings.GetBinding(ESlotBindingType.Spell, i));
-        _cancelCastAction.ApplyBindingOverride(0, _settings.GetBinding(ESlotBindingType.CancelCast, 0));
-        _actions.Enable();
-        BindingsChanged?.Invoke();
+        ResizeSpellBindings();
     }
 
     public void UseSpell(int index)
@@ -328,7 +320,6 @@ public sealed class PlayerSlotBindings : NetworkBehaviour
     {
         GetComponent<Inventory>().SizeChanged -= ResizeInventoryBindings;
         _spells.SpellsChanged -= ResizeSpellBindings;
-        InputSystem.onDeviceChange -= OnDeviceChanged;
         StopInput();
         _actions.Dispose();
         Destroy(_settings);

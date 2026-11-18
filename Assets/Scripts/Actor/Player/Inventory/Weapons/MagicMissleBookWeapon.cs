@@ -13,7 +13,6 @@ public sealed class MagicMissleBookWeapon : Weapon
     [SerializeField, Min(0.1f)] private float _missileRange = 12f;
     [SerializeField, Min(0.1f)] private float _burstSpeed = 4f;
     [SerializeField, Min(0.1f)] private float _burstRange = 8f;
-    [SerializeField] private LayerMask _targetMask;
     private ActorSanity _sanity;
     private bool _secondary;
     private bool _released;

@@ -19,12 +19,16 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
     private GameObject _cooldownPanel;
     private RectTransform _cooldownFill;
     private Text _cooldownText;
+    private EffectHandler _effects;
+    private UnityEngine.UI.Text _actionLock;
+    private bool IsBlocked => _effects != null && _effects.IsStunned;
     public Item CurrentItem => _getItem?.Invoke();
 
     public void Bind(Func<Item> getItem, Component container, int index, Action<int, int> swap, Action<int> drop, Action<int> select = null)
     {
         _getItem = getItem;
         _container = container;
+        _effects = container.GetComponent<EffectHandler>();
         _index = index;
         _swap = swap;
         _drop = drop;
@@ -63,17 +67,19 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
         _ornament.transform.SetAsFirstSibling();
         Refresh(_getItem());
         RefreshCooldown(_getItem());
+        _actionLock = HudStyle.CreateActionLock(transform);
+        HudStyle.SetActionLock(_actionLock, IsBlocked);
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Left && !eventData.dragging)
+        if (!IsBlocked && eventData.button == PointerEventData.InputButton.Left && !eventData.dragging)
             _select?.Invoke(_index);
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (eventData.button != PointerEventData.InputButton.Left || _getItem() == null)
+        if (IsBlocked || eventData.button != PointerEventData.InputButton.Left || _getItem() == null)
             return;
 
         Canvas canvas = GetComponentInParent<Canvas>();
@@ -94,7 +100,7 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
 
     public void OnDrop(PointerEventData eventData)
     {
-        if (eventData.pointerDrag == null)
+        if (IsBlocked || eventData.pointerDrag == null)
             return;
         ItemSlotUI source = eventData.pointerDrag.GetComponent<ItemSlotUI>();
         if (source != null && source._dragIcon != null && source._container == _container && source._index != _index)
@@ -107,7 +113,7 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
             return;
         Destroy(_dragIcon.gameObject);
         _dragIcon = null;
-        if (eventData.pointerCurrentRaycast.gameObject == null)
+        if (!IsBlocked && eventData.pointerCurrentRaycast.gameObject == null)
             _drop(_index);
     }
 
@@ -120,6 +126,13 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
     private void LateUpdate()
     {
         Item item = _getItem?.Invoke();
+        HudStyle.SetActionLock(_actionLock, IsBlocked);
+        _actionLock.transform.parent.SetAsLastSibling();
+        if (IsBlocked && _dragIcon != null)
+        {
+            Destroy(_dragIcon.gameObject);
+            _dragIcon = null;
+        }
         if (item != _shownItem || (item == null && _icon.enabled) || (item != null && item.Rarity != _shownRarity))
             Refresh(item);
         _icon.color = item is Weapon weapon && !weapon.IsAvailable ? new Color(0.35f, 0.35f, 0.35f) : Color.white;

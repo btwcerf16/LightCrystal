@@ -141,6 +141,13 @@ public sealed class GameLobby : NetworkBehaviour
         StartCoroutine(LoadScene(_mapScene));
     }
 
+    public void StartTutorial()
+    {
+        if (!IsHost || IsStarting) return;
+        _starting.Value = true;
+        StartCoroutine(LoadScene(TutorialRun.SceneName));
+    }
+
     public void ReturnToLobby()
     {
         if (!IsServer)
@@ -183,24 +190,37 @@ public sealed class GameLobby : NetworkBehaviour
             OpenScreenRpc();
             return;
         }
-        if (sceneName != _mapScene || !IsStarting) return;
+        bool isTutorial = sceneName == TutorialRun.SceneName;
+        if (!IsStarting || (sceneName != _mapScene && !isTutorial)) return;
+        TutorialRun tutorial = isTutorial ? FindFirstObjectByType<TutorialRun>() : null;
+        int tutorialCharacterIndex = tutorial != null ? _characters.IndexOf(tutorial.Character) : -1;
+        if (isTutorial && tutorialCharacterIndex < 0)
+        {
+            Debug.LogError("Tutorial scene needs a TutorialRun with a character from the catalog.", this);
+            NetworkManager.GetComponent<LobbyConnection>().Leave();
+            return;
+        }
         foreach (ulong id in timedOut) NetworkManager.DisconnectClient(id);
-        NetworkManager.GetComponent<GameDefeatController>().BeginMatch();
+        if (!isTutorial)
+            NetworkManager.GetComponent<GameDefeatController>().BeginMatch();
         Vector3 center = FindFirstObjectByType<Crystal>().transform.position;
         for (int i = 0; i < Count; i++)
         {
             LobbyPlayer choice = _players[i];
             if (!completed.Contains(choice.ClientId) || !NetworkManager.ConnectedClients.ContainsKey(choice.ClientId)) continue;
-            CharacterConfig config = _characters.Get(choice.CharacterIndex);
+            int characterIndex = isTutorial ? tutorialCharacterIndex : choice.CharacterIndex;
+            CharacterConfig config = _characters.Get(characterIndex);
             Vector3 position = center + new Vector3((i % 2 == 0 ? -1f : 1f) * (1f + i / 2), -2f, 0f);
             NetworkObject player = Instantiate(config.PlayerPrefab, position, Quaternion.identity);
             player.GetComponent<ActorStats>().ApplyConfig(config.Stats);
             player.GetComponent<ActorHealth>().ResetHealth();
             player.GetComponent<ActorSanity>().RestoreSanity(config.Stats.MaxSanity);
-            player.GetComponent<NetworkSpellHolder>().SetInitialCharacter(choice.CharacterIndex);
+            player.GetComponent<NetworkSpellHolder>().SetInitialCharacter(characterIndex);
             player.SpawnAsPlayerObject(choice.ClientId, true);
+            if (tutorial != null) tutorial.Begin(player);
         }
-        NetworkManager.GetComponent<NetworkWaveDirector>().StartCycle();
+        if (!isTutorial)
+            NetworkManager.GetComponent<NetworkWaveDirector>().StartCycle();
         OpenScreenRpc();
     }
 

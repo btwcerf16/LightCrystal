@@ -62,7 +62,7 @@ public sealed class Crystal : MonoBehaviour
         float lightAmount = _power * elapsed;
         float healingFraction = _healthRegenPerSecond * elapsed;
         ContactFilter2D filter = new ContactFilter2D();
-        filter.SetLayerMask(_targetMask);
+        filter.SetLayerMask(_targetMask & DamageCalculator.CombatLayers);
         filter.useTriggers = true;
         Physics2D.OverlapCircle(transform.position, _radius, filter, _colliders);
         _targets.Clear();

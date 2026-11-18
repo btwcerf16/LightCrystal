@@ -46,7 +46,7 @@ public sealed class NyxPlanBSpell : Spell
         wave.NetworkObject.Spawn(destroyWithScene: true);
 
         HashSet<Enemy> stunnedEnemies = new();
-        foreach (Collider2D hit in Physics2D.OverlapCircleAll(origin, Config.WavePrefab.Radius))
+        foreach (Collider2D hit in Physics2D.OverlapCircleAll(origin, Config.WavePrefab.Radius, DamageCalculator.GetTargetMask(_ownerStats, ~0)))
         {
             if (hit == null)
                 continue;

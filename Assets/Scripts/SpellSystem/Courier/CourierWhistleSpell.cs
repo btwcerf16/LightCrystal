@@ -6,7 +6,7 @@ public sealed class CourierWhistleSpell : Spell
     protected override void Cast(SpellCastData data)
     {
         var enemies = new HashSet<Enemy>();
-        foreach (Collider2D target in Physics2D.OverlapCircleAll(transform.position, ((CourierWhistleConfig)SpellData).Radius))
+        foreach (Collider2D target in Physics2D.OverlapCircleAll(transform.position, ((CourierWhistleConfig)SpellData).Radius, DamageCalculator.GetTargetMask(_ownerStats, ~0)))
         {
             Enemy enemy = target.GetComponentInParent<Enemy>();
             if (enemy != null && enemies.Add(enemy) && !enemy.GetComponent<ActorHealth>().IsDead)

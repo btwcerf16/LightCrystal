@@ -9,9 +9,9 @@ public sealed class DefeatScreen : MonoBehaviour
     [SerializeField] private Text _completedWavesText;
     private Sequence _screenAnimation;
 
-    public void Show(int completedWaves)
+    public void Show(int completedWaves, bool crystalLost = false)
     {
-        _completedWavesText.text = "Пройдено волн: " + completedWaves;
+        _completedWavesText.text = crystalLost ? "Кристалл разрушен" : "Пройдено волн: " + completedWaves;
         _screenGroup.alpha = 0f;
         _defeatTitle.localScale = Vector3.one * 0.96f;
         _screenAnimation = DOTween.Sequence()

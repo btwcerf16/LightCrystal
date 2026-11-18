@@ -47,7 +47,7 @@ public sealed class RoyalScissorsItem : Item
         if (_hauntingSpirit == null) return false;
         float distance = _range * _range;
         Vector2 forward = _ownerStats.GetComponentInChildren<ActorHand>().AimDirection;
-        foreach (Collider2D hit in Physics2D.OverlapCircleAll(_ownerStats.transform.position, _range))
+        foreach (Collider2D hit in Physics2D.OverlapCircleAll(_ownerStats.transform.position, _range, DamageCalculator.CombatLayers))
         {
             Enemy enemy = hit.GetComponentInParent<Enemy>();
             if (enemy == null || !enemy.CanBeExecuted) continue;

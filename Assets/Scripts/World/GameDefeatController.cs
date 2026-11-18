@@ -14,6 +14,7 @@ public sealed class GameDefeatController : MonoBehaviour
     private int _downedPlayersCount;
     private bool _isMatchActive;
     private bool _isDefeated;
+    private bool _crystalOnly;
     public event System.Action Defeated;
 
     private void OnEnable()
@@ -34,9 +35,18 @@ public sealed class GameDefeatController : MonoBehaviour
 
     public void BeginMatch()
     {
-        if (SceneManager.GetActiveScene().name != "Arena01")
+        if (SceneManager.GetActiveScene().name == "Arena01")
+            BeginMatch(crystalOnly: false);
+    }
+
+    public void BeginCrystalDefense() => BeginMatch(crystalOnly: true);
+
+    private void BeginMatch(bool crystalOnly)
+    {
+        if (!_networkManager.IsServer)
             return;
         ClearMatch();
+        _crystalOnly = crystalOnly;
         _isMatchActive = true;
         Crystal crystal = FindFirstObjectByType<Crystal>();
         if (crystal != null)
@@ -80,7 +90,7 @@ public sealed class GameDefeatController : MonoBehaviour
 
     private void CheckDefeat()
     {
-        if (_registeredPlayers.Count > 0 && _downedPlayersCount == _registeredPlayers.Count)
+        if (!_crystalOnly && _registeredPlayers.Count > 0 && _downedPlayersCount == _registeredPlayers.Count)
             Defeat();
     }
 
@@ -96,14 +106,19 @@ public sealed class GameDefeatController : MonoBehaviour
         foreach (ActorHealth playerHealth in _registeredPlayers)
         {
             playerHealth.GetComponent<PlayableActorMovement>().Stop();
-            playerHealth.GetComponent<NetworkPlayerSetup>().ShowDefeatRpc(completedWaves);
+            playerHealth.GetComponent<NetworkPlayerSetup>().ShowDefeatRpc(completedWaves, _crystalOnly);
         }
-        StartCoroutine(ReturnToLobby());
+        StartCoroutine(ReturnAfterDefeat());
     }
 
-    private IEnumerator ReturnToLobby()
+    private IEnumerator ReturnAfterDefeat()
     {
         yield return new WaitForSecondsRealtime(_defeatScreenDuration);
+        if (_crystalOnly)
+        {
+            GetComponent<LobbyConnection>().Leave();
+            yield break;
+        }
         if (GameLobby.Instance == null)
             GetComponent<LobbyConnection>().SpawnLobby();
         GameLobby.Instance.ReturnToLobby();
@@ -128,6 +143,7 @@ public sealed class GameDefeatController : MonoBehaviour
         _downedPlayersCount = 0;
         _isMatchActive = false;
         _isDefeated = false;
+        _crystalOnly = false;
     }
 
     private void OnDisable()

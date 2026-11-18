@@ -1,3 +1,4 @@
+using DG.Tweening;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -12,6 +13,8 @@ public class WorldItem : NetworkBehaviour, ITooltipSource
     private Material _priceMaterial;
     private bool _hasPendingItem;
     private bool _initializeForSale;
+    private Tween _levitation;
+    private float _visualRestY;
 
     private readonly NetworkVariable<EItemRarity> _rarity = new();
     private readonly NetworkVariable<EnchantState> _enchants = new();
@@ -50,6 +53,7 @@ public class WorldItem : NetworkBehaviour, ITooltipSource
     {
         if (_itemVisualSpriteRenderer == null)
             _itemVisualSpriteRenderer = GetComponent<SpriteRenderer>();
+        _visualRestY = _itemVisualSpriteRenderer.transform.localPosition.y;
         if (_boxCollider == null)
             _boxCollider = GetComponent<BoxCollider2D>();
         if (_priceText != null)
@@ -84,6 +88,7 @@ public class WorldItem : NetworkBehaviour, ITooltipSource
 
     public override void OnNetworkDespawn()
     {
+        StopLevitation();
         _isForSale.OnValueChanged -= OnSaleChanged;
         Font.textureRebuilt -= RefreshPriceFont;
         if (_priceText != null)
@@ -134,6 +139,7 @@ public class WorldItem : NetworkBehaviour, ITooltipSource
 
     private void OnSaleChanged(bool previous, bool current)
     {
+        UpdateLevitation();
         RefreshPrice();
     }
 
@@ -159,6 +165,7 @@ public class WorldItem : NetworkBehaviour, ITooltipSource
 
     public override void OnDestroy()
     {
+        _levitation?.Kill();
         Font.textureRebuilt -= RefreshPriceFont;
         if (_priceMaterial != null)
             Destroy(_priceMaterial);
@@ -209,6 +216,33 @@ public class WorldItem : NetworkBehaviour, ITooltipSource
         bool isVisible = newVisible && ItemId > 0;
         _itemVisualSpriteRenderer.enabled = isVisible;
         _boxCollider.enabled = isVisible;
+        UpdateLevitation();
         RefreshPrice();
+    }
+
+    private void UpdateLevitation()
+    {
+        Transform visual = _itemVisualSpriteRenderer.transform;
+        if (visual == transform)
+            return;
+        if (!IsClient || !_isVisible.Value || ItemId <= 0 || IsForSale)
+        {
+            StopLevitation();
+            return;
+        }
+        if (_levitation == null)
+            _levitation = visual.DOLocalMoveY(_visualRestY + 0.065f, 1.45f).SetEase(Ease.InOutSine).SetLoops(-1, LoopType.Yoyo);
+    }
+
+    private void StopLevitation()
+    {
+        if (_levitation == null)
+            return;
+        _levitation.Kill();
+        _levitation = null;
+        Transform visual = _itemVisualSpriteRenderer.transform;
+        Vector3 position = visual.localPosition;
+        position.y = _visualRestY;
+        visual.localPosition = position;
     }
 }

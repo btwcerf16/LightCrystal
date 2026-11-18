@@ -6,7 +6,6 @@ public sealed class BoneCrossbowWeapon : Bow
     [SerializeField] private Projectile _bonePrefab;
     [SerializeField, Min(0.1f)] private float _boneSpeed = 12f;
     [SerializeField, Min(0.1f)] private float _boneRange = 9f;
-    [SerializeField] private LayerMask _targetMask;
 
     protected override bool FiresOnRelease => false;
     public override string DisplayName => "Костяной арбалет";

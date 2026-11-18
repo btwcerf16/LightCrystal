@@ -11,6 +11,9 @@ public sealed class NetworkSummonZone : NetworkBehaviour
     private SummonZone _zone;
     private double _lastTick;
     private bool _isWaveEvent;
+    private NetworkObject _eventPrefab;
+    private Vector3 _eventPosition;
+    private System.Action<NetworkObject> _configureEvent;
 
     public float Capacity => _capacity.Value;
     public event System.Action<NetworkObject> EventSummoned;
@@ -53,6 +56,13 @@ public sealed class NetworkSummonZone : NetworkBehaviour
 
     public void SetWaveEvent() => _isWaveEvent = true;
 
+    public void SetEvent(NetworkObject prefab, Vector3 position, System.Action<NetworkObject> configure = null)
+    {
+        _eventPrefab = prefab;
+        _eventPosition = position;
+        _configureEvent = configure;
+    }
+
     public void SummonEvent()
     {
         if (!IsServer || !IsSpawned)
@@ -78,7 +88,7 @@ public sealed class NetworkSummonZone : NetworkBehaviour
 
     private void CreateEvent()
     {
-        NetworkObject prefab = _eventDatabase != null ? _eventDatabase.GetRandomPrefab(_isWaveEvent) : null;
+        NetworkObject prefab = _eventPrefab != null ? _eventPrefab : _eventDatabase?.GetRandomPrefab(_isWaveEvent);
         if (prefab == null || !prefab.TryGetComponent<IWaveEvent>(out _))
         {
             Debug.LogError("В базе зоны призыва нужен префаб события с положительным весом.", this);
@@ -86,18 +96,23 @@ public sealed class NetworkSummonZone : NetworkBehaviour
             return;
         }
 
-        Crystal crystal = FindFirstObjectByType<Crystal>();
-        ShopSpawnArea area = FindFirstObjectByType<ShopSpawnArea>();
-        if (crystal == null || area == null
-            || !area.TryGetPosition(crystal.transform.position, _minimumCrystalDistance, out Vector3 position))
+        Vector3 position = _eventPosition;
+        if (_eventPrefab == null)
         {
-            Debug.LogError("Не удалось создать событие на карте вдали от кристалла.", this);
-            NetworkObject.Despawn();
-            return;
+            Crystal crystal = FindFirstObjectByType<Crystal>();
+            ShopSpawnArea area = FindFirstObjectByType<ShopSpawnArea>();
+            if (crystal == null || area == null
+                || !area.TryGetPosition(crystal.transform.position, _minimumCrystalDistance, out position))
+            {
+                Debug.LogError("Не удалось создать событие на карте вдали от кристалла.", this);
+                NetworkObject.Despawn();
+                return;
+            }
         }
 
         NetworkObject summonedEvent = Instantiate(prefab, position, Quaternion.identity);
         summonedEvent.GetComponent<IWaveEvent>().ConfigureSpawn(Capacity, _isWaveEvent);
+        _configureEvent?.Invoke(summonedEvent);
         summonedEvent.Spawn(destroyWithScene: true);
         EventSummoned?.Invoke(summonedEvent);
         NetworkObject.Despawn();

@@ -70,7 +70,7 @@ public sealed class Skeleton : Enemy
         Transform best = null;
         int priority = int.MinValue;
         float distance = float.PositiveInfinity;
-        foreach (Collider2D candidate in Physics2D.OverlapCircleAll(transform.position, Stats.ViewDistance.Value, _targetMask))
+        foreach (Collider2D candidate in Physics2D.OverlapCircleAll(transform.position, Stats.ViewDistance.Value, (_targetMask) & DamageCalculator.CombatLayers))
         {
             PlayerInputReader player = candidate.GetComponentInParent<PlayerInputReader>();
             if (player == null || !IsInRange(player.transform))

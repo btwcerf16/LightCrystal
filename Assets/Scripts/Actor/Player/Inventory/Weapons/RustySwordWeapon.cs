@@ -139,7 +139,7 @@ public sealed class RustySwordWeapon : Weapon
         if (IsOwnerStunned || !IsEquipped || !_isAttacking || OwnerNetworkObject == null || !OwnerNetworkObject.IsSpawned || !OwnerNetworkObject.NetworkManager.IsServer)
             return;
 
-        Collider2D[] targets = Physics2D.OverlapCircleAll(position, _attackRadius);
+        Collider2D[] targets = Physics2D.OverlapCircleAll(position, _attackRadius, DamageCalculator.GetTargetMask(OwnerStats, _targetMask));
         foreach (Collider2D target in targets)
         {
             if (_hitTargets.Count >= TargetLimit)

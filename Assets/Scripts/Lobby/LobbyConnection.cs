@@ -19,6 +19,7 @@ public sealed class LobbyConnection : MonoBehaviour
     private static string _lastError;
     public string Error { get; private set; }
     public bool IsSinglePlayer { get; private set; }
+    public bool IsTutorial { get; private set; }
 
     private void Awake()
     {
@@ -30,19 +31,27 @@ public sealed class LobbyConnection : MonoBehaviour
         _manager.OnClientStopped += OnStopped;
     }
 
-    public void CreateLobby(bool singlePlayer = false)
+    public void CreateLobby(bool singlePlayer = false, bool tutorial = false)
     {
         if (_manager.IsListening || _manager.ShutdownInProgress || _returning) return;
         if (_lobbyPrefab == null) { StartupFailed("Префаб лобби не назначен."); return; }
         if (_characters == null || _characters.Count == 0) { StartupFailed("Каталог классов не назначен или пуст."); return; }
         Error = "";
         _leaving = false;
-        IsSinglePlayer = singlePlayer;
+        IsTutorial = tutorial;
+        IsSinglePlayer = singlePlayer || tutorial;
         _manager.NetworkConfig.ConnectionApproval = true;
         UnityTransport transport = GetComponent<UnityTransport>();
-        transport.SetConnectionData(singlePlayer, "127.0.0.1", singlePlayer ? (ushort)0 : _multiplayerPort,
-            singlePlayer ? "127.0.0.1" : "0.0.0.0");
-        if (!_manager.StartHost()) StartupFailed("Не удалось запустить хост на UDP-порту " + transport.ConnectionData.Port + ".");
+        transport.SetConnectionData(IsSinglePlayer, "127.0.0.1", IsSinglePlayer ? (ushort)0 : _multiplayerPort,
+            IsSinglePlayer ? "127.0.0.1" : "0.0.0.0");
+        if (!_manager.StartHost())
+        {
+            StartupFailed("Не удалось запустить хост на UDP-порту " + transport.ConnectionData.Port + ".");
+            return;
+        }
+
+        if (tutorial)
+            GameLobby.Instance?.StartTutorial();
     }
 
     public void Connect(string address)
@@ -54,6 +63,7 @@ public sealed class LobbyConnection : MonoBehaviour
         Error = "";
         _leaving = false;
         IsSinglePlayer = false;
+        IsTutorial = false;
         _manager.NetworkConfig.ConnectionApproval = true;
         UnityTransport transport = GetComponent<UnityTransport>();
         transport.SetConnectionData(address, _multiplayerPort);
@@ -105,6 +115,7 @@ public sealed class LobbyConnection : MonoBehaviour
         {
             _leaving = false;
             IsSinglePlayer = false;
+            IsTutorial = false;
             Error = _lastError = "";
             return;
         }

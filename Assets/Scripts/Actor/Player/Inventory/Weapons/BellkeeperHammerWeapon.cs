@@ -124,7 +124,7 @@ public sealed class BellkeeperHammerWeapon : Weapon
             return;
         if (_isSlam)
             PlayImpact();
-        foreach (Collider2D hit in Physics2D.OverlapCircleAll(_attackPoint.position, _attackRadius))
+        foreach (Collider2D hit in Physics2D.OverlapCircleAll(_attackPoint.position, _attackRadius, DamageCalculator.GetTargetMask(OwnerStats, _targetMask)))
         {
             if (_hitTargets.Count >= TargetLimit)
                 break;

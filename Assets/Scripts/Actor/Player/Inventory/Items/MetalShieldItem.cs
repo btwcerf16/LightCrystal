@@ -35,7 +35,7 @@ public sealed class MetalShieldItem : Item
             return;
         _targets.Clear();
         Vector2 center = _ownerStats.transform.position;
-        foreach (Collider2D hit in Physics2D.OverlapCircleAll(center, _radius))
+        foreach (Collider2D hit in Physics2D.OverlapCircleAll(center, _radius, DamageCalculator.CombatLayers))
         {
             Enemy enemy = hit.GetComponentInParent<Enemy>();
             if (enemy == null || !_targets.Add(enemy))

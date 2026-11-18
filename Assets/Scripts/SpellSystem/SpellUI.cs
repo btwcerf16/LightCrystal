@@ -23,6 +23,7 @@ public sealed class SpellUI : NetworkBehaviour
         public GameObject Cooldown;
         public Image CastFill;
         public Outline Border;
+        public UnityEngine.UI.Text ActionLock;
     }
 
     private readonly List<SlotView> _slots = new();
@@ -32,6 +33,7 @@ public sealed class SpellUI : NetworkBehaviour
     private PlayerSlotBindings _bindings;
     private PlayerInputReader _input;
     private NetworkActorVitals _vitals;
+    private EffectHandler _effects;
     private GameObject _canvas;
     private RectTransform _panel;
     private Font _font;
@@ -46,6 +48,7 @@ public sealed class SpellUI : NetworkBehaviour
         _bindings = GetComponent<PlayerSlotBindings>();
         _input = GetComponent<PlayerInputReader>();
         _vitals = GetComponent<NetworkActorVitals>();
+        _effects = GetComponent<EffectHandler>();
     }
 
     private void OnEnable() => Show();
@@ -145,7 +148,8 @@ public sealed class SpellUI : NetworkBehaviour
             costOutline.effectDistance = new Vector2(1f, -1f);
             cost.text = config != null && !passive ? config.SanityCost.ToString("0.#") : "";
             cost.gameObject.SetActive(config != null && !passive);
-            _slots.Add(new SlotView { Button = button, Binding = binding, Cost = cost, Timer = timer, Cooldown = cooldown.gameObject, CastFill = castFill, Border = border });
+            UnityEngine.UI.Text actionLock = HudStyle.CreateActionLock(card);
+            _slots.Add(new SlotView { Button = button, Binding = binding, Cost = cost, Timer = timer, Cooldown = cooldown.gameObject, CastFill = castFill, Border = border, ActionLock = actionLock });
         }
         RefreshBindings();
     }
@@ -174,12 +178,17 @@ public sealed class SpellUI : NetworkBehaviour
             Spell spell = _holder.Spells[i];
             if (spell == null)
             {
+                HudStyle.SetActionLock(_slots[i].ActionLock, false);
                 _slots[i].Button.interactable = false;
                 _slots[i].CastFill.gameObject.SetActive(false);
                 _slots[i].Cooldown.SetActive(false);
                 continue;
             }
             bool passive = spell.SpellData.IsPassive;
+            bool blocked = !passive && _effects != null && (_effects.IsStunned || _effects.IsSilenced);
+            HudStyle.SetActionLock(_slots[i].ActionLock,
+                !passive && _effects != null && _effects.IsStunned,
+                !passive && _effects != null && _effects.IsSilenced);
             bool toggled = _networkHolder != null ? _networkHolder.IsSpellToggled(i) : spell is ToggleSpell { IsToggled: true };
             _slots[i].Border.effectColor = toggled ? new Color(0.4f, 0.9f, 0.5f) : HudStyle.Line;
             float remaining = passive ? 0f : spell.CooldownRemaining;
@@ -192,7 +201,7 @@ public sealed class SpellUI : NetworkBehaviour
             _slots[i].Cooldown.SetActive(!casting && remaining > 0f);
             _slots[i].Timer.text = remaining >= 1f ? Mathf.CeilToInt(remaining).ToString() : remaining.ToString("0.0");
             _slots[i].Cost.color = affordable ? new Color32(255, 227, 148, 255) : new Color32(255, 126, 114, 255);
-            _slots[i].Button.interactable = !passive && !casting && remaining <= 0f && affordable && _vitals.State.x > 0f && !_input.IsMenuOpen && !_input.IsStatsOpen;
+            _slots[i].Button.interactable = !blocked && !passive && !casting && remaining <= 0f && affordable && _vitals.State.x > 0f && !_input.IsMenuOpen && !_input.IsStatsOpen;
         }
     }
 

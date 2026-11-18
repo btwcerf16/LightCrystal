@@ -3,6 +3,20 @@ using UnityEngine;
 
 public static class DamageCalculator
 {
+    public const int SensorLayer = 10;
+    public const int CombatLayers = ~(1 << SensorLayer);
+
+    public static int GetTargetMask(ActorStats attacker, int configuredMask)
+    {
+        int mask = configuredMask & CombatLayers;
+        if (configuredMask != ~0 || attacker == null)
+            return mask;
+        int friendlyLayers = attacker.TryGetComponent<Enemy>(out _)
+            ? LayerMask.GetMask("Enemy")
+            : LayerMask.GetMask("Player", "LocalPlayer");
+        return mask & ~friendlyLayers;
+    }
+
     public static float RollCriticalDamage(float damage, ActorStats attacker, float additionalCriticalChance = 0f)
     {
         return RollCriticalDamage(damage, attacker, additionalCriticalChance, out _);

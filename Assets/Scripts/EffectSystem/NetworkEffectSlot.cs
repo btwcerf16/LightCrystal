@@ -6,10 +6,11 @@ public struct NetworkEffectSlot : INetworkSerializable, IEquatable<NetworkEffect
     public int InstanceId;
     public int EffectIndex;
     public double EndsAt;
+    public float DisplayDuration;
 
     public bool Equals(NetworkEffectSlot other)
     {
-        return InstanceId == other.InstanceId && EffectIndex == other.EffectIndex && EndsAt == other.EndsAt;
+        return InstanceId == other.InstanceId && EffectIndex == other.EffectIndex && EndsAt == other.EndsAt && DisplayDuration == other.DisplayDuration;
     }
 
     public void NetworkSerialize<T>(BufferSerializer<T> serializer) where T : IReaderWriter
@@ -17,5 +18,6 @@ public struct NetworkEffectSlot : INetworkSerializable, IEquatable<NetworkEffect
         serializer.SerializeValue(ref InstanceId);
         serializer.SerializeValue(ref EffectIndex);
         serializer.SerializeValue(ref EndsAt);
+        serializer.SerializeValue(ref DisplayDuration);
     }
 }

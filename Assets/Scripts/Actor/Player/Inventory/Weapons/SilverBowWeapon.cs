@@ -6,7 +6,6 @@ public sealed class SilverBowWeapon : Bow
     [SerializeField] private Projectile _arrowPrefab;
     [SerializeField, Min(0.1f)] private float _arrowSpeed = 23f;
     [SerializeField, Min(0.1f)] private float _arrowRange = 10f;
-    [SerializeField] private LayerMask _targetMask;
 
     public override string DisplayName => "Серебряный лук";
 

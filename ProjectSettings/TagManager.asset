@@ -18,7 +18,7 @@ TagManager:
   - Actor
   - Enemy
   - Player
-  - 
+  - EnemySensor
   - 
   - 
   - 

@@ -16,7 +16,7 @@ public sealed class DownedEffect : Effect
     {
         DownedEffectData data = (DownedEffectData)EffectData;
         float speed = 0f;
-        foreach (Collider2D collider in Physics2D.OverlapCircleAll(owner.transform.position, data.ReviveRadius))
+        foreach (Collider2D collider in Physics2D.OverlapCircleAll(owner.transform.position, data.ReviveRadius, DamageCalculator.CombatLayers))
         {
             PlayerInputReader player = collider.GetComponentInParent<PlayerInputReader>();
             if (player == null || player.gameObject == owner.gameObject

@@ -6,6 +6,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.UI;
 
+[DefaultExecutionOrder(10)]
 public sealed class PlayerItemTooltipUI : NetworkBehaviour
 {
     private readonly List<RaycastResult> _uiHits = new();
@@ -15,6 +16,7 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
     private HoverTooltipUI _tooltip;
     private PointerEventData _pointerData;
     private PlayerInputReader _input;
+    private PlayerNetworkInteractions _interactions;
     private Camera _camera;
     private ActorStats _stats;
     private EnchantDatabase _enchantDatabase;
@@ -31,6 +33,7 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
         if (!IsSpawned || !IsClient || !IsOwner || !isActiveAndEnabled || _tooltip != null)
             return;
         _input = GetComponent<PlayerInputReader>();
+        _interactions = GetComponent<PlayerNetworkInteractions>();
         _stats = GetComponent<ActorStats>();
         _enchantDatabase = NetworkManager.GetComponent<ItemFactory>().EnchantDatabase;
         if (EventSystem.current == null)
@@ -45,6 +48,7 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
     {
         if (_tooltip == null)
             return;
+        UpdateActionHint();
         if (Pointer.current == null || Pointer.current.press.isPressed || (_input != null && _input.IsMenuOpen))
         {
             _tooltip.Hide();
@@ -86,6 +90,28 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
                 description += "\n\nAlt — расчёт характеристик";
         }
         _tooltip.Show(source, source.TooltipTitle, description, pointer, source.TooltipDelay);
+    }
+
+    private void UpdateActionHint()
+    {
+        WorldItem item = _input.isActiveAndEnabled && !_input.IsMenuOpen && !_input.IsStatsOpen
+            ? _interactions.GetWorldItemUnderHand()
+            : null;
+        if (item != null)
+        {
+            if (_camera == null)
+                _camera = Camera.main;
+            if (_camera != null)
+            {
+                Vector3 point = _camera.WorldToScreenPoint(item.transform.position);
+                if (point.z > 0f)
+                {
+                    _tooltip.SetActionHint(item.IsForSale ? "E — купить" : "E — поднять", point);
+                    return;
+                }
+            }
+        }
+        _tooltip.SetActionHint(null);
     }
 
     private void ShowRange(ITooltipSource source)

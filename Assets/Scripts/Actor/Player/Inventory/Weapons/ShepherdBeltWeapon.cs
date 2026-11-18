@@ -16,7 +16,6 @@ public sealed class ShepherdBeltWeapon : Weapon
     [SerializeField, Min(1)] private int _projectilesPerThrow = 1;
     [SerializeField, Range(0f, 180f)] private float _throwSpreadAngle;
     [SerializeField, Min(0f)] private float _throwHealthCost;
-    [SerializeField] private LayerMask _targetMask;
     private readonly HashSet<IDamageable> _meleeHitTargets = new();
     private bool _hasThrownProjectile;
     public override string DisplayName => "Потрёпанный ремень пастуха";
@@ -108,7 +107,7 @@ public sealed class ShepherdBeltWeapon : Weapon
             return;
         Transform thrustPoint = _thrustPoint != null ? _thrustPoint : _attackPoint;
         Vector2 attackPosition = thrustPoint.position + _attackPoint.right * ((attackPointIndex - 2) * _meleePointSpacing);
-        foreach (Collider2D targetCollider in Physics2D.OverlapCircleAll(attackPosition, _meleeRadius, _targetMask))
+        foreach (Collider2D targetCollider in Physics2D.OverlapCircleAll(attackPosition, _meleeRadius, DamageCalculator.GetTargetMask(OwnerStats, _targetMask)))
         {
             if (_meleeHitTargets.Count >= TargetLimit)
                 break;

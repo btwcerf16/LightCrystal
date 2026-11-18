@@ -33,6 +33,17 @@ public class Shop : MonoBehaviour
         CreateShop();
     }
 
+    public void Initialize(Item[] stock)
+    {
+        int count = Mathf.Min(stock.Length, _itemsPosition.Length);
+        Items = new Item[count];
+        for (int i = 0; i < count; i++)
+        {
+            Items[i] = stock[i];
+            CreateWorldItem(i);
+        }
+    }
+
     public void CreateShop()
     {
         Items = new Item[0];
@@ -102,11 +113,15 @@ public class Shop : MonoBehaviour
                 }
                 roll -= weight;
             }
-            WorldItem worldItem = Instantiate(_worldItemPrefab, _itemsPosition[i].position, Quaternion.identity).GetComponent<WorldItem>();
-            worldItem.SetItem(Items[i].gameObject, true);
-            _worldItems.Add(worldItem);
+            CreateWorldItem(i);
         }
+    }
 
+    private void CreateWorldItem(int index)
+    {
+        WorldItem worldItem = Instantiate(_worldItemPrefab, _itemsPosition[index].position, Quaternion.identity).GetComponent<WorldItem>();
+        worldItem.SetItem(Items[index].gameObject, true);
+        _worldItems.Add(worldItem);
     }
     public List<WorldItem> GetItems()
     {

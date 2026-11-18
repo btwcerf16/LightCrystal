@@ -11,7 +11,7 @@ public sealed class KnightStrikeSpell : Spell
     {
         KnightStrikeConfig config = (KnightStrikeConfig)SpellData;
         _hitTargets.Clear();
-        foreach (Collider2D target in Physics2D.OverlapCircleAll(_owner.transform.position, config.Radius))
+        foreach (Collider2D target in Physics2D.OverlapCircleAll(_owner.transform.position, config.Radius, DamageCalculator.GetTargetMask(_ownerStats, ~0)))
         {
             Enemy enemy = target.GetComponentInParent<Enemy>();
             if (enemy == null)

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Unity.Netcode;
 using UnityEngine;
@@ -10,6 +11,7 @@ public class PlayerNetworkInteractions : NetworkBehaviour
     private ActorArsenal _actorArsenal;
     private Inventory _actorInventory;
     private ActorHand _hand;
+    private readonly List<Collider2D> _handHits = new();
     private ItemFactory _itemFactory;
     private ActorWallet _wallet;
     private NetworkPlayerWallet _networkWallet;
@@ -164,7 +166,10 @@ public class PlayerNetworkInteractions : NetworkBehaviour
 
             item.SetWorldItem(worldItem.gameObject);
             if (item == _lastUsedWeapon)
+            {
                 CancelWeaponActivities();
+                _lastUsedWeapon = null;
+            }
             if (isWeapon)
                 _actorArsenal.DropWeapon(i);
             else
@@ -196,15 +201,34 @@ public class PlayerNetworkInteractions : NetworkBehaviour
 
     private void OnInteractPressed()
     {
-        foreach (Collider2D target in Physics2D.OverlapPointAll(_hand.Position))
+        WorldItem item = GetWorldItemUnderHand();
+        if (item != null)
+            PickupRpc(item.NetworkObjectId);
+    }
+
+    internal WorldItem GetWorldItemUnderHand()
+    {
+        if (_effects != null && (_effects.IsDowned || _effects.IsStunned))
+            return null;
+
+        Vector2 position = _hand.Position;
+        var filter = new ContactFilter2D { useTriggers = Physics2D.queriesHitTriggers };
+        filter.SetLayerMask(Physics2D.DefaultRaycastLayers);
+        Physics2D.OverlapPoint(position, filter, _handHits);
+
+        WorldItem bestItem = null;
+        float lowestDepth = float.PositiveInfinity;
+        foreach (Collider2D hit in _handHits)
         {
-            WorldItem worldItem = target.GetComponentInParent<WorldItem>();
-            if (worldItem != null && worldItem.CanBePicked)
-            {
-                PickupRpc(worldItem.NetworkObjectId);
-                return;
-            }
+            WorldItem item = hit.GetComponentInParent<WorldItem>();
+            float depth = hit.transform.position.z;
+            if (depth >= lowestDepth || item == null || !item.IsUnderHand(position))
+                continue;
+
+            bestItem = item;
+            lowestDepth = depth;
         }
+        return bestItem;
     }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]

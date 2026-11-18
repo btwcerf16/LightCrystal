@@ -16,6 +16,7 @@ public sealed class HoverTooltipUI : MonoBehaviour
     private RectTransform _panel;
     private Text _title;
     private Text _body;
+    private Text _actionHint;
     private Outline _border;
     private ItemRarityBorder _ornament;
     private object _target;
@@ -184,6 +185,44 @@ public sealed class HoverTooltipUI : MonoBehaviour
         position.x = Mathf.Clamp(position.x, area.xMin + 8f, area.xMax - width - 8f);
         position.y = Mathf.Clamp(position.y, area.yMin + height + 8f, area.yMax - 8f);
         _panel.anchoredPosition = position;
+    }
+
+    public void SetActionHint(string text, Vector2 screenPoint = default)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            if (_actionHint != null)
+                _actionHint.transform.parent.gameObject.SetActive(false);
+            return;
+        }
+
+        if (_actionHint == null)
+        {
+            RectTransform hint = Rect("ItemAction", _area, new Vector2(120f, 24f));
+            hint.anchorMin = hint.anchorMax = new Vector2(0.5f, 0.5f);
+            hint.pivot = new Vector2(0.5f, 0f);
+            Image background = hint.gameObject.AddComponent<Image>();
+            background.color = HudStyle.Surface;
+            background.raycastTarget = false;
+
+            _actionHint = Label("Action", 16, Vector2.zero, hint);
+            _actionHint.alignment = TextAnchor.MiddleCenter;
+            _actionHint.resizeTextForBestFit = false;
+            _actionHint.rectTransform.anchorMin = Vector2.zero;
+            _actionHint.rectTransform.anchorMax = Vector2.one;
+            _actionHint.rectTransform.offsetMin = Vector2.zero;
+            _actionHint.rectTransform.offsetMax = Vector2.zero;
+        }
+
+        RectTransform panel = (RectTransform)_actionHint.transform.parent;
+        _actionHint.text = text;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(_area, screenPoint, null, out Vector2 position);
+        Rect bounds = _area.rect;
+        float halfWidth = panel.sizeDelta.x * 0.5f;
+        panel.anchoredPosition = new Vector2(
+            Mathf.Clamp(position.x, bounds.xMin + halfWidth, bounds.xMax - halfWidth),
+            Mathf.Clamp(position.y + 22f, bounds.yMin, bounds.yMax - panel.sizeDelta.y));
+        panel.gameObject.SetActive(true);
     }
 
     public void Hide()

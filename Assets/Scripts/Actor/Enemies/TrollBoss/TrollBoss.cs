@@ -177,7 +177,7 @@ public sealed class TrollBoss : Enemy, INamed
     {
         DustRaised?.Invoke(center, Vector2.one * radius);
         _hitActors.Clear();
-        foreach (Collider2D collider in Physics2D.OverlapCircleAll(center, radius, _targetMask))
+        foreach (Collider2D collider in Physics2D.OverlapCircleAll(center, radius, (_targetMask) & DamageCalculator.CombatLayers))
         {
             ActorHealth target = collider.GetComponentInParent<ActorHealth>();
             if (target == null || target.IsDead ||

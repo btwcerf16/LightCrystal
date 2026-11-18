@@ -151,7 +151,7 @@ public sealed class Spider : Enemy
 
         NetworkWorldAudio.Play(GetComponent<NetworkObject>().NetworkManager, WorldSoundId.SpiderHiss, transform.position);
         Vector2 biteCenter = (Vector2)transform.position - (Vector2)_facing.up * 0.5f;
-        foreach (Collider2D target in Physics2D.OverlapCircleAll(biteCenter, _biteRadius, _targetMask))
+        foreach (Collider2D target in Physics2D.OverlapCircleAll(biteCenter, _biteRadius, (_targetMask) & DamageCalculator.CombatLayers))
         {
             if (target.GetComponentInParent<Enemy>() != null)
                 continue;

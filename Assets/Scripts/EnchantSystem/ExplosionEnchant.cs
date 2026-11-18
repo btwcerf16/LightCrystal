@@ -17,7 +17,7 @@ public sealed class ExplosionEnchant : Enchant
             if (visuals != null)
                 visuals.PlayExplosion(radius);
             HashSet<ActorHealth> hit = new();
-            foreach (Collider2D collider in Physics2D.OverlapCircleAll(target.transform.position, radius))
+            foreach (Collider2D collider in Physics2D.OverlapCircleAll(target.transform.position, radius, DamageCalculator.CombatLayers))
             {
                 ActorHealth health = collider.GetComponentInParent<ActorHealth>();
                 if (health == null || health.IsDead || health.GetComponent<Enemy>() == null || !hit.Add(health))

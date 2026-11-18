@@ -14,7 +14,7 @@ public sealed class PullEnchant : Enchant
         PullEnchantData data = (PullEnchantData)Data;
         _pulledEnemies.Clear();
         ContactFilter2D filter = new ContactFilter2D { useTriggers = true };
-        filter.SetLayerMask(data.EnemyMask);
+        filter.SetLayerMask(data.EnemyMask & DamageCalculator.CombatLayers);
         Physics2D.OverlapCircle(impactPoint, data.Radius, filter, _hits);
         foreach (Collider2D hit in _hits)
         {

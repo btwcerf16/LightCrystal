@@ -56,6 +56,17 @@ public sealed class LocalPlayerSettings : ScriptableObject
     }
 
     private string _character = "";
+    public bool HasCharacter => !string.IsNullOrEmpty(_character);
+    public bool UseCharacterBindings => HasCharacter && PlayerPrefs.GetInt(CharacterBindingsKey) != 0;
+    private string CharacterBindingsKey => "SlotBindings." + _character + ".UseCharacterBindings";
+
+    public void SetUseCharacterBindings(bool enabled)
+    {
+        if (!HasCharacter)
+            return;
+        PlayerPrefs.SetInt(CharacterBindingsKey, enabled ? 1 : 0);
+        PlayerPrefs.Save();
+    }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void LoadVolume()
@@ -74,7 +85,7 @@ public sealed class LocalPlayerSettings : ScriptableObject
         if (character != null) _character = character;
         LoadBindings(ref _inventoryBindings, ESlotBindingType.Inventory, inventorySize);
         LoadBindings(ref _arsenalBindings, ESlotBindingType.Arsenal, arsenalSize);
-        LoadBindings(ref _spellBindings, ESlotBindingType.Spell, spellSize);
+        LoadBindings(ref _spellBindings, ESlotBindingType.Spell, Mathf.Max(4, spellSize));
         LoadBindings(ref _cancelCastBindings, ESlotBindingType.CancelCast, 1);
     }
 
@@ -85,12 +96,8 @@ public sealed class LocalPlayerSettings : ScriptableObject
 
         for (int i = 0; i < size; i++)
         {
-            string defaultPath = string.IsNullOrEmpty(_character) ? bindings[i] : GetDefaultBinding(type, i);
-            if (string.IsNullOrEmpty(defaultPath))
-                defaultPath = GetDefaultBinding(type, i);
-
-            string previous = PlayerPrefs.GetString("SlotBindings." + type + "." + i, defaultPath);
-            bindings[i] = PlayerPrefs.GetString(PreferenceKey(type, i), previous);
+            string shared = PlayerPrefs.GetString(SharedBindingKey(type, i), GetDefaultBinding(type, i));
+            bindings[i] = UseCharacterBindings ? PlayerPrefs.GetString(PreferenceKey(type, i), shared) : shared;
         }
     }
 
@@ -134,8 +141,8 @@ public sealed class LocalPlayerSettings : ScriptableObject
     {
         for (int i = 0; i < bindings.Length; i++)
         {
-            bindings[i] = GetDefaultBinding(type, i);
-            PlayerPrefs.SetString(PreferenceKey(type, i), bindings[i]);
+            PlayerPrefs.DeleteKey(PreferenceKey(type, i));
+            bindings[i] = PlayerPrefs.GetString(SharedBindingKey(type, i), GetDefaultBinding(type, i));
         }
     }
 
@@ -166,6 +173,8 @@ public sealed class LocalPlayerSettings : ScriptableObject
 
     private string PreferenceKey(ESlotBindingType type, int index)
     {
-        return "SlotBindings." + (string.IsNullOrEmpty(_character) ? "" : _character + ".") + type + "." + index;
+        return UseCharacterBindings ? "SlotBindings." + _character + "." + type + "." + index : SharedBindingKey(type, index);
     }
+
+    private static string SharedBindingKey(ESlotBindingType type, int index) => "SlotBindings." + type + "." + index;
 }

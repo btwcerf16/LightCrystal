@@ -58,6 +58,20 @@ public sealed class PlayerHUD : NetworkBehaviour
     public RectTransform SpellPanel => Section("Spells", new Vector2(ArsenalWidth, 68f), new Vector2(CenterWidth, Height - 68f));
     public RectTransform InventoryPanel => Section("InventoryPanel", new Vector2(ArsenalWidth + CenterWidth, 0f), new Vector2(InventoryWidth, Height));
 
+    private bool _minimalLayout;
+
+    public void SetMinimalLayout()
+    {
+        CreateRoot();
+        _minimalLayout = true;
+        _root.GetComponent<Image>().enabled = false;
+        SetCurrencyVisible(false);
+        if (_performanceText != null)
+            _performanceText.transform.parent.gameObject.SetActive(false);
+    }
+
+    public void SetCurrencyVisible(bool visible) => _currencyText.transform.parent.gameObject.SetActive(visible);
+
     public override void OnNetworkSpawn()
     {
         _arsenal = GetComponent<ActorArsenal>();
@@ -89,7 +103,7 @@ public sealed class PlayerHUD : NetworkBehaviour
 
     private void Update()
     {
-        if (IsSpawned && IsOwner && _performanceText != null)
+        if (IsSpawned && IsOwner && _performanceText != null && !_minimalLayout)
             UpdatePerformanceStats();
 
         if (IsSpawned && IsServer)

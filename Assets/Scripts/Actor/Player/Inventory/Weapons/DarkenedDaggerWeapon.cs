@@ -17,7 +17,6 @@ public sealed class DarkenedDaggerWeapon : Weapon
     [SerializeField, Min(0f)] private float _projectileDamage = 1f;
     [SerializeField, Min(0.1f)] private float _projectileSpeed = 16f;
     [SerializeField, Min(0.1f)] private float _projectileRange = 3f;
-    [SerializeField] private LayerMask _targetMask;
     private readonly HashSet<IDamageable> _meleeHitTargets = new();
     private bool _hasThrownProjectile;
     public override string DisplayName => "Потемневший кинжал";
@@ -117,7 +116,7 @@ public sealed class DarkenedDaggerWeapon : Weapon
         if (!IsServer || !IsEquipped || IsOwnerStunned || !_isAttacking)
             return;
         Vector2 attackPosition = _thrustPoint.position;
-        foreach (Collider2D targetCollider in Physics2D.OverlapCircleAll(attackPosition, _meleeRadius, _targetMask))
+        foreach (Collider2D targetCollider in Physics2D.OverlapCircleAll(attackPosition, _meleeRadius, DamageCalculator.GetTargetMask(OwnerStats, _targetMask)))
         {
             if (_meleeHitTargets.Count >= TargetLimit)
                 break;

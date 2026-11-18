@@ -36,7 +36,7 @@ public sealed class NetworkPlayerSetup : NetworkBehaviour
 
         _inputReader.enabled = true;
         _visionObject.SetActive(true);
-        if (_runGuidePrefab != null)
+        if (_runGuidePrefab != null && gameObject.scene.name != TutorialRun.SceneName)
         {
             _runGuide = Instantiate(_runGuidePrefab, transform);
             _runGuide.Show(_inputReader);
@@ -45,7 +45,7 @@ public sealed class NetworkPlayerSetup : NetworkBehaviour
 
     protected override void OnNetworkPostSpawn()
     {
-        if (!IsServer)
+        if (!IsServer || gameObject.scene.name == TutorialRun.SceneName)
             return;
         CharacterConfig character = GetComponent<NetworkSpellHolder>().Character;
         if (character == null || character.BeginningWeapon == null)
@@ -64,11 +64,11 @@ public sealed class NetworkPlayerSetup : NetworkBehaviour
     }
 
     [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Server)]
-    public void ShowDefeatRpc(int completedWaves)
+    public void ShowDefeatRpc(int completedWaves, bool crystalLost)
     {
         _inputReader.SetMenuOpen(true);
         _inputReader.enabled = false;
-        Instantiate(_defeatScreenPrefab).Show(completedWaves);
+        Instantiate(_defeatScreenPrefab).Show(completedWaves, crystalLost);
     }
 
     private void OnDamageTaken(float damage)

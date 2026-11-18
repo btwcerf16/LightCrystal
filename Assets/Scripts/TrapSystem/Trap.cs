@@ -37,7 +37,7 @@ public abstract class Trap : MonoBehaviour
         TrapParameters = trapData;
         _owner = trapData.Owner;
         _effectOnCaught = trapData.EffectOnCaught;
-        _targetsLayerMask = trapData.TargetsLayerMask;
+        _targetsLayerMask = DamageCalculator.GetTargetMask(trapData.Owner, trapData.TargetsLayerMask);
         _lifeTime = Mathf.Max(0f, trapData.LifeTime);
         _operationsCount = Mathf.Max(0, trapData.OperationsCount);
         _remainingLifetime = _lifeTime;
@@ -59,7 +59,7 @@ public abstract class Trap : MonoBehaviour
             if (_remainingTriggerDelay <= 0f)
             {
                 Vector2 center = transform.TransformPoint(_circle.offset);
-                foreach (Collider2D target in Physics2D.OverlapCircleAll(center, Radius, _targetsLayerMask))
+                foreach (Collider2D target in Physics2D.OverlapCircleAll(center, Radius, (_targetsLayerMask) & DamageCalculator.CombatLayers))
                     TryCatch(target);
                 Finish();
             }

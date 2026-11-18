@@ -7,6 +7,7 @@ public class NetworkShop : NetworkBehaviour, IWaveEvent
 {
     private Shop _shop;
     private float? _capacity;
+    private Item[] _stock;
     private bool _isWaveEvent;
     [SerializeField, Min(0.1f)] private float _lifetime = 60f;
     private double _expiresAt;
@@ -29,11 +30,16 @@ public class NetworkShop : NetworkBehaviour, IWaveEvent
     {
         if (!IsServer || !_capacity.HasValue)
             return;
-        _shop.Initialize(_capacity.Value);
+        if (_stock == null)
+            _shop.Initialize(_capacity.Value);
+        else
+            _shop.Initialize(_stock);
         SpawnItems();
         if (!_isWaveEvent)
             _expiresAt = NetworkManager.ServerTime.Time + _lifetime;
     }
+
+    public void SetStock(Item[] stock) => _stock = stock;
 
     public void Initialize(EShopCategory category)
     {
@@ -69,6 +75,7 @@ public class NetworkShop : NetworkBehaviour, IWaveEvent
         Finished = null;
         _expiresAt = 0;
         _capacity = null;
+        _stock = null;
         _isWaveEvent = false;
         if (!IsServer)
             return;

@@ -129,7 +129,7 @@ public sealed class SpearWeapon : Weapon
         if (!_isAttacking || IsOwnerStunned || !IsAvailable || OwnerNetworkObject == null || !OwnerNetworkObject.IsSpawned || !OwnerNetworkObject.NetworkManager.IsServer)
             return;
         Vector2 position = _attackPoint.position + _attackPoint.right * ((point - 2) * _pointSpacing);
-        foreach (Collider2D hit in Physics2D.OverlapCircleAll(position, _attackRadius))
+        foreach (Collider2D hit in Physics2D.OverlapCircleAll(position, _attackRadius, DamageCalculator.GetTargetMask(OwnerStats, _targetMask)))
         {
             if (_hitTargets.Count >= TargetLimit)
                 break;
@@ -164,7 +164,7 @@ public sealed class SpearWeapon : Weapon
         {
             Attacker = OwnerStats, Damage = CurrentDamage * _throwMultiplier,
             DamageType = EDamageType.Physical, Direction = _hand.AimDirection,
-            Speed = _throwSpeed, LifeTime = _throwRange / _throwSpeed, LayerMask = ~0
+            Speed = _throwSpeed, LifeTime = _throwRange / _throwSpeed, LayerMask = _targetMask
         });
         SetAvailable(false);
         projectile.GetComponent<NetworkObject>().Spawn();

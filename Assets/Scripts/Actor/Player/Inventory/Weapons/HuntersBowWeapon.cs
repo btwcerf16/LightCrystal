@@ -6,7 +6,6 @@ public sealed class HuntersBowWeapon : Bow
     [SerializeField] private HunterArrowProjectile _arrowPrefab;
     [SerializeField, Min(0.1f)] private float _arrowSpeed = 20f;
     [SerializeField, Min(0.1f)] private float _arrowRange = 9f;
-    [SerializeField] private LayerMask _targetMask;
 
     public override string DisplayName => "Набор охотника";
 

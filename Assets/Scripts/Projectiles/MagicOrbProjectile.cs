@@ -30,7 +30,7 @@ public sealed class MagicOrbProjectile : Projectile
         if (dealDamage)
         {
             _targets.Clear();
-            foreach (Collider2D target in Physics2D.OverlapCircleAll(transform.position, _explosionRadius, Data.LayerMask))
+            foreach (Collider2D target in Physics2D.OverlapCircleAll(transform.position, _explosionRadius, (Data.LayerMask) & DamageCalculator.CombatLayers))
             {
                 IDamageable damageable = target.GetComponentInParent<IDamageable>();
                 if (damageable != null && (target.GetComponentInParent<Enemy>() != null || target.GetComponentInParent<EnchantRune>() != null) && _targets.Add(damageable))

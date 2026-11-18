@@ -17,6 +17,7 @@ public sealed class PlayerMenuUI : NetworkBehaviour
     private RectTransform _rows;
     private Text _message;
     private Text _wavePauseLabel;
+    private Toggle _characterBindings;
     private Button _inventoryTab;
     private Button _arsenalTab;
     private Button _spellsTab;
@@ -83,7 +84,16 @@ public sealed class PlayerMenuUI : NetworkBehaviour
         _arsenalTab = MakeButton(settings, "Арсенал", new Vector2(280f, -88f), new Vector2(240f, 40f), () => ShowSettings(ESlotBindingType.Arsenal));
         _spellsTab = MakeButton(settings, "Способности", new Vector2(536f, -88f), new Vector2(240f, 40f), () => ShowSettings(ESlotBindingType.Spell));
 
-        RectTransform scrollArea = Rect("Slots", settings, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24f, -144f), new Vector2(752f, 336f));
+        RectTransform profile = Rect("CharacterBindings", settings, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24f, -136f), new Vector2(360f, 32f));
+        Paint(profile, Color.clear);
+        _characterBindings = profile.gameObject.AddComponent<Toggle>();
+        RectTransform box = Rect("Box", profile, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(0f, -6f), new Vector2(20f, 20f));
+        _characterBindings.targetGraphic = Paint(box, HudStyle.Line);
+        _characterBindings.graphic = Paint(Rect("Check", box, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(4f, -4f), new Vector2(12f, 12f)), HudStyle.Text);
+        Label(profile, "Настройки под персонажа", new Vector2(28f, 0f), new Vector2(330f, 32f), 16);
+        _characterBindings.onValueChanged.AddListener(_bindings.SetUseCharacterBindings);
+
+        RectTransform scrollArea = Rect("Slots", settings, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(24f, -176f), new Vector2(752f, 304f));
         Paint(scrollArea, HudStyle.Surface);
         scrollArea.gameObject.AddComponent<RectMask2D>();
         ScrollRect scroll = scrollArea.gameObject.AddComponent<ScrollRect>();
@@ -263,6 +273,7 @@ public sealed class PlayerMenuUI : NetworkBehaviour
         _bindingLabels[index].text = "Нажми клавишу";
         foreach (Button button in _bindingButtons)
             button.interactable = false;
+        _characterBindings.interactable = false;
         EventSystem.current.SetSelectedGameObject(null);
         bool cancelCast = _bindingType == ESlotBindingType.Spell && index == GetComponent<SpellHolder>().Count;
         _bindings.BeginRebind(cancelCast ? ESlotBindingType.CancelCast : _bindingType, cancelCast ? 0 : index, message =>
@@ -279,6 +290,8 @@ public sealed class PlayerMenuUI : NetworkBehaviour
 
     private void RefreshBindings()
     {
+        _characterBindings.SetIsOnWithoutNotify(_bindings.UseCharacterBindings);
+        _characterBindings.interactable = _bindings.HasCharacter && !_bindings.IsRebinding;
         for (int i = 0; i < _bindingLabels.Count; i++)
         {
             SpellConfig config = _bindingType == ESlotBindingType.Spell ? GetComponent<SpellHolder>().GetConfig(i) : null;
@@ -292,7 +305,7 @@ public sealed class PlayerMenuUI : NetworkBehaviour
     private void ResetBindings()
     {
         _bindings.ResetBindings();
-        _message.text = "Все привязки сброшены к стандартным.";
+        _message.text = _bindings.UseCharacterBindings ? "Для персонажа восстановлены общие привязки." : "Общие привязки сброшены к стандартным.";
     }
 
     private void QuitGame()
@@ -351,9 +364,11 @@ public sealed class PlayerMenuUI : NetworkBehaviour
         return rect;
     }
 
-    private void Paint(RectTransform rect, Color color)
+    private Image Paint(RectTransform rect, Color color)
     {
-        rect.gameObject.AddComponent<Image>().color = color;
+        Image image = rect.gameObject.AddComponent<Image>();
+        image.color = color;
+        return image;
     }
 
     private Text Label(Transform parent, string value, Vector2 position, Vector2 size, int fontSize)

@@ -33,6 +33,7 @@ public abstract class Projectile : MonoBehaviour
             _hitbox.isTrigger = true;
             _hitbox.radius = _collisionRadius;
         }
+        projectileData.LayerMask = DamageCalculator.GetTargetMask(projectileData.Attacker, projectileData.LayerMask);
         ExtraPiercing = 0;
         _hitTargets.Clear();
         if (projectileData.Attacker != null && !projectileData.StatsApplied)
@@ -110,6 +111,8 @@ public abstract class Projectile : MonoBehaviour
 
     protected virtual bool CanHit(Collider2D targetCollider)
     {
+        if ((Data.LayerMask.value & (1 << targetCollider.gameObject.layer)) == 0)
+            return false;
         if (targetCollider.isTrigger && targetCollider.GetComponentInParent<IDamageable>() == null)
             return false;
         IDamageable damageableTarget = targetCollider.GetComponentInParent<IDamageable>();

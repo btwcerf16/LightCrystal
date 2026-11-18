@@ -26,7 +26,7 @@ MonoBehaviour:
   RestartOnReapply: 0
   TintActor: 0
   ActorTintStrength: 0.25
-  HealthBonus: 0.05
+  HealthBonus: 0.1
   BaseDamageBonus: 0.05
   PhysicalResistanceBonus: 0.01
   MagicResistanceBonus: 0.01

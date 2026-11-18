@@ -121,7 +121,7 @@ public sealed class FirstDawnSwordWeapon : Weapon
     {
         if (!CanStrike || _isWave)
             return;
-        foreach (Collider2D hit in Physics2D.OverlapCircleAll(_attackPoint.position, _attackRadius))
+        foreach (Collider2D hit in Physics2D.OverlapCircleAll(_attackPoint.position, _attackRadius, DamageCalculator.GetTargetMask(OwnerStats, _targetMask)))
         {
             if (_hitTargets.Count >= TargetLimit)
                 break;
@@ -148,7 +148,7 @@ public sealed class FirstDawnSwordWeapon : Weapon
         wave.Launch(new ProjectileData
         {
             Attacker = OwnerStats, Damage = _waveDamage, DamageType = EDamageType.Magic,
-            Direction = _hand.AimDirection, Speed = _waveSpeed, LifeTime = _waveRange / _waveSpeed, LayerMask = ~0
+            Direction = _hand.AimDirection, Speed = _waveSpeed, LifeTime = _waveRange / _waveSpeed, LayerMask = _targetMask
         });
         wave.GetComponent<NetworkObject>().Spawn();
     }

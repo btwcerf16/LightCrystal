@@ -102,7 +102,7 @@ public sealed class Goblin : Enemy
         Transform bestTarget = null;
         int bestPriority = int.MinValue;
         float bestDistance = float.PositiveInfinity;
-        foreach (Collider2D candidate in Physics2D.OverlapCircleAll(transform.position, Stats.ViewDistance.Value, _targetMask))
+        foreach (Collider2D candidate in Physics2D.OverlapCircleAll(transform.position, Stats.ViewDistance.Value, (_targetMask) & DamageCalculator.CombatLayers))
         {
             PlayerInputReader player = candidate.GetComponentInParent<PlayerInputReader>();
             if (player == null)
@@ -149,12 +149,18 @@ public sealed class Goblin : Enemy
         return base.CanAttack() && Stats.AttackSpeed.Value > 0f;
     }
 
+    public void LockMainTarget()
+    {
+        ClearTemporaryTarget();
+        _isMainTargetLocked = true;
+    }
+
     public override void Attack()
     {
         NotifyAttackStarted();
         if (Health.IsDead) return;
-        if (CurrentTarget == MainTarget)
-            _isMainTargetLocked = true;
+        if (TemporaryTarget == null && MainTarget != null)
+            LockMainTarget();
         SetAim(AimAt(CurrentTarget));
         _isAttacking = true;
         _hitTargets.Clear();
@@ -167,7 +173,7 @@ public sealed class Goblin : Enemy
             return;
         NetworkManager manager = GetComponent<NetworkObject>().NetworkManager;
         NetworkWorldAudio.Play(manager, WorldSoundId.GoblinDaggerSwing, _attackPoint.position);
-        foreach (Collider2D target in Physics2D.OverlapCircleAll(_attackPoint.position, _attackRadius, _targetMask))
+        foreach (Collider2D target in Physics2D.OverlapCircleAll(_attackPoint.position, _attackRadius, (_targetMask) & DamageCalculator.CombatLayers))
         {
             if (target.GetComponentInParent<Enemy>() != null)
                 continue;

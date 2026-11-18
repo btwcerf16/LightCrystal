@@ -73,14 +73,18 @@ public class EffectHandler : MonoBehaviour
         }
     }
 
-    public Effect AddEffect(EffectData effectData)
+    public Effect AddEffect(EffectData effectData) => AddEffect(effectData, effectData != null ? effectData.EffectDuration : 0f);
+
+    public Effect AddEffect(EffectData effectData, float duration)
     {
-        if (!CanProcess || !isActiveAndEnabled || effectData == null || (!effectData.IsPermanent && effectData.EffectDuration <= 0f))
+        if (!CanProcess || !isActiveAndEnabled || effectData == null || (!effectData.IsPermanent && duration <= 0f))
             return null;
         if ((effectData.Status & EActorStatus.Stunned) != 0 && CompareTag("Boss"))
             return null;
 
-        float duration = effectData.IsPermanent ? float.PositiveInfinity : effectData.EffectDuration;
+        float displayDuration = duration;
+        if (effectData.IsPermanent)
+            duration = float.PositiveInfinity;
         if (!effectData.IsPermanent && !effectData.IsBuff && (effectData.Status != EActorStatus.None || effectData.AffectedByEffectResistance))
             duration *= 1f - Mathf.Clamp01(_ownerStats.EffectResistance.Value);
         if (duration <= 0f)
@@ -92,6 +96,7 @@ public class EffectHandler : MonoBehaviour
             if (existing != null)
             {
                 existing.TimeRemaining = duration;
+                existing.DisplayDuration = displayDuration;
                 if (effectData.RestartOnReapply)
                 {
                     existing.EffectEnd(_ownerStats);
@@ -106,6 +111,7 @@ public class EffectHandler : MonoBehaviour
 
         Effect newEffect = effectData.CreateEffect(gameObject);
         newEffect.TimeRemaining = duration;
+        newEffect.DisplayDuration = displayDuration;
         _activeEffects.Add(newEffect);
         newEffect.EffectStart(_ownerStats);
         RefreshStatus();

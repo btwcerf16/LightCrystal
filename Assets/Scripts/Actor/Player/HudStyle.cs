@@ -1,9 +1,12 @@
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.UI;
 
 public static class HudStyle
 {
     private static Font _pixelFont;
+    private static Sprite _silenceMask;
+    private static Sprite _stunAnvil;
     public static Font PixelFont => _pixelFont ??= Resources.Load<Font>("Tiny5-Regular");
 
     public static readonly Color Surface = new Color32(22, 24, 25, 255);
@@ -41,5 +44,66 @@ public static class HudStyle
         label.resizeTextForBestFit = true;
         label.resizeTextMinSize = 10;
         label.resizeTextMaxSize = 12;
+    }
+
+    public static UnityEngine.UI.Text CreateActionLock(Transform parent)
+    {
+        var shade = new GameObject("ActionLock", typeof(RectTransform), typeof(UnityEngine.UI.Image)).GetComponent<UnityEngine.UI.Image>();
+        shade.transform.SetParent(parent, false);
+        shade.rectTransform.anchorMin = Vector2.zero;
+        shade.rectTransform.anchorMax = Vector2.one;
+        shade.rectTransform.offsetMin = shade.rectTransform.offsetMax = Vector2.zero;
+        shade.color = new Color(0.08f, 0.03f, 0.05f, 0.78f);
+        shade.raycastTarget = false;
+        var mask = new GameObject("Mask", typeof(RectTransform), typeof(UnityEngine.UI.Image)).GetComponent<UnityEngine.UI.Image>();
+        mask.transform.SetParent(shade.transform, false);
+        mask.rectTransform.sizeDelta = new Vector2(24f, 24f);
+        mask.rectTransform.anchoredPosition = new Vector2(0f, 5f);
+        mask.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
+        mask.sprite = _silenceMask ??= Resources.Load<Sprite>("SilenceMask");
+        mask.preserveAspect = true;
+        mask.raycastTarget = false;
+        DOVirtual.Float(0f, 1f, 0.5f, progress =>
+            {
+                bool secondFrame = progress >= 0.5f;
+                bool stunned = mask.sprite == _stunAnvil;
+                mask.rectTransform.localRotation = Quaternion.Euler(0f, 0f, stunned ? 0f : (secondFrame ? -45f : 45f));
+                mask.rectTransform.anchoredPosition = new Vector2(0f, stunned ? (secondFrame ? 1f : 11f) : 5f);
+            })
+            .SetEase(Ease.Linear)
+            .SetLoops(-1)
+            .SetUpdate(true)
+            .SetLink(shade.gameObject, LinkBehaviour.PauseOnDisableRestartOnEnable);
+        var label = new GameObject("Reason", typeof(RectTransform), typeof(UnityEngine.UI.Text)).GetComponent<UnityEngine.UI.Text>();
+        label.transform.SetParent(shade.transform, false);
+        label.rectTransform.anchorMin = Vector2.zero;
+        label.rectTransform.anchorMax = Vector2.right;
+        label.rectTransform.pivot = new Vector2(0.5f, 0f);
+        label.rectTransform.sizeDelta = new Vector2(-2f, 18f);
+        label.rectTransform.anchoredPosition = new Vector2(0f, 3f);
+        label.font = PixelFont;
+        label.fontSize = 11;
+        label.color = Text;
+        label.alignment = TextAnchor.MiddleCenter;
+        label.raycastTarget = false;
+        shade.gameObject.SetActive(false);
+        return label;
+    }
+
+    public static void SetActionLock(UnityEngine.UI.Text label, bool stunned, bool silenced = false)
+    {
+        GameObject overlay = label.transform.parent.gameObject;
+        bool blocked = stunned || silenced;
+        string reason = stunned ? "СТАН" : "Безмолвие";
+        if (overlay.activeSelf == blocked && label.text == reason)
+            return;
+        label.text = reason;
+        var icon = overlay.transform.GetChild(0).GetComponent<UnityEngine.UI.Image>();
+        icon.sprite = stunned
+            ? (_stunAnvil ??= Resources.Load<Sprite>("StunAnvil"))
+            : (_silenceMask ??= Resources.Load<Sprite>("SilenceMask"));
+        icon.rectTransform.localRotation = Quaternion.Euler(0f, 0f, stunned ? 0f : 45f);
+        icon.rectTransform.anchoredPosition = new Vector2(0f, stunned ? 11f : 5f);
+        overlay.SetActive(blocked);
     }
 }

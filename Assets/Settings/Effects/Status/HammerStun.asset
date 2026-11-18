@@ -23,9 +23,12 @@ MonoBehaviour:
   SpriteIcon: {fileID: 0}
   EffectColor: {r: 0.7, g: 0.4, b: 0.9, a: 1}
   IsBuff: 0
+  IsPermanent: 0
   Status: 1
+  AffectedByEffectResistance: 1
   CanPurged: 1
   Stackable: 0
   RestartOnReapply: 1
   TintActor: 1
   ActorTintStrength: 0.25
+  ViewDistanceMultiplier: 1

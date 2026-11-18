@@ -3,6 +3,7 @@ using UnityEngine;
 public abstract class Effect : MonoBehaviour
 {
     public float TimeRemaining { get; internal set; }
+    internal float DisplayDuration { get; set; }
     public EffectData EffectData { get; private set; }
 
     public void Initialize(EffectData effectData)

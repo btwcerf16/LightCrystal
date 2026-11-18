@@ -23,11 +23,6 @@ public sealed class LobbyMenuUI : MonoBehaviour
     private GameObject _modeSelection;
     private GameObject _friendsMenu;
     private GameObject _room;
-    private RectTransform _crystal;
-    private Image _crystalGlow;
-    private readonly Image[] _crystalParticles = new Image[12];
-    private Texture2D _glowTexture;
-    private Sprite _glowSprite;
     private InputField _address;
     private Text _status;
     private Text _roster;
@@ -82,12 +77,13 @@ public sealed class LobbyMenuUI : MonoBehaviour
         Button(background, "Выход", new Vector2(784, 436), new Vector2(128, 48), Quit, quiet: true);
 
         _entry = Rect("Connection", background, Vector2.zero, new Vector2(1696, 704)).gameObject;
-        BuildCrystal(_entry.transform);
+        MenuCrystalVisual.Create(_entry.transform, _crystalSprite, new Vector2(480f, 64f), 1f);
         _modeSelection = Rect("GameMode", _entry.transform, Vector2.zero, Vector2.zero).gameObject;
         _friendsMenu = Rect("Friends", _entry.transform, Vector2.zero, Vector2.zero).gameObject;
         Label(_modeSelection.transform, "Выбор режима", new Vector2(-528, 154), new Vector2(640, 80), 58, Paper, TextAnchor.MiddleLeft);
         Button(_modeSelection.transform, "Одиночное", new Vector2(-608, 44), new Vector2(480, 64), () => _connection.CreateLobby(singlePlayer: true), primary: true);
         Button(_modeSelection.transform, "С друзьями", new Vector2(-608, -40), new Vector2(480, 64), () => ShowFriendsMenu(true));
+        Button(_modeSelection.transform, "Обучение", new Vector2(-608, -124), new Vector2(480, 64), () => _connection.CreateLobby(singlePlayer: true, tutorial: true));
         Label(_friendsMenu.transform, "С друзьями", new Vector2(-528, 154), new Vector2(640, 80), 58, Paper, TextAnchor.MiddleLeft);
         Button(_friendsMenu.transform, "Создать комнату", new Vector2(-608, 44), new Vector2(480, 64), () => _connection.CreateLobby(), primary: true);
         Label(_friendsMenu.transform, "IP-адрес хоста", new Vector2(-688, -38), new Vector2(320, 40), 24, Secondary, TextAnchor.MiddleLeft);
@@ -169,58 +165,6 @@ public sealed class LobbyMenuUI : MonoBehaviour
     {
         _modeSelection.SetActive(!show);
         _friendsMenu.SetActive(show);
-    }
-
-    private void BuildCrystal(Transform parent)
-    {
-        const int size = 96;
-        _glowTexture = new Texture2D(size, size, TextureFormat.RGBA32, false);
-        _glowTexture.wrapMode = TextureWrapMode.Clamp;
-        Color32[] pixels = new Color32[size * size];
-        for (int y = 0; y < size; y++)
-        for (int x = 0; x < size; x++)
-        {
-            Vector2 point = new Vector2(x, y) * (2f / (size - 1)) - Vector2.one;
-            float intensity = 1f - Mathf.Clamp01(point.magnitude);
-            pixels[y * size + x] = new Color32(255, 255, 255, (byte)(255f * intensity * intensity));
-        }
-        _glowTexture.SetPixels32(pixels);
-        _glowTexture.Apply(false, true);
-        _glowSprite = Sprite.Create(_glowTexture, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
-
-        _crystalGlow = Paint(Rect("CrystalGlow", parent, new Vector2(480, 64), new Vector2(880, 740)), Color.clear);
-        _crystalGlow.sprite = _glowSprite;
-        _crystalGlow.raycastTarget = false;
-        for (int i = 0; i < _crystalParticles.Length; i++)
-        {
-            Image particle = Paint(Rect("CrystalParticle", parent, Vector2.zero, Vector2.one * (3f + i % 3)), Accent);
-            particle.raycastTarget = false;
-            particle.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
-            _crystalParticles[i] = particle;
-        }
-
-        Image crystal = Paint(Rect("Crystal", parent, new Vector2(480, 64), new Vector2(256, 384)), Color.white);
-        crystal.sprite = _crystalSprite;
-        crystal.preserveAspect = true;
-        crystal.raycastTarget = false;
-        _crystal = crystal.rectTransform;
-        AnimateCrystal(0f);
-    }
-
-    private void AnimateCrystal(float time)
-    {
-        float rise = Mathf.Sin(time * 1.3f) * 14f;
-        _crystal.anchoredPosition = new Vector2(480, 64 + rise);
-        _crystal.localRotation = Quaternion.Euler(0f, 0f, Mathf.Sin(time * 0.8f) * 2.5f);
-        _crystalGlow.rectTransform.anchoredPosition = _crystal.anchoredPosition;
-        _crystalGlow.color = new Color(0.34f, 0.7f, 0.8f, 0.27f + Mathf.Sin(time * 1.3f) * 0.06f);
-        for (int i = 0; i < _crystalParticles.Length; i++)
-        {
-            float progress = Mathf.Repeat(time * (0.16f + i % 3 * 0.02f) + i * 0.173f, 1f);
-            float x = (i * 137 % 277) - 138f + Mathf.Sin(time * 1.1f + i) * 11f;
-            _crystalParticles[i].rectTransform.anchoredPosition = new Vector2(480f + x, -90f + 330f * progress + rise);
-            _crystalParticles[i].color = new Color(0.58f, 0.83f, 0.86f, Mathf.Sin(progress * Mathf.PI) * 0.55f);
-        }
     }
 
     private void BuildCarousel()
@@ -445,7 +389,7 @@ public sealed class LobbyMenuUI : MonoBehaviour
                 ShowFriendsMenu(false);
             RefreshRoom();
         }
-        if (_lobby == null)
+        if (_lobby == null || _connection.IsTutorial)
         {
             HideSpellTooltip();
             _statsPanel.SetActive(false);
@@ -475,8 +419,6 @@ public sealed class LobbyMenuUI : MonoBehaviour
 
     private void LateUpdate()
     {
-        if (_entry != null && _entry.activeInHierarchy)
-            AnimateCrystal(Time.unscaledTime);
         if (_room == null || !_room.activeSelf) return;
         if (_hoveredSpell >= 0 && Pointer.current != null) _spellTooltip.Move(Pointer.current.position.ReadValue());
         for (int i = 0; i < _cards.Length; i++)
@@ -506,7 +448,7 @@ public sealed class LobbyMenuUI : MonoBehaviour
 
     private void RefreshRoom()
     {
-        if (_room == null || _lobby == null) return;
+        if (_room == null || _lobby == null || _connection.IsTutorial) return;
         _entry.SetActive(false);
         _room.SetActive(true);
         _recordRun.gameObject.SetActive(_lobby.IsServer);
@@ -572,8 +514,6 @@ public sealed class LobbyMenuUI : MonoBehaviour
     private void OnDestroy()
     {
         if (_lobby != null) _lobby.Changed -= RefreshRoom;
-        Destroy(_glowSprite);
-        Destroy(_glowTexture);
     }
 
     private static void Quit()

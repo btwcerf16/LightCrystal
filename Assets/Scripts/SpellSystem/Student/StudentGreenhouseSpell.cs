@@ -21,7 +21,7 @@ public sealed class StudentGreenhouseSpell : PassiveSpell
     {
         StudentGreenhouseConfig config = (StudentGreenhouseConfig)SpellData;
         _enemies.Clear();
-        foreach (Collider2D target in Physics2D.OverlapCircleAll(transform.position, config.Radius))
+        foreach (Collider2D target in Physics2D.OverlapCircleAll(transform.position, config.Radius, DamageCalculator.GetTargetMask(_ownerStats, ~0)))
         {
             Enemy enemy = target.GetComponentInParent<Enemy>();
             if (enemy != null && !enemy.GetComponent<ActorHealth>().IsDead)

@@ -15,7 +15,6 @@ public sealed class GlassShardsWeapon : Weapon
     [SerializeField, Min(1)] private int _projectilesPerThrow = 1;
     [SerializeField, Range(0f, 180f)] private float _throwSpreadAngle;
     [SerializeField, Min(0f)] private float _throwHealthCost;
-    [SerializeField] private LayerMask _targetMask;
     private readonly HashSet<IDamageable> _meleeHitTargets = new();
     private bool _hasThrownProjectile;
     public override string DisplayName => "Осколки стекла";
@@ -106,7 +105,7 @@ public sealed class GlassShardsWeapon : Weapon
         if (!IsServer || !IsEquipped || IsOwnerStunned || !_isAttacking)
             return;
         Vector2 attackPosition = _attackPoint.position + _attackPoint.right * ((attackPointIndex - 2) * _meleePointSpacing);
-        foreach (Collider2D targetCollider in Physics2D.OverlapCircleAll(attackPosition, _meleeRadius, _targetMask))
+        foreach (Collider2D targetCollider in Physics2D.OverlapCircleAll(attackPosition, _meleeRadius, DamageCalculator.GetTargetMask(OwnerStats, _targetMask)))
         {
             if (_meleeHitTargets.Count >= TargetLimit)
                 break;

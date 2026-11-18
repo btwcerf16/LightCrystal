@@ -32,6 +32,7 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
     private float _nextSeparationCheck;
 
     protected EffectHandler Effects { get; private set; }
+    protected float AttackDistance => _attackDistance;
     protected bool IsStunned => Effects != null && Effects.IsStunned;
     protected abstract State ChaseState { get; }
     protected ActorStats Stats { get; private set; }
@@ -136,7 +137,7 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
         Transform bestTarget = null;
         int bestPriority = int.MinValue;
         float bestDistanceSquared = float.PositiveInfinity;
-        foreach (Collider2D candidate in Physics2D.OverlapCircleAll(transform.position, Stats.ViewDistance.Value, _targetMask))
+        foreach (Collider2D candidate in Physics2D.OverlapCircleAll(transform.position, Stats.ViewDistance.Value, (_targetMask) & DamageCalculator.CombatLayers))
         {
             PlayerInputReader player = candidate.GetComponentInParent<PlayerInputReader>();
             if (player == null || player.GetComponent<ActorHealth>().IsDead)

@@ -14,6 +14,7 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
         public int InstanceId;
         public EffectData Data;
         public double EndsAt;
+        public float DisplayDuration;
         public RectTransform Rect;
         public RectTransform ElapsedFill;
         public Text StackLabel;
@@ -101,7 +102,7 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
             if (view.IsPresent && !view.Data.IsPermanent)
             {
                 float remaining = Mathf.Max(0f, (float)(view.EndsAt - NetworkManager.ServerTime.Time));
-                float fraction = Mathf.Clamp01(remaining / Mathf.Max(0.01f, view.Data.EffectDuration));
+                float fraction = Mathf.Clamp01(remaining / Mathf.Max(0.01f, view.DisplayDuration));
                 view.ElapsedFill.anchorMin = new Vector2(0f, fraction);
             }
         }
@@ -161,7 +162,11 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
                 view = CreateView(slot.InstanceId, data);
                 _views.Add(view);
             }
-            view.EndsAt = view.IsPresent ? System.Math.Max(view.EndsAt, slot.EndsAt) : slot.EndsAt;
+            if (!view.IsPresent || slot.EndsAt >= view.EndsAt)
+            {
+                view.EndsAt = slot.EndsAt;
+                view.DisplayDuration = slot.DisplayDuration;
+            }
             view.IsPresent = true;
             view.Count++;
         }
@@ -227,7 +232,7 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
         _tooltip.SetBorderColor(GetBorderColor(view.Data));
 
         string description = view.Data.FormatText(view.Data.EffectDescription);
-        string stats = view.Data.FormatText(view.Data.EffectStats);
+        string stats = TooltipText.Format(new { EffectDuration = view.DisplayDuration }, view.Data.EffectStats, view.Data);
         string body = string.IsNullOrEmpty(stats) ? description : description + "\n\n" + stats;
         if (!view.Data.IsPermanent)
         {

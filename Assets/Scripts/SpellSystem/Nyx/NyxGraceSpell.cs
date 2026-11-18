@@ -18,7 +18,7 @@ public sealed class NyxGraceSpell : Spell
     private void HitWave(Vector2 center, NyxGraceConfig config)
     {
         HashSet<ActorHealth> hitEnemies = new();
-        foreach (Collider2D hit in Physics2D.OverlapCircleAll(center, config.WavePrefab.Radius))
+        foreach (Collider2D hit in Physics2D.OverlapCircleAll(center, config.WavePrefab.Radius, DamageCalculator.GetTargetMask(_ownerStats, ~0)))
         {
             if (hit == null)
                 continue;
