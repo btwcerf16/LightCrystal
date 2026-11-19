@@ -16,6 +16,7 @@ public sealed class CrystalVisuals : MonoBehaviour
     private Tween _breathing;
     private Vector3 _position;
     private Tween _floating;
+    private Tween _wavePulse;
 
     private void Awake()
     {
@@ -42,6 +43,7 @@ public sealed class CrystalVisuals : MonoBehaviour
         _floating = null;
         _breathing?.Kill();
         _breathing = null;
+        _wavePulse?.Kill();
         if (_light != null)
             _light.intensity = _baseIntensity;
     }
@@ -52,6 +54,21 @@ public sealed class CrystalVisuals : MonoBehaviour
             ? NetworkManager.Singleton.ServerTime.Time : Time.timeAsDouble;
         _floating?.Goto((float)((time + _floatPeriod * 0.25f) % _floatPeriod), true);
         _breathing?.Goto((float)(time % 4.2), true);
+    }
+
+    public void PlayWavePulse()
+    {
+        if (!_light.enabled)
+            return;
+
+        _wavePulse?.Kill();
+        float radius = _light.pointLightOuterRadius;
+        _wavePulse = DOTween.Sequence()
+            .Append(DOTween.To(() => _light.pointLightOuterRadius, value => _light.pointLightOuterRadius = value,
+                radius * 1.25f, 0.16f).SetEase(Ease.OutQuad))
+            .Append(DOTween.To(() => _light.pointLightOuterRadius, value => _light.pointLightOuterRadius = value,
+                radius, 0.55f).SetEase(Ease.InOutSine))
+            .OnKill(() => _light.pointLightOuterRadius = radius);
     }
 
     public void SetHealth(float current, float maximum)

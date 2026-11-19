@@ -13,6 +13,6 @@ public sealed class DelayedSilenceSpell : Spell
 
         var config = (DelayedSilenceConfig)SpellData;
         if (effects.AddEffect(config.Mark, config.Delay) is SilenceMarkEffect mark)
-            mark.SetSilence(config.Silence, config.SilenceDuration);
+            mark.SetSilence(config.Silence, config.SilenceDuration, config.MarkVisualPrefab);
     }
 }

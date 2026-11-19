@@ -27,14 +27,13 @@ public abstract class Weapon : Item
     public event Action<IDamageable, EAttackType, Vector2> Hit;
     public event Action<ActorHealth> Killed;
 
-    public virtual int TargetLimit
+    public virtual int TargetLimit => GetTargetLimit(_maxTargets);
+    protected int SplashTargetLimit => GetTargetLimit(5);
+
+    private int GetTargetLimit(int count)
     {
-        get
-        {
-            int count = _maxTargets;
-            ModifyTargetLimit?.Invoke(ref count);
-            return Mathf.Max(1, count);
-        }
+        ModifyTargetLimit?.Invoke(ref count);
+        return Mathf.Max(1, count);
     }
 
     public virtual void SetAvailable(bool available)

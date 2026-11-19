@@ -6391,6 +6391,9 @@ MonoBehaviour:
   - Clip: {fileID: 8300000, guid: 833ddd19b6704397acb51db34885d7a5, type: 3}
     Radius: 1
     Volume: 1
+  - Clip: {fileID: 8300000, guid: 7178a203c81741ae946a392a19450aea, type: 3}
+    Radius: 32
+    Volume: 0.65
 --- !u!114 &8123400010000000102
 MonoBehaviour:
   m_ObjectHideFlags: 0

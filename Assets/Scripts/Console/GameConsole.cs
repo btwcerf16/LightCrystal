@@ -329,7 +329,7 @@ public sealed class GameConsole : NetworkBehaviour
         _commands.Clear();
         foreach (MonoBehaviour component in FindObjectsByType<MonoBehaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None))
         {
-            if (component == null)
+            if (component == null || !_commands.HasCommands(component.GetType()))
                 continue;
             if (component is GameConsole)
             {

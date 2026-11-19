@@ -48,16 +48,20 @@ public sealed class ShopConsoleCommands : MonoBehaviour
     }
 
     [ConsoleCommand]
-    private string SpawnEnchanter()
+    private string SpawnEnchanter(float capacity = 50f)
     {
+        if (!float.IsFinite(capacity) || capacity < 0f || capacity > 100f)
+            throw new ArgumentOutOfRangeException(nameof(capacity), "Заполненность должна быть от 0 до 100.");
+
         NetworkManager manager = NetworkManager.Singleton;
         if (manager == null || !manager.IsListening || !manager.IsServer)
             throw new InvalidOperationException("Чарователя можно создать только на запущенном сервере.");
         if (_enchanterPrefab == null)
             throw new InvalidOperationException("Префаб чарователя не назначен.");
         NetworkEnchanter enchanter = Instantiate(_enchanterPrefab, transform.position + Vector3.right * 4f, Quaternion.identity);
+        enchanter.ConfigureSpawn(capacity, isWaveEvent: false);
         enchanter.NetworkObject.Spawn();
-        return "Чарователь появился.";
+        return $"Чарователь появился: заполненность {capacity}%, уровень {enchanter.EventLevel}.";
     }
 
     [ConsoleCommand]

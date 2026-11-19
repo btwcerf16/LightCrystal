@@ -20,7 +20,7 @@ public sealed class BellkeeperHammerWeapon : Weapon
     public float AbilityCooldown => GetReducedCooldown(BaseCooldown);
     public override string GetWeaponTooltip(bool detailed) => base.GetWeaponTooltip(detailed)
         + $"\n\nУрон ЛКМ и ПКМ: {FormatDamage(_damage, EDamageType.Physical, detailed, true)}"
-        + $"\nСкорость атаки: {FormatAttackSpeed(PrimaryAttackType, detailed)}\nЦелей за удар: {TargetLimit}"
+        + $"\nСкорость атаки: {FormatAttackSpeed(PrimaryAttackType, detailed)}\nЦелей за удар: {SplashTargetLimit}"
         + $"\nПКМ: стан {_stun.EffectDuration:0.#} с, рассудок {_sanityCost:0.#}"
         + $"\nКулдаун ПКМ: {FormatTooltipValue(BaseCooldown, AbilityCooldown, detailed)} с";
 
@@ -124,9 +124,10 @@ public sealed class BellkeeperHammerWeapon : Weapon
             return;
         if (_isSlam)
             PlayImpact();
+        int targetLimit = SplashTargetLimit;
         foreach (Collider2D hit in Physics2D.OverlapCircleAll(_attackPoint.position, _attackRadius, DamageCalculator.GetTargetMask(OwnerStats, _targetMask)))
         {
-            if (_hitTargets.Count >= TargetLimit)
+            if (_hitTargets.Count >= targetLimit)
                 break;
             if (hit.transform.root == OwnerNetworkObject.transform.root)
                 continue;

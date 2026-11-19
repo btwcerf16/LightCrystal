@@ -14,10 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::WaveEventDatabase
   _events:
   - Prefab: {fileID: 4217550918128061283, guid: bc6ffe39c2db17b48940021ae59f0824, type: 3}
-    WaveWeight: 50
+    WaveWeight: 60
     StandaloneWeight: 70
   - Prefab: {fileID: 5269882328658457228, guid: 5e708cd8d54c400478cd8b08cf312a51, type: 3}
-    WaveWeight: 30
+    WaveWeight: 20
     StandaloneWeight: 30
   - Prefab: {fileID: 7103984887849500154, guid: d6ed5b93114a49efacc1e7a0d23df8ea, type: 3}
     WaveWeight: 20

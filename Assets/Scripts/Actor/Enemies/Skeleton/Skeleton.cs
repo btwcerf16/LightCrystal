@@ -54,41 +54,12 @@ public sealed class Skeleton : Enemy
         base.Update();
     }
 
-    private bool IsInRange(Transform target)
-    {
-        Vector2 offset = target.position - transform.position;
-        return offset.sqrMagnitude <= Stats.ViewDistance.Value * Stats.ViewDistance.Value;
-    }
-
     private void FindTarget()
     {
-        if (TemporaryTarget != null)
-            return;
-        if (_isMainTargetLocked && MainTarget != null)
+        if (TemporaryTarget != null || (_isMainTargetLocked && MainTarget != null))
             return;
         _isMainTargetLocked = false;
-        Transform best = null;
-        int priority = int.MinValue;
-        float distance = float.PositiveInfinity;
-        foreach (Collider2D candidate in Physics2D.OverlapCircleAll(transform.position, Stats.ViewDistance.Value, (_targetMask) & DamageCalculator.CombatLayers))
-        {
-            PlayerInputReader player = candidate.GetComponentInParent<PlayerInputReader>();
-            if (player == null || !IsInRange(player.transform))
-                continue;
-            ActorHealth health = player.GetComponent<ActorHealth>();
-            if (health == null || health.IsDead)
-                continue;
-            ActorStats stats = player.GetComponent<ActorStats>();
-            int candidatePriority = stats != null ? stats.TargetPriority : 0;
-            float candidateDistance = ((Vector2)(player.transform.position - transform.position)).sqrMagnitude;
-            if (candidatePriority > priority || (candidatePriority == priority && candidateDistance < distance))
-            {
-                best = player.transform;
-                priority = candidatePriority;
-                distance = candidateDistance;
-            }
-        }
-        SetTemporaryTarget(best);
+        SetTemporaryTarget(FindPlayerTarget(requireCenterInRange: true));
     }
 
     public void SetAim(Vector2 direction)

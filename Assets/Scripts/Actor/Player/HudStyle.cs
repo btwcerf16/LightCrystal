@@ -46,7 +46,7 @@ public static class HudStyle
         label.resizeTextMaxSize = 12;
     }
 
-    public static UnityEngine.UI.Text CreateActionLock(Transform parent)
+    public static UnityEngine.UI.Text CreateActionLock(Transform parent, float iconSize = 24f)
     {
         var shade = new GameObject("ActionLock", typeof(RectTransform), typeof(UnityEngine.UI.Image)).GetComponent<UnityEngine.UI.Image>();
         shade.transform.SetParent(parent, false);
@@ -57,7 +57,7 @@ public static class HudStyle
         shade.raycastTarget = false;
         var mask = new GameObject("Mask", typeof(RectTransform), typeof(UnityEngine.UI.Image)).GetComponent<UnityEngine.UI.Image>();
         mask.transform.SetParent(shade.transform, false);
-        mask.rectTransform.sizeDelta = new Vector2(24f, 24f);
+        mask.rectTransform.sizeDelta = Vector2.one * iconSize;
         mask.rectTransform.anchoredPosition = new Vector2(0f, 5f);
         mask.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 45f);
         mask.sprite = _silenceMask ??= Resources.Load<Sprite>("SilenceMask");
@@ -82,7 +82,7 @@ public static class HudStyle
         label.rectTransform.sizeDelta = new Vector2(-2f, 18f);
         label.rectTransform.anchoredPosition = new Vector2(0f, 3f);
         label.font = PixelFont;
-        label.fontSize = 11;
+        label.fontSize = iconSize > 24f ? 16 : 11;
         label.color = Text;
         label.alignment = TextAnchor.MiddleCenter;
         label.raycastTarget = false;

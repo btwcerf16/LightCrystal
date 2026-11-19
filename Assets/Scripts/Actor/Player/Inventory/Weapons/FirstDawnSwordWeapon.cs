@@ -27,7 +27,7 @@ public sealed class FirstDawnSwordWeapon : Weapon
     public float AbilityCooldown => GetReducedCooldown(BaseCooldown);
     public override string GetWeaponTooltip(bool detailed) => base.GetWeaponTooltip(detailed)
         + $"\n\nЛКМ — клинок: {FormatDamage(_damage, EDamageType.Physical, detailed, true)} физ. урона"
-        + $"\nСкорость атаки: {FormatAttackSpeed(PrimaryAttackType, detailed)}\nЦелей за удар: {TargetLimit}"
+        + $"\nСкорость атаки: {FormatAttackSpeed(PrimaryAttackType, detailed)}\nЦелей ЛКМ: {SplashTargetLimit} · ПКМ: {TargetLimit}"
         + $"\n\nПКМ — волна: {FormatDamage(_waveDamage, EDamageType.Magic, detailed)} маг. урона"
         + $"\nСкорость каста: {FormatAttackSpeed(SecondaryAttackType, detailed)}\n{FormatProjectile(_waveSpeed, _waveRange, detailed)}"
         + $"\nСтан: {_stun.EffectDuration:0.#} с\nРассудок: {_sanityCost:0.#}\nКулдаун: {FormatTooltipValue(BaseCooldown, AbilityCooldown, detailed)} с";
@@ -121,9 +121,10 @@ public sealed class FirstDawnSwordWeapon : Weapon
     {
         if (!CanStrike || _isWave)
             return;
+        int targetLimit = SplashTargetLimit;
         foreach (Collider2D hit in Physics2D.OverlapCircleAll(_attackPoint.position, _attackRadius, DamageCalculator.GetTargetMask(OwnerStats, _targetMask)))
         {
-            if (_hitTargets.Count >= TargetLimit)
+            if (_hitTargets.Count >= targetLimit)
                 break;
             if (hit.transform.root == OwnerNetworkObject.transform.root)
                 continue;

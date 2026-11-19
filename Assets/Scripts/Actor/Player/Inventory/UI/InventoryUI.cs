@@ -13,6 +13,8 @@ public sealed class InventoryUI : NetworkBehaviour
     [SerializeField, Min(1)] private int _columns = 3;
     private GameObject _canvasObject;
     private PlayerSlotBindings _slotBindings;
+    private EffectHandler _effects;
+    private UnityEngine.UI.Text _actionLock;
     private readonly List<Text> _bindingLabels = new List<Text>();
 
     public float Width => Mathf.Max(1, _columns) * _slotSize + 16f;
@@ -60,6 +62,7 @@ public sealed class InventoryUI : NetworkBehaviour
             return;
 
         _slotBindings = GetComponent<PlayerSlotBindings>();
+        _effects = GetComponent<EffectHandler>();
         if (EventSystem.current == null)
             new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
         int columns = Mathf.Max(1, _columns);
@@ -89,8 +92,19 @@ public sealed class InventoryUI : NetworkBehaviour
                 inventory.RequestChangeItemSlot, inventory.RequestDropItem, inventory.RequestUseItem);
             _bindingLabels.Add(HudStyle.Binding(slot, _slotBindings.GetBindingLabel(false, i)));
         }
+        _actionLock = HudStyle.CreateActionLock(grid, Mathf.Min(width, height));
+        _actionLock.transform.parent.gameObject.AddComponent<UnityEngine.UI.LayoutElement>().ignoreLayout = true;
+        RefreshActionLock();
         _slotBindings.BindingsChanged += RefreshBindings;
         GetComponent<PlayerHUD>().RefreshLayout();
+    }
+
+    private void LateUpdate() => RefreshActionLock();
+
+    private void RefreshActionLock()
+    {
+        if (_actionLock != null)
+            HudStyle.SetActionLock(_actionLock, _effects != null && _effects.IsStunned);
     }
 
     private void RefreshBindings()
@@ -102,6 +116,7 @@ public sealed class InventoryUI : NetworkBehaviour
 
     private void RemoveInventoryUI()
     {
+        _actionLock = null;
         if (_slotBindings != null)
             _slotBindings.BindingsChanged -= RefreshBindings;
         _bindingLabels.Clear();

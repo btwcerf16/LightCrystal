@@ -12,6 +12,9 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
     [SerializeField] private Transform _mainTarget;
     [SerializeField] protected LayerMask _targetMask = ~0;
     [SerializeField] protected Transform _facing;
+    [SerializeField, Range(0f, 1f)] private float _goldDropChance = 0.4f;
+    [SerializeField, Min(0), Tooltip("Base gold before multipliers. Zero uses the enemy catalog weight.")]
+    private int _goldDropAmount;
 
     protected Rigidbody2D _body;
     protected Animator _animator;
@@ -27,6 +30,7 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
     [SerializeField, Min(0.1f)] private float _separationRadius = 0.85f;
     [SerializeField, Min(0f)] private float _separationStrength = 0.9f;
     private readonly Collider2D[] _neighbors = new Collider2D[24];
+    private readonly List<Collider2D> _targetHits = new();
     private Vector2 _separation;
     private Coroutine _knockback;
     private float _nextSeparationCheck;
@@ -132,19 +136,26 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
         _stateMachine.ChangeState(ChaseState);
     }
 
-    protected Transform FindPlayerTarget()
+    protected Transform FindPlayerTarget(bool requireCenterInRange = false)
     {
+        Vector2 position = transform.position;
+        float viewDistance = Stats.ViewDistance.Value;
+        var filter = new ContactFilter2D { useTriggers = Physics2D.queriesHitTriggers };
+        filter.SetLayerMask(_targetMask & DamageCalculator.CombatLayers);
+        int count = Physics2D.OverlapCircle(position, viewDistance, filter, _targetHits);
         Transform bestTarget = null;
         int bestPriority = int.MinValue;
         float bestDistanceSquared = float.PositiveInfinity;
-        foreach (Collider2D candidate in Physics2D.OverlapCircleAll(transform.position, Stats.ViewDistance.Value, (_targetMask) & DamageCalculator.CombatLayers))
+        for (int i = 0; i < count; i++)
         {
-            PlayerInputReader player = candidate.GetComponentInParent<PlayerInputReader>();
-            if (player == null || player.GetComponent<ActorHealth>().IsDead)
+            PlayerInputReader player = _targetHits[i].GetComponentInParent<PlayerInputReader>();
+            if (player == null || !player.TryGetComponent(out ActorHealth health) || health.IsDead)
                 continue;
 
-            int priority = player.GetComponent<ActorStats>().TargetPriority;
-            float distanceSquared = ((Vector2)(player.transform.position - transform.position)).sqrMagnitude;
+            float distanceSquared = ((Vector2)player.transform.position - position).sqrMagnitude;
+            if (requireCenterInRange && distanceSquared > viewDistance * viewDistance)
+                continue;
+            int priority = player.TryGetComponent(out ActorStats stats) ? stats.TargetPriority : 0;
             if (priority > bestPriority || (priority == bestPriority && distanceSquared < bestDistanceSquared))
             {
                 bestTarget = player.transform;
@@ -153,6 +164,7 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
             }
         }
 
+        _targetHits.Clear();
         return bestTarget;
     }
 
@@ -202,16 +214,23 @@ public abstract class Enemy : MonoBehaviour, ILightSensitive
         NetworkObject networkObject = GetComponent<NetworkObject>();
         if (_goldContributors.Count == 0 || networkObject == null || !networkObject.IsSpawned || !networkObject.NetworkManager.IsServer)
             return;
-        EnemyDatabase database = networkObject.NetworkManager.GetComponent<WaveDirector>()?.EnemyDatabase;
-        int weight = database != null ? database.GetWeight(this) : 0;
-        if (weight <= 0 || UnityEngine.Random.value >= 0.4f)
+        if (_goldDropChance <= 0f || (_goldDropChance < 1f && UnityEngine.Random.value >= _goldDropChance))
+            return;
+
+        int amount = _goldDropAmount;
+        if (amount == 0)
+        {
+            EnemyDatabase database = networkObject.NetworkManager.GetComponent<WaveDirector>()?.EnemyDatabase;
+            amount = (database != null ? database.GetWeight(this) : 0) * 3;
+        }
+        if (amount <= 0)
             return;
 
         _goldContributors.RemoveWhere(wallet => wallet == null || !wallet.GetComponent<NetworkObject>().IsSpawned);
         if (_goldContributors.Count == 0)
             return;
 
-        int share = Mathf.FloorToInt(weight * 3 * _goldDropMultiplier) / _goldContributors.Count;
+        int share = Mathf.FloorToInt(amount * _goldDropMultiplier) / _goldContributors.Count;
         foreach (ActorWallet wallet in _goldContributors)
             wallet.AddCurrency(share, transform.position);
     }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using Unity.Netcode;
@@ -17,6 +18,7 @@ public sealed class ConsoleCommandRegistry
     }
 
     private readonly Dictionary<string, List<Command>> _commands = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<Type, (MethodInfo Method, ConsoleCommandAttribute Attribute)[]> _commandMethods = new();
 
     public void Clear() => _commands.Clear();
 
@@ -98,13 +100,17 @@ public sealed class ConsoleCommandRegistry
             }
             if (parameters[argumentIndex].ParameterType == typeof(Enemy))
             {
-                foreach (Enemy enemy in EnemyPrefabs())
+                foreach (var group in EnemyPrefabs().Distinct().GroupBy(enemy => enemy.GetType().Name, StringComparer.OrdinalIgnoreCase))
                 {
-                    string name = enemy.GetType().Name;
-                    if (name.StartsWith(fragment, StringComparison.OrdinalIgnoreCase) && !matches.Contains(leading + name))
-                        matches.Add(leading + name);
-                    if (enemy.name.StartsWith(fragment, StringComparison.OrdinalIgnoreCase) && enemy.name != name)
-                        matches.Add(leading + (enemy.name.Contains(" ") ? "\"" + enemy.name + "\"" : enemy.name));
+                    if (group.Count() == 1)
+                    {
+                        if (group.Key.StartsWith(fragment, StringComparison.OrdinalIgnoreCase))
+                            matches.Add(leading + group.Key);
+                        continue;
+                    }
+                    foreach (Enemy enemy in group)
+                        if (enemy.name.StartsWith(fragment, StringComparison.OrdinalIgnoreCase))
+                            matches.Add(leading + (enemy.name.Contains(" ") ? "\"" + enemy.name + "\"" : enemy.name));
                 }
                 matches.Sort(StringComparer.OrdinalIgnoreCase);
                 return matches;
@@ -131,17 +137,29 @@ public sealed class ConsoleCommandRegistry
         return matches;
     }
 
+    private (MethodInfo Method, ConsoleCommandAttribute Attribute)[] GetCommandMethods(Type type)
+    {
+        if (!_commandMethods.TryGetValue(type, out var methods))
+        {
+            methods = type.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+                .Where(method => !method.ContainsGenericParameters && !method.IsSpecialName)
+                .Select(method => (Method: method, Attribute: method.GetCustomAttribute<ConsoleCommandAttribute>()))
+                .Where(entry => entry.Attribute != null)
+                .ToArray();
+            _commandMethods.Add(type, methods);
+        }
+        return methods;
+    }
+
+    public bool HasCommands(Type type) => GetCommandMethods(type).Length > 0;
+
     public void Register(object target, string ownerName = null, bool isDefaultTarget = true)
     {
         if (target == null)
             return;
 
-        foreach (MethodInfo method in target.GetType().GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic))
+        foreach (var (method, attribute) in GetCommandMethods(target.GetType()))
         {
-            ConsoleCommandAttribute attribute = method.GetCustomAttribute<ConsoleCommandAttribute>();
-            if (attribute == null || method.ContainsGenericParameters || method.IsSpecialName)
-                continue;
-
             Command command = new Command
             {
                 Target = method.IsStatic ? null : target,

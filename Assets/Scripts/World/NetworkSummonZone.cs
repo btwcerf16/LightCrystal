@@ -114,6 +114,8 @@ public sealed class NetworkSummonZone : NetworkBehaviour
         summonedEvent.GetComponent<IWaveEvent>().ConfigureSpawn(Capacity, _isWaveEvent);
         _configureEvent?.Invoke(summonedEvent);
         summonedEvent.Spawn(destroyWithScene: true);
+        if (Capacity >= 100f)
+            PlayerHUD.RevealWaveEvent(summonedEvent);
         EventSummoned?.Invoke(summonedEvent);
         NetworkObject.Despawn();
     }

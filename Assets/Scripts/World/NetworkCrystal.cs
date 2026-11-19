@@ -8,6 +8,7 @@ public sealed class NetworkCrystal : NetworkBehaviour, ITooltipSource
     private NetworkActorVitals _vitals;
     private Crystal _crystal;
     private CrystalVisuals _visuals;
+    private WaveDirector _director;
 
     public Vector2 HealthState => IsSpawned ? new Vector2(_vitals.State.x, _vitals.State.y) : new Vector2(_health.CurrentHealth, _health.MaxHealth);
     public string TooltipTitle => "Кристалл";
@@ -26,11 +27,15 @@ public sealed class NetworkCrystal : NetworkBehaviour, ITooltipSource
     {
         _vitals.Changed += Apply;
         Apply(_vitals.State);
+        if (IsServer && NetworkManager.TryGetComponent(out _director))
+            _director.CalmStarted += OnCalmStarted;
     }
 
     public override void OnNetworkDespawn()
     {
         _vitals.Changed -= Apply;
+        if (_director != null)
+            _director.CalmStarted -= OnCalmStarted;
         _crystal.enabled = false;
     }
 
@@ -39,4 +44,16 @@ public sealed class NetworkCrystal : NetworkBehaviour, ITooltipSource
         _visuals.SetHealth(state.x, state.y);
         _crystal.SetDestroyed(state.x <= 0f);
     }
+
+    private void OnCalmStarted()
+    {
+        if (_director.WaveCount == 0 || _health.IsDead)
+            return;
+
+        PlayWavePulseRpc();
+        NetworkWorldAudio.Play(NetworkManager, WorldSoundId.WaveCompleted, transform.position);
+    }
+
+    [Rpc(SendTo.ClientsAndHost, InvokePermission = RpcInvokePermission.Server)]
+    private void PlayWavePulseRpc() => _visuals.PlayWavePulse();
 }

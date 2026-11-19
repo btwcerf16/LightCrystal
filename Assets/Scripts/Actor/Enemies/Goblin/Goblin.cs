@@ -86,43 +86,12 @@ public sealed class Goblin : Enemy
 
         AimChanged?.Invoke(direction);
     }
-    private bool IsInRange(Transform target)
-    {
-        Vector2 offset = target.position - transform.position;
-        return offset.sqrMagnitude <= Stats.ViewDistance.Value * Stats.ViewDistance.Value;
-    }
-
     private void FindTarget()
     {
-        if (TemporaryTarget != null)
-            return;
-        if (_isMainTargetLocked && MainTarget != null)
+        if (TemporaryTarget != null || (_isMainTargetLocked && MainTarget != null))
             return;
         _isMainTargetLocked = false;
-        Transform bestTarget = null;
-        int bestPriority = int.MinValue;
-        float bestDistance = float.PositiveInfinity;
-        foreach (Collider2D candidate in Physics2D.OverlapCircleAll(transform.position, Stats.ViewDistance.Value, (_targetMask) & DamageCalculator.CombatLayers))
-        {
-            PlayerInputReader player = candidate.GetComponentInParent<PlayerInputReader>();
-            if (player == null)
-                continue;
-            ActorHealth health = player.GetComponent<ActorHealth>();
-            if (health == null || health.IsDead)
-                continue;
-            if (!IsInRange(player.transform))
-                continue;
-            ActorStats stats = player.GetComponent<ActorStats>();
-            int priority = stats != null ? stats.TargetPriority : 0;
-            float distance = ((Vector2)player.transform.position - (Vector2)transform.position).sqrMagnitude;
-            if (priority > bestPriority || (priority == bestPriority && distance < bestDistance))
-            {
-                bestTarget = player.transform;
-                bestPriority = priority;
-                bestDistance = distance;
-            }
-        }
-        SetTemporaryTarget(bestTarget);
+        SetTemporaryTarget(FindPlayerTarget(requireCenterInRange: true));
     }
 
     public override void Arise()

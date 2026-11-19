@@ -24,3 +24,4 @@ MonoBehaviour:
   SilenceDuration: 2
   Mark: {fileID: 11400000, guid: f5f1531908284c41a7ec5bd55db64d25, type: 2}
   Silence: {fileID: 11400000, guid: 5c12adf68d976264e867ba4942d5d33b, type: 2}
+  MarkVisualPrefab: {fileID: 114002, guid: a6dcca73073645169dbc725a5e2fe9c5, type: 3}

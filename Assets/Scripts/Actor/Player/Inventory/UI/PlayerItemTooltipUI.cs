@@ -19,6 +19,7 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
     private PlayerNetworkInteractions _interactions;
     private Camera _camera;
     private ActorStats _stats;
+    private EffectHandler _effects;
     private EnchantDatabase _enchantDatabase;
 
     public override void OnNetworkSpawn() => Bind();
@@ -35,6 +36,7 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
         _input = GetComponent<PlayerInputReader>();
         _interactions = GetComponent<PlayerNetworkInteractions>();
         _stats = GetComponent<ActorStats>();
+        _effects = GetComponent<EffectHandler>();
         _enchantDatabase = NetworkManager.GetComponent<ItemFactory>().EnchantDatabase;
         if (EventSystem.current == null)
             new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
@@ -86,6 +88,17 @@ public sealed class PlayerItemTooltipUI : NetworkBehaviour
             Keyboard keyboard = Keyboard.current;
             bool detailed = keyboard != null && (keyboard.leftAltKey.isPressed || keyboard.rightAltKey.isPressed);
             description = hoveredWeapon.GetWeaponTooltip(detailed);
+            if (source is Weapon && hoveredWeapon.transform.IsChildOf(transform) && _effects != null && _effects.IsSilenced)
+            {
+                bool primary = hoveredWeapon.PrimaryAttackType == EAttackType.Magic;
+                bool secondary = hoveredWeapon.SecondaryAttackType == EAttackType.Magic;
+                if (primary && secondary)
+                    description += "\n\nБезмолвие — ЛКМ и ПКМ недоступны";
+                else if (primary)
+                    description += "\n\nБезмолвие — ЛКМ недоступна";
+                else if (secondary)
+                    description += "\n\nБезмолвие — ПКМ недоступна";
+            }
             if (!detailed)
                 description += "\n\nAlt — расчёт характеристик";
         }

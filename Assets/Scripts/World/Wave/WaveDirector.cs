@@ -86,7 +86,7 @@ public class WaveDirector : MonoBehaviour
             Debug.LogError("WaveDirector requires an enemy database, a crystal and a map spawn area.", this);
             return;
         }
-        GoldDropMultiplier = 1f + (Mathf.Clamp(playerCount, 1, 4) - 1) * 0.5f;
+        GoldDropMultiplier = 1f + (playerCount - 1) * 0.5f;
         _isInitialized = true;
         _stateMachine.Initialize(_calmState);
     }

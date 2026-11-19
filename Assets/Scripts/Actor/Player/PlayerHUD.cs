@@ -305,8 +305,16 @@ public sealed class PlayerHUD : NetworkBehaviour
         }
     }
 
+    public static void RevealWaveEvent(NetworkObject waveEvent)
+    {
+        NetworkManager manager = waveEvent.NetworkManager;
+        double revealedUntil = manager.ServerTime.Time + 10d;
+        foreach (NetworkClient client in manager.ConnectedClientsList)
+            client.PlayerObject?.GetComponent<PlayerHUD>()?.RevealWaveEventRpc(waveEvent.NetworkObjectId, revealedUntil);
+    }
+
     [Rpc(SendTo.Owner, InvokePermission = RpcInvokePermission.Server)]
-    public void RevealWaveEventRpc(ulong objectId, double revealedUntil)
+    private void RevealWaveEventRpc(ulong objectId, double revealedUntil)
     {
         CreateRoot();
         if (_minimap != null)

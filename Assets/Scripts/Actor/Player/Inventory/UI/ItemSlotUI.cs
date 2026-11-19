@@ -67,8 +67,11 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
         _ornament.transform.SetAsFirstSibling();
         Refresh(_getItem());
         RefreshCooldown(_getItem());
-        _actionLock = HudStyle.CreateActionLock(transform);
-        HudStyle.SetActionLock(_actionLock, IsBlocked);
+        if (container is ActorArsenal)
+        {
+            _actionLock = HudStyle.CreateActionLock(transform);
+            HudStyle.SetActionLock(_actionLock, IsBlocked);
+        }
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -126,8 +129,13 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
     private void LateUpdate()
     {
         Item item = _getItem?.Invoke();
-        HudStyle.SetActionLock(_actionLock, IsBlocked);
-        _actionLock.transform.parent.SetAsLastSibling();
+        if (_actionLock != null)
+        {
+            bool magicBlocked = _effects != null && _effects.IsSilenced && item is Weapon equippedWeapon &&
+                (equippedWeapon.PrimaryAttackType == EAttackType.Magic || equippedWeapon.SecondaryAttackType == EAttackType.Magic);
+            HudStyle.SetActionLock(_actionLock, IsBlocked, magicBlocked);
+            _actionLock.transform.parent.SetAsLastSibling();
+        }
         if (IsBlocked && _dragIcon != null)
         {
             Destroy(_dragIcon.gameObject);

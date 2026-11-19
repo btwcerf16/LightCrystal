@@ -10,6 +10,7 @@ public sealed class NetworkWaveDirector : MonoBehaviour
     private NetworkSummonZone _summonZone;
     private NetworkObject _currentWaveEvent;
     private NetworkObject _nextWaveEvent;
+    private NetworkObject _revealedWaveEvent;
     private NetworkManager _networkManager;
     private WaveDirector _director;
 
@@ -104,6 +105,7 @@ public sealed class NetworkWaveDirector : MonoBehaviour
 
     private void OnEventSummoned(NetworkObject spawnedEvent)
     {
+        bool fullyCharged = _summonZone.Capacity >= 100f;
         _summonZone.EventSummoned -= OnEventSummoned;
         _summonZone = null;
         if (!spawnedEvent.TryGetComponent(out IWaveEvent waveEvent))
@@ -117,17 +119,19 @@ public sealed class NetworkWaveDirector : MonoBehaviour
         }
 
         waveEvent.Finished += OnFinished;
-        TryRevealEvent(spawnedEvent);
+        if (fullyCharged)
+            _revealedWaveEvent = spawnedEvent;
+        else
+            TryRevealEvent(spawnedEvent);
     }
 
     private void TryRevealEvent(NetworkObject spawnedEvent)
     {
-        if (!_director.TryConsumeEventReveal())
+        if (spawnedEvent == _revealedWaveEvent || !_director.TryConsumeEventReveal())
             return;
 
-        double revealedUntil = _networkManager.ServerTime.Time + 10d;
-        foreach (NetworkClient client in _networkManager.ConnectedClientsList)
-            client.PlayerObject?.GetComponent<PlayerHUD>()?.RevealWaveEventRpc(spawnedEvent.NetworkObjectId, revealedUntil);
+        _revealedWaveEvent = spawnedEvent;
+        PlayerHUD.RevealWaveEvent(spawnedEvent);
     }
 
     private void ClearWaveEvents()
@@ -141,6 +145,7 @@ public sealed class NetworkWaveDirector : MonoBehaviour
         _summonZone = null;
         _currentWaveEvent = null;
         _nextWaveEvent = null;
+        _revealedWaveEvent = null;
     }
 
     public void ApplyBossFightEffect(GameObject player)

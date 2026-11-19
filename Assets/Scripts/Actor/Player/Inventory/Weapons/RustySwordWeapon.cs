@@ -19,9 +19,9 @@ public sealed class RustySwordWeapon : Weapon
     public float SecondaryDamage => PrimaryDamage * SecondaryDamageMultiplier;
     public float AttackSpeed => _stats != null ? _stats.AttackSpeed.Value : 1f;
     public override string GetWeaponTooltip(bool detailed) => base.GetWeaponTooltip(detailed)
-        + $"\n\nУрон ЛКМ: {FormatDamage(_damage, EDamageType.Physical, detailed, true)}"
-        + $"\nУрон ПКМ: {FormatDamage(_damage, EDamageType.Physical, detailed, true, SecondaryDamageMultiplier)}"
-        + $"\nСкорость атаки: {FormatAttackSpeed(PrimaryAttackType, detailed)}\nЦелей за удар: {TargetLimit}";
+        + $"\n\nЛКМ — укол: {FormatDamage(_damage, EDamageType.Physical, detailed, true)} физ. урона, целей {TargetLimit}"
+        + $"\nПКМ — взмах: {FormatDamage(_damage, EDamageType.Physical, detailed, true, SecondaryDamageMultiplier)} физ. урона, целей {SplashTargetLimit}"
+        + $"\nСкорость атаки: {FormatAttackSpeed(PrimaryAttackType, detailed)}";
 
     private void Awake()
     {
@@ -104,7 +104,7 @@ public sealed class RustySwordWeapon : Weapon
             return;
         Vector2 position = _attackPointThrust.position;
         position += (Vector2)_attackPointThrust.up * (attackPointIndex - 2) * _thrustPointSpacing;
-        Attack(position, CurrentDamage);
+        Attack(position, CurrentDamage, TargetLimit);
     }
 
     public void StartSweep(int attackPointIndex)
@@ -114,7 +114,7 @@ public sealed class RustySwordWeapon : Weapon
 
         Vector2 position = _attackPoint.position;
         position += (Vector2)_attackPoint.right * (attackPointIndex - 2);
-        Attack(position, CurrentDamage * SecondaryDamageMultiplier);
+        Attack(position, CurrentDamage * SecondaryDamageMultiplier, SplashTargetLimit);
     }
 
     private float CurrentDamage => PhysicalDamage;
@@ -134,7 +134,7 @@ public sealed class RustySwordWeapon : Weapon
             _trail.emitting = false;
     }
 
-    private void Attack(Vector2 position, float damage)
+    private void Attack(Vector2 position, float damage, int targetLimit)
     {
         if (IsOwnerStunned || !IsEquipped || !_isAttacking || OwnerNetworkObject == null || !OwnerNetworkObject.IsSpawned || !OwnerNetworkObject.NetworkManager.IsServer)
             return;
@@ -142,7 +142,7 @@ public sealed class RustySwordWeapon : Weapon
         Collider2D[] targets = Physics2D.OverlapCircleAll(position, _attackRadius, DamageCalculator.GetTargetMask(OwnerStats, _targetMask));
         foreach (Collider2D target in targets)
         {
-            if (_hitTargets.Count >= TargetLimit)
+            if (_hitTargets.Count >= targetLimit)
                 return;
             if (target.transform.root == OwnerNetworkObject.transform.root)
                 continue;
