@@ -34,8 +34,6 @@ public sealed class BellkeeperHammerWeapon : Weapon
             OwnerStats.PhysicalDamage.AddModifier(new StatModifier(_damage, StatModifierType.Flat, this));
             _bonusApplied = true;
         }
-        if (_hand != null)
-            _hand.VisualRenderer.enabled = false;
         _renderer.enabled = true;
     }
 
@@ -47,8 +45,6 @@ public sealed class BellkeeperHammerWeapon : Weapon
         _bonusApplied = false;
         base.Drop();
         _renderer.enabled = false;
-        if (_hand != null)
-            _hand.VisualRenderer.enabled = true;
     }
 
     private void BeginAttack(string trigger, bool slam)

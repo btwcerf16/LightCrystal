@@ -51,8 +51,6 @@ public sealed class SpearWeapon : Weapon
         _bonusApplied = false;
         base.Drop();
         _renderer.enabled = false;
-        if (_hand != null)
-            _hand.VisualRenderer.enabled = true;
     }
 
     public override void SetAvailable(bool available)
@@ -64,8 +62,6 @@ public sealed class SpearWeapon : Weapon
     private void RefreshVisual()
     {
         _renderer.enabled = IsEquipped && IsAvailable;
-        if (_hand != null && IsEquipped)
-            _hand.VisualRenderer.enabled = !IsAvailable;
     }
 
     public override bool BeginPrimaryUse()

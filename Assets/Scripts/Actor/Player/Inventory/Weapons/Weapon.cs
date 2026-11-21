@@ -12,6 +12,7 @@ public abstract class Weapon : Item
     [SerializeField] private EAttackType _secondaryAttackType;
     protected ActorHand _hand;
     protected bool _isAttacking;
+    private SpriteRenderer _equippedHandRenderer;
     private Stat _animationSpeedStat;
     private float? _physicalDamageOverride;
     public EAttackType PrimaryAttackType => _primaryAttackType;
@@ -41,6 +42,7 @@ public abstract class Weapon : Item
         if (IsAvailable == available)
             return;
         IsAvailable = available;
+        RefreshHandVisibility();
         StateChanged?.Invoke();
     }
 
@@ -113,6 +115,8 @@ public abstract class Weapon : Item
         base.Equip();
         _physicalDamageOverride = null;
         _hand = GetComponentInParent<ActorHand>();
+        _equippedHandRenderer = _hand != null ? _hand.VisualRenderer : null;
+        RefreshHandVisibility();
         Equipped?.Invoke();
         SetAttackType(_primaryAttackType);
     }
@@ -139,6 +143,14 @@ public abstract class Weapon : Item
         Unequipped?.Invoke();
         ClearAnimationSpeed();
         base.Drop();
+        RefreshHandVisibility();
+        _equippedHandRenderer = null;
+    }
+
+    private void RefreshHandVisibility()
+    {
+        if (_equippedHandRenderer != null)
+            _equippedHandRenderer.enabled = !IsEquipped || !IsAvailable;
     }
 
     private void ClearAnimationSpeed()

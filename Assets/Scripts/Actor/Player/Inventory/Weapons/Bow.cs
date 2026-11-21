@@ -20,8 +20,6 @@ public abstract class Bow : Weapon
     {
         base.Equip();
         _networkArsenal = OwnerStats.GetComponent<NetworkPlayerArsenal>();
-        if (_hand != null)
-            _hand.VisualRenderer.enabled = false;
     }
 
     public override bool BeginPrimaryUse()
@@ -89,8 +87,6 @@ public abstract class Bow : Weapon
             CancelUse();
         base.Drop();
         UpdateDrawVisual(-1f);
-        if (_hand != null)
-            _hand.VisualRenderer.enabled = true;
     }
 
     private void LateUpdate()

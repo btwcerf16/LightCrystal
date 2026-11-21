@@ -34,7 +34,6 @@ public sealed class MagicMissleBookWeapon : Weapon
         base.Equip();
         _sanity = GetComponentInParent<ActorSanity>();
         _renderer.enabled = true;
-        _hand.VisualRenderer.enabled = false;
         Projectile.TargetHit -= OnProjectileHit;
         if (IsServer)
             Projectile.TargetHit += OnProjectileHit;
@@ -46,8 +45,6 @@ public sealed class MagicMissleBookWeapon : Weapon
         Projectile.TargetHit -= OnProjectileHit;
         base.Drop();
         _renderer.enabled = false;
-        if (_hand != null)
-            _hand.VisualRenderer.enabled = true;
     }
 
     public override bool BeginPrimaryUse()

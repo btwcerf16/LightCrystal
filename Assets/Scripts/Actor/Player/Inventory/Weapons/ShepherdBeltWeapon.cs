@@ -32,8 +32,6 @@ public sealed class ShepherdBeltWeapon : Weapon
     public override void Equip()
     {
         base.Equip();
-        if (_hand != null)
-            _hand.VisualRenderer.enabled = false;
         RefreshWeaponVisual();
     }
 
@@ -42,8 +40,6 @@ public sealed class ShepherdBeltWeapon : Weapon
         CancelUse();
         base.Drop();
         _weaponRenderer.enabled = false;
-        if (_hand != null)
-            _hand.VisualRenderer.enabled = true;
     }
 
     public override void SetAvailable(bool available)
@@ -55,8 +51,6 @@ public sealed class ShepherdBeltWeapon : Weapon
     private void RefreshWeaponVisual()
     {
         _weaponRenderer.enabled = IsEquipped && IsAvailable;
-        if (_hand != null && IsEquipped)
-            _hand.VisualRenderer.enabled = !IsAvailable;
     }
 
     public override bool BeginPrimaryUse()

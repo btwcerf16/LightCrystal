@@ -142,7 +142,10 @@ public abstract class Projectile : MonoBehaviour
                 if (!damageableTarget.IsDead && Data.EffectOnHit != null)
                     targetCollider.GetComponentInParent<EffectHandler>()?.AddEffect(Data.EffectOnHit);
                 if (Data.SourceWeapon != null && Data.SourceWeapon.OwnerStats == Data.Attacker)
-                    Data.SourceWeapon.NotifyHit(damageableTarget, EAttackType.Range, targetCollider.ClosestPoint(transform.position));
+                {
+                    EAttackType attackType = Data.DamageType == EDamageType.Magic ? EAttackType.Magic : EAttackType.Range;
+                    Data.SourceWeapon.NotifyHit(damageableTarget, attackType, targetCollider.ClosestPoint(transform.position));
+                }
             }
             if (damageableTarget is ActorHealth targetHealth)
             {

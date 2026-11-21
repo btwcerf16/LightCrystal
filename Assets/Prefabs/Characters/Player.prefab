@@ -5846,6 +5846,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerArsenal
   ShowTopMostFoldoutHeaderGroup: 1
+  _wandEffectMaterial: {fileID: 2100000, guid: 78e976f7bb885da4c850f7a8eadf3f80, type: 2}
 --- !u!114 &8123400010000000017
 MonoBehaviour:
   m_ObjectHideFlags: 0

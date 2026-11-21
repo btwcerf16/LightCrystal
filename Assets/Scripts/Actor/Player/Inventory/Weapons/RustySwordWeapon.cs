@@ -39,8 +39,6 @@ public sealed class RustySwordWeapon : Weapon
             _stats.PhysicalDamage.AddModifier(new StatModifier(_damage, StatModifierType.Flat, this));
             _bonusApplied = true;
         }
-        if (_hand != null)
-            _hand.VisualRenderer.enabled = false;
         _swordRenderer.enabled = true;
     }
 
@@ -53,8 +51,6 @@ public sealed class RustySwordWeapon : Weapon
             _stats.PhysicalDamage.RemoveModifiersFrom(this);
             _bonusApplied = false;
         }
-        if (_hand != null)
-            _hand.VisualRenderer.enabled = true;
         _swordRenderer.enabled = false;
         StopTrail();
     }
