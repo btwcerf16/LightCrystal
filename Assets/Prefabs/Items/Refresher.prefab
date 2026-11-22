@@ -50,5 +50,6 @@ MonoBehaviour:
   _price: 140
   _cooldown: 50
   _description: "Безумен тот факт, что такой артефакт достался смертным."
-  _statsDescription: "Максимальный рассудок: −{SanityPenaltyPercent:0}%\nАктивно: сброс перезарядок спеллов и нулевой КД на {Refresh.EffectDuration:0.#} с. Сопротивление потере рассудка: +50%."
+  _statsDescription: "Максимальный рассудок: −{SanityPenaltyPercent:0}%\nАктивно на {Refresh.EffectDuration:0.#} с: +{Refresh.CastSpeedBonus:0%} к скорости каста и +{Refresh.MadnessResistancePercent:0.#}% к сопротивлению потере рассудка."
+  _sanityPenalty: 0.25
   _refresh: {fileID: 11400000, guid: 60010c3f545241a79af4393f30c3beec, type: 2}

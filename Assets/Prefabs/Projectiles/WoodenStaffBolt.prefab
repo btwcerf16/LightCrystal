@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 143720390681002122}
   - component: {fileID: 6566908855852379870}
   - component: {fileID: 5529964042686445618}
+  - component: {fileID: 117023810000000001}
   m_Layer: 0
   m_Name: WoodenStaffBolt
   m_TagString: Projectile
@@ -180,8 +181,6 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkProjectile
   ShowTopMostFoldoutHeaderGroup: 1
-  _orbExplosionPrefab: {fileID: 0}
-  _finishExplosionRadius: 0
 --- !u!96 &6566908855852379870
 TrailRenderer:
   serializedVersion: 4
@@ -314,3 +313,17 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::StraightProjectile
   _collisionRadius: 0.07
+--- !u!114 &117023810000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1748997662627369463}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d49b8bee4944036bd1f4411936d7395, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkProjectileFinishEffect
+  _effectPrefab: {fileID: 2026658084249230375, guid: 0e138df5e3cb47249b5a27695e2772b7, type: 3}
+  _finishRadius: 0.5

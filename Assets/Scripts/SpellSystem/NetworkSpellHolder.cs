@@ -4,7 +4,7 @@ using UnityEngine;
 [RequireComponent(typeof(SpellHolder))]
 public sealed class NetworkSpellHolder : NetworkBehaviour
 {
-    private NetworkList<double> _cooldowns;
+    private NetworkList<NetworkSpellChargeState> _chargeStates;
     private NetworkList<float> _castProgress;
     private SpellHolder _holder;
     private PlayerBodyAnimation _bodyAnimation;
@@ -41,24 +41,24 @@ public sealed class NetworkSpellHolder : NetworkBehaviour
         _holder.SetSpells(character.Spells, IsServer);
         if (IsServer)
         {
-            _cooldowns.Clear();
+            _chargeStates.Clear();
             _castProgress.Clear();
             _toggledSpellSlots.Value = 0;
             for (int i = 0; i < _holder.Count; i++)
             {
-                _cooldowns.Add(0);
+                _chargeStates.Add(GetChargeState(_holder.Spells[i]));
                 _castProgress.Add(-1f);
             }
         }
         else
-            ReceiveCooldowns(default);
+            ReceiveChargeStates(default);
     }
 
     private void Awake()
     {
         _holder = GetComponent<SpellHolder>();
         _bodyAnimation = GetComponent<PlayerBodyAnimation>();
-        _cooldowns = new NetworkList<double>();
+        _chargeStates = new NetworkList<NetworkSpellChargeState>();
         _castProgress = new NetworkList<float>();
     }
 
@@ -69,14 +69,12 @@ public sealed class NetworkSpellHolder : NetworkBehaviour
         ReceiveCharacter(0, _characterIndex.Value);
         if (IsServer)
         {
-            _holder.SpellCast += PublishCooldown;
-            _holder.CooldownsChanged += PublishCooldowns;
             _holder.CastFailed += ShowCastFailure;
         }
         else
         {
-            _cooldowns.OnListChanged += ReceiveCooldowns;
-            ReceiveCooldowns(default);
+            _chargeStates.OnListChanged += ReceiveChargeStates;
+            ReceiveChargeStates(default);
         }
         if (IsOwner)
         {
@@ -90,10 +88,8 @@ public sealed class NetworkSpellHolder : NetworkBehaviour
         _characterIndex.OnValueChanged -= ReceiveCharacter;
         _holder.CastRequested -= RequestCast;
         _holder.CancelCastRequested -= RequestCancelCast;
-        _holder.SpellCast -= PublishCooldown;
-        _holder.CooldownsChanged -= PublishCooldowns;
         _holder.CastFailed -= ShowCastFailure;
-        _cooldowns.OnListChanged -= ReceiveCooldowns;
+        _chargeStates.OnListChanged -= ReceiveChargeStates;
         _holder.ClearSpells();
     }
 
@@ -124,6 +120,9 @@ public sealed class NetworkSpellHolder : NetworkBehaviour
             float progress = spell != null ? spell.CastProgress : -1f;
             if (_castProgress[i] != progress)
                 _castProgress[i] = progress;
+            NetworkSpellChargeState state = GetChargeState(spell);
+            if (!_chargeStates[i].Equals(state))
+                _chargeStates[i] = state;
             if (i < 32 && spell is ToggleSpell { IsToggled: true })
                 toggledSpellSlots |= 1u << i;
         }
@@ -172,25 +171,22 @@ public sealed class NetworkSpellHolder : NetworkBehaviour
         GetComponent<NetworkPlayerWallet>().ShowHint(message);
     }
 
-    private void PublishCooldowns()
+    private static NetworkSpellChargeState GetChargeState(Spell spell)
     {
-        for (int i = 0; i < _holder.Spells.Count; i++)
-            if (_holder.Spells[i] != null)
-                PublishCooldown(i);
+        return spell == null ? default : new NetworkSpellChargeState
+        {
+            AvailableCharges = spell.AvailableCharges,
+            RechargesAt = spell.CooldownEndsAt
+        };
     }
 
-    private void PublishCooldown(int index)
+    private void ReceiveChargeStates(NetworkListEvent<NetworkSpellChargeState> change)
     {
-        _cooldowns[index] = _holder.Spells[index].CooldownEndsAt;
-    }
-
-    private void ReceiveCooldowns(NetworkListEvent<double> change)
-    {
-        for (int i = 0; i < _cooldowns.Count && i < _holder.Spells.Count; i++)
+        for (int i = 0; i < _chargeStates.Count && i < _holder.Spells.Count; i++)
         {
             Spell spell = _holder.Spells[i];
             if (spell != null)
-                spell.SetCooldown(_cooldowns[i]);
+                spell.ApplyChargeState(_chargeStates[i]);
         }
     }
 }

@@ -28,18 +28,10 @@ public sealed class PlayerHUD : NetworkBehaviour
     private int _shownSeconds = -1;
     private int _shownWaveNumber;
     private WaveDirector _waveDirector;
-    private ActorArsenal _arsenal;
     private NetworkPlayerArsenal _networkArsenal;
     private RectTransform _weaponChargePanel;
     private readonly RectTransform[] _weaponChargeFills = new RectTransform[4];
     private float _shownWeaponCharge = -1f;
-    private RectTransform _comboRect;
-    private Text _comboText;
-    private CanvasGroup _comboGroup;
-    private Tween _comboPulse;
-    private Tween _comboFade;
-    private readonly NetworkVariable<int> _combo = new(0,
-        NetworkVariableReadPermission.Owner, NetworkVariableWritePermission.Server);
     private readonly NetworkVariable<double> _waveStartsAt = new(0,
         NetworkVariableReadPermission.Owner, NetworkVariableWritePermission.Server);
     private readonly NetworkVariable<int> _activeWaveNumber = new(0,
@@ -74,10 +66,7 @@ public sealed class PlayerHUD : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        _arsenal = GetComponent<ActorArsenal>();
         _networkArsenal = GetComponent<NetworkPlayerArsenal>();
-        if (IsOwner)
-            _combo.OnValueChanged += ReceiveCombo;
         if (!IsServer)
             return;
         _waveDirector = NetworkManager.GetComponent<WaveDirector>();
@@ -106,14 +95,6 @@ public sealed class PlayerHUD : NetworkBehaviour
         if (IsSpawned && IsOwner && _performanceText != null && !_minimalLayout)
             UpdatePerformanceStats();
 
-        if (IsSpawned && IsServer)
-        {
-            Weapon weapon = _arsenal.ActiveWeapon;
-            int count = weapon != null && weapon.TryGetComponent(out WeaponEnchants enchants)
-                ? enchants.GetEnchant<ComboEnchant>()?.Count ?? 0 : 0;
-            if (_combo.Value != count)
-                _combo.Value = count;
-        }
         if (!IsSpawned || !IsOwner || _waveTimer == null)
             return;
         int waveNumber = _activeWaveNumber.Value;
@@ -291,7 +272,6 @@ public sealed class PlayerHUD : NetworkBehaviour
             bossBars.transform.SetParent(_canvas.transform, false);
             bossBars.GetComponent<BossBarsUI>().Initialize(NetworkManager);
         }
-        CreateComboUI();
         _eventNotifications = new GameObject("EventNotifications", typeof(RectTransform)).AddComponent<EventNotificationsUI>();
         _eventNotifications.Initialize(_canvas.transform);
         ShopSpawnArea area = FindFirstObjectByType<ShopSpawnArea>();
@@ -343,44 +323,6 @@ public sealed class PlayerHUD : NetworkBehaviour
     {
         CreateRoot();
         _eventNotifications.Show(message, textColor);
-    }
-
-    private void CreateComboUI()
-    {
-        _comboRect = new GameObject("Combo", typeof(RectTransform), typeof(CanvasGroup)).GetComponent<RectTransform>();
-        _comboRect.SetParent(_canvas.transform, false);
-        _comboRect.anchorMin = _comboRect.anchorMax = _comboRect.pivot = new Vector2(0f, 1f);
-        _comboRect.anchoredPosition = new Vector2(260f, -18f);
-        _comboRect.sizeDelta = new Vector2(240f, 48f);
-        _comboGroup = _comboRect.GetComponent<CanvasGroup>();
-        _comboGroup.alpha = 0f;
-        _comboGroup.blocksRaycasts = false;
-        _comboText = CreateLabel(_comboRect, "Count", Color.white);
-        _comboText.alignment = TextAnchor.MiddleLeft;
-        _comboText.fontSize = 28;
-        _comboText.fontStyle = FontStyle.Bold;
-        ReceiveCombo(0, _combo.Value);
-    }
-
-    private void ReceiveCombo(int previous, int current)
-    {
-        if (_comboRect == null)
-            return;
-        _comboPulse?.Kill();
-        _comboFade?.Kill();
-        if (current <= 0)
-        {
-            _comboFade = _comboGroup.DOFade(0f, 0.2f);
-            return;
-        }
-        _comboText.text = $"КОМБО ×{current}";
-        Color red = new Color(1f, 0.15f, 0.12f);
-        _comboText.color = current <= 25
-            ? Color.Lerp(Color.white, red, (current - 1f) / 24f)
-            : Color.Lerp(red, new Color(0.55f, 0.04f, 0.12f), (current - 25f) / 25f);
-        _comboGroup.alpha = 1f;
-        _comboRect.localScale = Vector3.one;
-        _comboPulse = _comboRect.DOPunchScale(new Vector3(0.18f, 0.18f, 0f), 0.22f, 3, 0.6f);
     }
 
     private void CreateWaveTimer()
@@ -530,7 +472,6 @@ public sealed class PlayerHUD : NetworkBehaviour
 
     public override void OnNetworkDespawn()
     {
-        _combo.OnValueChanged -= ReceiveCombo;
         if (_waveDirector != null)
         {
             _waveDirector.CalmStarted -= PublishWaveTimer;
@@ -554,9 +495,6 @@ public sealed class PlayerHUD : NetworkBehaviour
         }
         DOTween.Kill(_currencyGainTweens);
         _hintAnimation?.Kill();
-        _comboPulse?.Kill();
-        _comboFade?.Kill();
-        _comboRect = null;
         if (_canvas == null)
             return;
         _canvas.SetActive(false);

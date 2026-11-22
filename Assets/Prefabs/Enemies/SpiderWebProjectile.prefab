@@ -179,8 +179,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkProjectile
   ShowTopMostFoldoutHeaderGroup: 1
-  _orbExplosionPrefab: {fileID: 0}
-  _finishExplosionRadius: 0
 --- !u!114 &7533882771131879353
 MonoBehaviour:
   m_ObjectHideFlags: 0

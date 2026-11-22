@@ -16,6 +16,7 @@ public sealed class FirstDawnSwordWeapon : Weapon
     private ActorSanity _sanity;
     private EffectHandler _effects;
     private bool _isWave;
+    private bool IsCastBlocked => IsOwnerStunned || IsOwnerSilenced;
     private bool _waveReleased;
     private readonly HashSet<IDamageable> _hitTargets = new();
 
@@ -101,15 +102,6 @@ public sealed class FirstDawnSwordWeapon : Weapon
         NotifyStateChanged();
     }
 
-    private void LateUpdate()
-    {
-        if (_hand == null)
-            return;
-        Vector3 scale = transform.localScale;
-        scale.y = Mathf.Abs(scale.y) * (_hand.AimDirection.x < 0f ? -1f : 1f);
-        transform.localScale = scale;
-    }
-
     private bool CanStrike => _isAttacking && IsEquipped && !IsOwnerStunned
         && OwnerNetworkObject != null && OwnerNetworkObject.IsSpawned && OwnerNetworkObject.NetworkManager.IsServer;
 
@@ -134,9 +126,15 @@ public sealed class FirstDawnSwordWeapon : Weapon
         }
     }
 
+    private void Update()
+    {
+        if (_isAttacking && _isWave && !_waveReleased && IsCastBlocked)
+            CancelUse();
+    }
+
     public void ReleaseWave()
     {
-        if (!CanStrike || !_isWave || _waveReleased)
+        if (!CanStrike || !_isWave || _waveReleased || IsOwnerSilenced)
             return;
         _waveReleased = true;
         DawnWaveProjectile wave = OwnerNetworkObject.NetworkManager.GetComponent<NetworkObjectPool>()

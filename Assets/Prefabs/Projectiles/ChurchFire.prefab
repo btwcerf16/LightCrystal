@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 6988523257097080322}
   - component: {fileID: 1636575422952579671}
   - component: {fileID: 2018494615889206388}
+  - component: {fileID: 117023810000000001}
   m_Layer: 0
   m_Name: ChurchFire
   m_TagString: Projectile
@@ -179,8 +180,6 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkProjectile
   ShowTopMostFoldoutHeaderGroup: 1
-  _orbExplosionPrefab: {fileID: 2026658084249230375, guid: c62e992c87e2fae4db7c09685f8a915c, type: 3}
-  _finishExplosionRadius: 0.65
 --- !u!114 &2018494615889206388
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -194,3 +193,17 @@ MonoBehaviour:
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::ChurchFireProjectile
   _radius: 0.1
+--- !u!114 &117023810000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 651781528319821222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d49b8bee4944036bd1f4411936d7395, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkProjectileFinishEffect
+  _effectPrefab: {fileID: 2026658084249230375, guid: c62e992c87e2fae4db7c09685f8a915c, type: 3}
+  _finishRadius: 0.65

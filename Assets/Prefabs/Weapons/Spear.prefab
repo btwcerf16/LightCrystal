@@ -208,7 +208,7 @@ MonoBehaviour:
     \u0441\u043B\u043E\u0442 \u0437\u0430\u043D\u044F\u0442, \u0430\u0442\u0430\u043A\u0438
     \u043D\u0435\u0434\u043E\u0441\u0442\u0443\u043F\u043D\u044B."
   _statsDescription: "Бонус физ. урона: +{Damage:0.#}"
-  _damage: 4
+  _damage: 5
   _primaryAttackType: 0
   _secondaryAttackType: 1
   _attackPoint: {fileID: 4220687173161739018}
@@ -218,12 +218,12 @@ MonoBehaviour:
   _projectilePrefab: {fileID: 8205738771316816059, guid: d67b454797f6e1445994d5a7d8ef4c5d, type: 3}
   _attackRadius: 0.25
   _pointSpacing: 0.6
-  _throwMultiplier: 1.5
-  _throwSpeed: 40
-  _throwRange: 9.6
+  _throwMultiplier: 1.45
+  _throwSpeed: 34
+  _throwRange: 10
   _sanityCost: 5
-  _closeCooldown: 5
-  _farCooldown: 1
+  _closeCooldown: 3.5
+  _farCooldown: 1.2
 --- !u!1 &8731877758624498983
 GameObject:
   m_ObjectHideFlags: 0

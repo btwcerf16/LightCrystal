@@ -23,7 +23,6 @@ public sealed class SpellHolder : MonoBehaviour
     public event Action CancelCastRequested;
     public event Action<int> SpellCast;
     public event Action<string> CastFailed;
-    public event Action CooldownsChanged;
     public event Action SpellsChanged;
 
     public void SetSpells(SpellConfig[] configs, bool canProcess)
@@ -34,12 +33,14 @@ public sealed class SpellHolder : MonoBehaviour
         SpellsChanged?.Invoke();
     }
 
-    public void ResetCooldowns()
+    private void Update()
     {
+        if (!_canProcess)
+            return;
+
         foreach (Spell spell in _spells)
             if (spell != null)
-                spell.SetCooldown(0);
-        CooldownsChanged?.Invoke();
+                spell.RefreshCharges();
     }
 
     private void Awake()

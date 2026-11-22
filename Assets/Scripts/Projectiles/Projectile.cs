@@ -19,6 +19,7 @@ public abstract class Projectile : MonoBehaviour
     protected ProjectileData Data { get; private set; }
     protected int ExtraPiercing { get; private set; }
     private readonly HashSet<IDamageable> _hitTargets = new();
+    public event Action Finishing;
     public event Action Finished;
     public static event Action<Projectile> Launched;
     public static event Action<Projectile, ActorHealth, float> TargetHit;
@@ -168,6 +169,7 @@ public abstract class Projectile : MonoBehaviour
             return;
         _hasFinishedFlight = true;
         _isFlying = false;
+        Finishing?.Invoke();
         Finished?.Invoke();
     }
 
@@ -180,6 +182,7 @@ public abstract class Projectile : MonoBehaviour
         _hitTargets.Clear();
         ExtraPiercing = 0;
         Data = default;
+        Finishing = null;
         Finished = null;
     }
 }

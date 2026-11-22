@@ -180,8 +180,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkProjectile
   ShowTopMostFoldoutHeaderGroup: 1
-  _orbExplosionPrefab: {fileID: 2026658084249230375, guid: 0e138df5e3cb47249b5a27695e2772b7, type: 3}
-  _finishExplosionRadius: 0
 --- !u!96 &4760505237421688426
 TrailRenderer:
   serializedVersion: 4

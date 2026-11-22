@@ -25,3 +25,4 @@ MonoBehaviour:
   MythicalValue: 0.02
   LegendaryValue: 0.03
   ResetDelay: 2
+  _counterPrefab: {fileID: 100006, guid: 16d8ca6231f84d8ab8c2074fe8645d9b, type: 3}

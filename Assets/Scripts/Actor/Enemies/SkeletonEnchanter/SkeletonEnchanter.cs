@@ -119,7 +119,7 @@ public sealed class SkeletonEnchanter : Enemy
             return;
 
         Spell spell = _spells.Spells[0];
-        if (spell.CooldownRemaining > 0f || (Effects != null && Effects.IsSilenced))
+        if (spell.AvailableCharges == 0 || (Effects != null && Effects.IsSilenced))
             return;
 
         Transform target = CurrentTarget;

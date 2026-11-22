@@ -9,7 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6774367939195999403}
-  - component: {fileID: 8515056388838877961}
+  - component: {fileID: 117000000000000095}
+  - component: {fileID: 117004700000000001}
   - component: {fileID: 7616600512412900001}
   m_Layer: 0
   m_Name: MagicWand
@@ -28,14 +29,14 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
-  - {fileID: 3703277602129967901}
+  - {fileID: 7038864183342389301}
   - {fileID: 5047312454344996514}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &8515056388838877961
+--- !u!114 &117004700000000001
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -44,11 +45,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 3009511764691562725}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 51982e9918854eb5aea4fe5cb56aea83, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::MagicFocusWeapon
-  _icon: {fileID: 21300000, guid: a386058793704fc280a8f9666b0a645a, type: 3}
-  _worldIcon: {fileID: 21300000, guid: a386058793704fc280a8f9666b0a645a, type: 3}
+  m_Script: {fileID: 11500000, guid: 830e9de11b204771a116d4a7262e1e52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MagicWandWeapon
+  _icon: {fileID: -1286768236951378217, guid: ffa85768029e5a64294cd109b2cf507e, type: 3}
+  _worldIcon: {fileID: -1286768236951378217, guid: ffa85768029e5a64294cd109b2cf507e, type: 3}
   _itemId: 47
   _rarity: 0
   _price: 20
@@ -64,22 +65,22 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 257
   _attackPoint: {fileID: 5047312454344996514}
-  _animator: {fileID: 0}
+  _animator: {fileID: 117000000000000095}
   _maxTargets: 1
   _primaryAttackType: 2
   _secondaryAttackType: 2
-  _visual: {fileID: 3703277602129967901}
+  _rotationOnlyByZ: 0
+  _grip: {fileID: 7038864183342389301}
   _displayName: "\u041C\u0430\u0433\u0438\u0447\u0435\u0441\u043A\u0430\u044F \u043F\u0430\u043B\u043E\u0447\u043A\u0430"
   _sanityBonus: 0.1
   _castSpeedBonus: 0
-  _attackInterval: 0.45
   _range: 3
   _primarySanityCost: 5
+  _effectMaterial: {fileID: 2100000, guid: 78e976f7bb885da4c850f7a8eadf3f80, type: 2}
+  _primaryCastTime: 0.18
+  _chargeTime: 0.65
   _chargedSanityCost: 8
-  _projectilePrefab: {fileID: 0}
-  _projectileSpeed: 10
-  _chargeTime: 1.5
-  _chargedDamage: 8
+  _chargedDamage: 9
   _chargedRange: 6
 --- !u!114 &7616600512412900001
 MonoBehaviour:
@@ -91,7 +92,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3ae97aad61484abea20f3bfe4e26c1dc, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WeaponEnchants
   _definitions: []
 --- !u!1 &3079383763014136852
@@ -119,13 +120,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3079383763014136852}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: -0.39583865, w: 0.91832006}
-  m_LocalPosition: {x: 0.55854946, y: 0.02294865, z: 0}
+  m_LocalRotation: {x: 0.38268343, y: -0.92387956, z: 0, w: 0}
+  m_LocalPosition: {x: 0.6035495, y: 0.02294865, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 6774367939195999403}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: -46.636578}
+  m_Father: {fileID: 7038864183342389301}
+  m_LocalEulerAnglesHint: {x: 180, y: 0, z: 135}
 --- !u!212 &8121004747208208476
 SpriteRenderer:
   serializedVersion: 2
@@ -175,16 +176,48 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 5
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: a386058793704fc280a8f9666b0a645a, type: 3}
+  m_Sprite: {fileID: -1286768236951378217, guid: ffa85768029e5a64294cd109b2cf507e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.28, y: 0.32}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!1 &3682226872646983001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7038864183342389301}
+  m_Layer: 0
+  m_Name: Grip
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7038864183342389301
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3682226872646983001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.045, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 3703277602129967901}
+  m_Father: {fileID: 6774367939195999403}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &9120726455247048127
 GameObject:
   m_ObjectHideFlags: 0
@@ -216,3 +249,25 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6774367939195999403}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!95 &117000000000000095
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3009511764691562725}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 93e4b71913bf4672b09161b952f620f2, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage:
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0

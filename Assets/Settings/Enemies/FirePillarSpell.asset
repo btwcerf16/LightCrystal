@@ -22,11 +22,11 @@ MonoBehaviour:
   SanityCost: 0
   CastTime: 0
   SpriteIcon: {fileID: 0}
-  Pillar: {fileID: 8562652673879130562, guid: 124194b3da0da4e46a8b1fae9bbe6ffc, type: 3}
+  _pillarPrefab: {fileID: 8562993869302112971, guid: 124194b3da0da4e46a8b1fae9bbe6ffc, type: 3}
   Burning: {fileID: 11400000, guid: 9504a655b3d3aa6438b4614226e28651, type: 2}
   TargetMask:
     serializedVersion: 2
-    m_Bits: 705
+    m_Bits: 704
   Damage: 4
   Radius: 1.5
   TriggerDelay: 1

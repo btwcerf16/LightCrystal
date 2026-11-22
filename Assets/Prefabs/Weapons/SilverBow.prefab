@@ -55,20 +55,20 @@ MonoBehaviour:
   _cooldown: 0
   _description: "Серебряная тетива поёт, когда стрела пробивает цель."
   _statsDescription: 
-  _damage: 3.5
+  _damage: 5
   _attackPoint: {fileID: 5608247217666110653}
   _animator: {fileID: 0}
-  _maxTargets: 5
+  _maxTargets: 4
   _primaryAttackType: 1
   _secondaryAttackType: 1
-  _drawDuration: 0.85
+  _drawDuration: 0.78
   _bowVisual: {fileID: 9056539585798522492}
   _upperString: {fileID: 9056539585798522502}
   _lowerString: {fileID: 9056539585798522512}
   _nockedArrow: {fileID: 9056539585798522523}
   _arrowPrefab: {fileID: 7188332974573166865, guid: ed9b53fb7d0a48dc822e9db42bc6a365, type: 3}
-  _arrowSpeed: 23
-  _arrowRange: 10
+  _arrowSpeed: 26
+  _arrowRange: 11
   _targetMask:
     serializedVersion: 2
     m_Bits: 256

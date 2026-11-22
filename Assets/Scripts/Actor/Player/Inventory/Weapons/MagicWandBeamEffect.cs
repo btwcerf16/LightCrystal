@@ -13,9 +13,9 @@ public sealed class MagicWandBeamEffect : MonoBehaviour
     {
         if (_core == null)
         {
-            _halo = CreateLine(transform, "Wand beam halo", material, 6);
-            _core = CreateLine(transform, "Wand beam core", material, 7);
-            _flash = CreateLine(transform, "Wand muzzle flash", material, 8);
+            _halo = WeaponEffectLine.Create(transform, "Wand beam halo", material, 6);
+            _core = WeaponEffectLine.Create(transform, "Wand beam core", material, 7);
+            _flash = WeaponEffectLine.Create(transform, "Wand muzzle flash", material, 8);
         }
 
         _duration = charged ? 0.24f : 0.14f;
@@ -64,18 +64,5 @@ public sealed class MagicWandBeamEffect : MonoBehaviour
         line.widthMultiplier = width * Mathf.Lerp(0.25f, 1f, fraction);
         color.a *= fraction;
         line.startColor = line.endColor = color;
-    }
-
-    internal static LineRenderer CreateLine(Transform parent, string name, Material material, int sortingOrder)
-    {
-        GameObject visual = new(name);
-        visual.transform.SetParent(parent, false);
-        LineRenderer line = visual.AddComponent<LineRenderer>();
-        line.sharedMaterial = material;
-        line.sortingOrder = sortingOrder;
-        line.useWorldSpace = true;
-        line.positionCount = 0;
-        line.enabled = false;
-        return line;
     }
 }

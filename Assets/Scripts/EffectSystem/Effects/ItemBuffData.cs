@@ -10,7 +10,6 @@ public sealed class ItemBuffData : EffectData
     public float CriticalChance;
     public float CameraDistance;
     public float MadnessResistance;
-    public bool FreeSpellCooldowns;
     public float ViewDistance;
     public float ViewAngleBonus;
     public float ViewAngleMultiplier = 1f;

@@ -11,6 +11,7 @@ public sealed class WeaponAttackShadow : NetworkBehaviour
     private Animator _model;
     private Animator _modelPrefab;
     private Weapon _weapon;
+    private Quaternion _weaponLocalRotation;
     private SpriteRenderer[] _renderers;
     private Color[] _originalColors;
     private float _fadeRemaining;
@@ -45,11 +46,14 @@ public sealed class WeaponAttackShadow : NetworkBehaviour
             }
             Weapon prefab = NetworkManager.GetComponent<ItemFactory>().GetPrefab(itemId) as Weapon;
             _weapon = prefab != null ? Instantiate(prefab, _weaponMount, false) : null;
+            if (_weapon != null)
+                _weaponLocalRotation = _weapon.transform.localRotation;
         }
         if (_weapon == null)
             return;
 
         _weapon.BindForUse(owner.GetComponent<ActorStats>(), hand, physicalDamage);
+        ActorHand.RotateWeapon(_weapon, _weaponLocalRotation);
         SpriteRenderer weaponRenderer = _weapon.GetComponentInChildren<SpriteRenderer>(true);
         if (weaponRenderer != null)
             weaponRenderer.enabled = true;

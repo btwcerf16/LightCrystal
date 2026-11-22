@@ -58,13 +58,13 @@ MonoBehaviour:
     \u0438\u0437 \u043A\u043E\u0441\u0442\u0435\u0439 \u043D\u0435\u0438\u0437\u0432\u0435\u0441\u0442\u043D\u043E\u0433\u043E
     \u0441\u0443\u0449\u0435\u0441\u0442\u0432\u0430."
   _statsDescription: 
-  _damage: 7
+  _damage: 9
   _attackPoint: {fileID: 5608247217666110653}
   _animator: {fileID: 0}
   _maxTargets: 1
   _primaryAttackType: 1
   _secondaryAttackType: 1
-  _drawDuration: 1.2
+  _drawDuration: 0.95
   _bowVisual: {fileID: 9056539585798522492}
   _upperString: {fileID: 9056539585798522502}
   _lowerString: {fileID: 9056539585798522512}
@@ -72,8 +72,8 @@ MonoBehaviour:
   _stringEnd: {x: -0.03125, y: 0.3125}
   _stringPullDistance: 0.25
   _bonePrefab: {fileID: 7188332974573166865, guid: 785f10bbb244467da6169e56554dc96a, type: 3}
-  _boneSpeed: 12
-  _boneRange: 9
+  _boneSpeed: 18
+  _boneRange: 10.5
   _targetMask:
     serializedVersion: 2
     m_Bits: 256

@@ -4,8 +4,6 @@ using UnityEngine;
 [RequireComponent(typeof(ActorArsenal))]
 public sealed class NetworkPlayerArsenal : NetworkBehaviour
 {
-    [SerializeField] private Material _wandEffectMaterial;
-    private MagicWandBeamEffect _wandBeamEffect;
     private NetworkList<NetworkInventorySlot> _slots;
     private readonly NetworkVariable<int> _activeWeaponIndex = new NetworkVariable<int>(0,
         NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
@@ -18,18 +16,6 @@ public sealed class NetworkPlayerArsenal : NetworkBehaviour
     private ItemFactory _itemFactory;
 
     private EffectHandler _effects;
-
-    internal Material WandEffectMaterial => _wandEffectMaterial;
-
-    [Rpc(SendTo.ClientsAndHost, InvokePermission = RpcInvokePermission.Server)]
-    internal void PlayWandBeamRpc(Vector2 origin, Vector2 end, bool charged)
-    {
-        if (_wandBeamEffect == null)
-            _wandBeamEffect = gameObject.AddComponent<MagicWandBeamEffect>();
-        _wandBeamEffect.Play(_wandEffectMaterial, origin, end, charged);
-        if (_arsenal.ActiveWeapon is MagicFocusWeapon focus)
-            focus.PlayWandFlick(charged);
-    }
 
     private void Awake()
     {

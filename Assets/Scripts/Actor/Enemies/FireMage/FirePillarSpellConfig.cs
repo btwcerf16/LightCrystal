@@ -3,7 +3,8 @@ using UnityEngine;
 [CreateAssetMenu(menuName = "Spells/Enemies/Fire Pillar")]
 public sealed class FirePillarSpellConfig : SpellConfig
 {
-    public DamageTrap Pillar;
+    [SerializeField] private GameObject _pillarPrefab;
+    public FirePillarTrap Pillar => _pillarPrefab != null ? _pillarPrefab.GetComponent<FirePillarTrap>() : null;
     public BurnEffectData Burning;
     public LayerMask TargetMask;
     [Min(0f)] public float Damage = 4f;

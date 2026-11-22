@@ -220,9 +220,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 8562993869302112971}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f3038e22322d48428c789dd2950f5a6f, type: 3}
+  m_Script: {fileID: 11500000, guid: 755b21509f8a48df945a083d9d716e37, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DamageTrap
+  m_EditorClassIdentifier: Assembly-CSharp::FirePillarTrap
   _targetsLayerMask:
     serializedVersion: 2
     m_Bits: 0

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public sealed class DamageTrap : Trap
+public class DamageTrap : Trap
 {
     protected override void OnCaught(Collider2D targetCollider)
     {

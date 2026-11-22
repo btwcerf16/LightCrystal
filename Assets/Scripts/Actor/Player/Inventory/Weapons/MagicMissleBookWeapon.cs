@@ -16,6 +16,7 @@ public sealed class MagicMissleBookWeapon : Weapon
     private ActorSanity _sanity;
     private bool _secondary;
     private bool _released;
+    private bool IsCastBlocked => IsOwnerStunned || IsOwnerSilenced;
 
     public override float GetRange(ActorStats owner) => owner != null ? owner.GetProjectileRange(_missileRange) : Mathf.Max(0f, _missileRange);
     public override string DisplayName => "Magic Missile";
@@ -49,7 +50,7 @@ public sealed class MagicMissleBookWeapon : Weapon
 
     public override bool BeginPrimaryUse()
     {
-        if (!IsEquipped || !IsAvailable || IsOwnerStunned || _isAttacking)
+        if (!IsEquipped || !IsAvailable || IsCastBlocked || _isAttacking)
             return false;
         BeginAttack(false);
         return true;
@@ -93,9 +94,15 @@ public sealed class MagicMissleBookWeapon : Weapon
         _animator.SetTrigger("Shake");
     }
 
+    private void Update()
+    {
+        if (_isAttacking && !_released && IsCastBlocked)
+            CancelUse();
+    }
+
     public void ReleaseMissiles()
     {
-        if (!IsServer || !IsEquipped || IsOwnerStunned || !_isAttacking || _released)
+        if (!IsServer || !IsEquipped || IsCastBlocked || !_isAttacking || _released)
             return;
         _released = true;
         NetworkObjectPool pool = OwnerStats.GetComponent<NetworkObject>().NetworkManager.GetComponent<NetworkObjectPool>();
@@ -124,15 +131,6 @@ public sealed class MagicMissleBookWeapon : Weapon
             missile.Launch(data);
             missile.GetComponent<NetworkObject>().Spawn();
         }
-    }
-
-    private void LateUpdate()
-    {
-        if (_hand == null)
-            return;
-        Vector3 scale = transform.localScale;
-        scale.y = Mathf.Abs(scale.y) * (_hand.AimDirection.x < 0f ? -1f : 1f);
-        transform.localScale = scale;
     }
 
     private void OnProjectileHit(Projectile projectile, ActorHealth target, float damage)

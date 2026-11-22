@@ -75,12 +75,13 @@ MonoBehaviour:
   _itemId: 34
   _rarity: 2
   _price: 65
-  _cooldown: 1.5
+  _cooldown: 1.3
   _description: "Потемневшее лезвие, брошенное в лесу вместе с добычей."
   _statsDescription: 
-  _damage: 1.5
+  _damage: 2.4
   _primaryAttackType: 0
   _secondaryAttackType: 1
+  _rotationOnlyByZ: 0
   _attackPoint: {fileID: 5608247217666110653}
   _animator: {fileID: 3123797774587916873}
   _maxTargets: 2
@@ -88,7 +89,7 @@ MonoBehaviour:
   _thrustPoint: {fileID: 9070031711971500013}
   _projectilePrefab: {fileID: 7188332974573166865, guid: 8f1904e01eee47eeb347e06cbb08971c, type: 3}
   _meleeRadius: 0.19
-  _projectileDamage: 4
+  _projectileDamage: 5
   _projectileSpeed: 24
   _projectileRange: 7
   _targetMask:

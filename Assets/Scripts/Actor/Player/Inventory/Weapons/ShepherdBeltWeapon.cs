@@ -140,15 +140,6 @@ public sealed class ShepherdBeltWeapon : Weapon
             OwnerStats.GetComponent<ActorHealth>().TakeDamage(_throwHealthCost, EDamageType.Pure);
     }
 
-    private void LateUpdate()
-    {
-        if (_hand == null)
-            return;
-        Vector3 weaponScale = transform.localScale;
-        weaponScale.y = Mathf.Abs(weaponScale.y) * (_hand.AimDirection.x < 0f ? -1f : 1f);
-        transform.localScale = weaponScale;
-    }
-
     public void FinishAttack() => _isAttacking = false;
     public override void EndPrimaryUse() { }
     public override void EndSecondaryUse() { }

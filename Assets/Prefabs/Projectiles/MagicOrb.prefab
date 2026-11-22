@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 1636575422952579671}
   - component: {fileID: 2018494615889206388}
   - component: {fileID: 3350526039467394929}
+  - component: {fileID: 117023810000000001}
   m_Layer: 0
   m_Name: MagicOrb
   m_TagString: Projectile
@@ -179,7 +180,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f81e1d9a6c4243d429f5daaa06e0e8cd, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkProjectile
-  _orbExplosionPrefab: {fileID: 2026658084249230375, guid: 0e138df5e3cb47249b5a27695e2772b7, type: 3}
   ShowTopMostFoldoutHeaderGroup: 1
 --- !u!114 &2018494615889206388
 MonoBehaviour:
@@ -195,6 +195,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MagicOrbProjectile
   _radius: 0.15
   _explosionRadius: 1.5
+  _finishEffect: {fileID: 117023810000000001}
 --- !u!96 &3350526039467394929
 TrailRenderer:
   serializedVersion: 4
@@ -314,3 +315,17 @@ TrailRenderer:
   m_Autodestruct: 0
   m_Emitting: 0
   m_ApplyActiveColorSpace: 1
+--- !u!114 &117023810000000001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 651781528319821222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7d49b8bee4944036bd1f4411936d7395, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkProjectileFinishEffect
+  _effectPrefab: {fileID: 2026658084249230375, guid: 0e138df5e3cb47249b5a27695e2772b7, type: 3}
+  _finishRadius: 0

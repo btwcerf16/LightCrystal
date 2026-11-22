@@ -4,6 +4,9 @@ using UnityEngine;
 public sealed class ComboEnchantData : EnchantData
 {
     [Min(0.1f)] public float ResetDelay = 2f;
+    [SerializeField] private ComboCounter _counterPrefab;
+
+    public ComboCounter CounterPrefab => _counterPrefab;
 
     public override Enchant Create(Weapon weapon)
     {

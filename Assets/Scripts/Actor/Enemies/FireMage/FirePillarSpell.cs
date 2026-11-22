@@ -3,14 +3,15 @@ using UnityEngine;
 
 public sealed class FirePillarSpell : Spell
 {
-    public override bool CanCast(SpellCastData data) => data.Target != null;
+    public override bool CanCast(SpellCastData data) =>
+        data.Target != null && ((FirePillarSpellConfig)SpellData).Pillar != null;
 
     protected override void Cast(SpellCastData data)
     {
         FirePillarSpellConfig config = (FirePillarSpellConfig)SpellData;
         NetworkManager manager = GetComponent<NetworkObject>().NetworkManager;
         Vector2 center = data.Target.transform.position;
-        DamageTrap pillar = manager.GetComponent<NetworkObjectPool>().GetObject(config.Pillar, center, Quaternion.identity);
+        FirePillarTrap pillar = manager.GetComponent<NetworkObjectPool>().GetObject(config.Pillar, center, Quaternion.identity);
         pillar.Initialize(new TrapData
         {
             Owner = OwnerStats,

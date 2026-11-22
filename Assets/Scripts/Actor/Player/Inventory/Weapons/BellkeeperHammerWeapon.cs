@@ -93,19 +93,6 @@ public sealed class BellkeeperHammerWeapon : Weapon
         NotifyStateChanged();
     }
 
-    private void LateUpdate()
-    {
-        if (_hand == null)
-            return;
-        Vector3 scale = transform.localScale;
-        float side = _hand.AimDirection.x < 0f ? -1f : 1f;
-        if (Mathf.Sign(scale.y) != side)
-        {
-            scale.y = Mathf.Abs(scale.y) * side;
-            transform.localScale = scale;
-        }
-    }
-
     private void PlayImpact()
     {
         if (_impactPlayed)

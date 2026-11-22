@@ -5376,6 +5376,7 @@ GameObject:
   - component: {fileID: 2281987729324516641}
   - component: {fileID: 8123400010000000101}
   - component: {fileID: 8123400010000000102}
+  - component: {fileID: 117023810000000002}
   m_Layer: 9
   m_Name: Player
   m_TagString: Player
@@ -5846,7 +5847,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkPlayerArsenal
   ShowTopMostFoldoutHeaderGroup: 1
-  _wandEffectMaterial: {fileID: 2100000, guid: 78e976f7bb885da4c850f7a8eadf3f80, type: 2}
 --- !u!114 &8123400010000000017
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6407,3 +6407,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 31d3ca3ffead4413bc428f2ef17a17d7, type: 3}
   m_Name:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkWorldAudio
+--- !u!114 &117023810000000002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8496232388664145000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fab70ff44672419da47f8f4f6de8e8a7, type: 3}
+  m_Name:
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkWeaponVisuals

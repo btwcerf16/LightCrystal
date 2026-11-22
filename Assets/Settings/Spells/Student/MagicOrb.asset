@@ -25,8 +25,9 @@ MonoBehaviour:
     1.5"
   IsPassive: 0
   CooldownTime: 4
+  MaxCharges: 3
   SanityCost: 10
-  CastTime: 0
+  CastTime: 0.2
   SpriteIcon: {fileID: 21300000, guid: f7cd884d78264adbae5dcd43f894a7e3, type: 3}
   Projectile: {fileID: 2018494615889206388, guid: 78594941b6064b5fb5b7cce3c7c5a043, type: 3}
   Damage: 3

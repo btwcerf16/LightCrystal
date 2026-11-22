@@ -73,7 +73,7 @@ MonoBehaviour:
   _itemId: 6
   _rarity: 4
   _price: 190
-  _cooldown: 25
+  _cooldown: 18
   _description: "\u041D\u0435\u0440\u043E\u0432\u043D\u044B\u0439 \u043A\u043B\u0438\u043D\u043E\u043A
     \u0438\u0437 \u0445\u043E\u043B\u043E\u0434\u043D\u043E\u0433\u043E \u0441\u0432\u0435\u0442\u0430.
     \u041B\u041A\u041C: \u0432\u0437\u043C\u0430\u0445. \u041F\u041A\u041C: \u043A\u043E\u0440\u043E\u0442\u043A\u0430\u044F
@@ -85,9 +85,10 @@ MonoBehaviour:
     \u0437\u0430\u043F\u0440\u0435\u0449\u0430\u0435\u0442 \u0435\u0451."
   _statsDescription: "\u0411\u043E\u043D\u0443\u0441 \u0444\u0438\u0437. \u0443\u0440\u043E\u043D\u0430:
     +{Damage:0.#}"
-  _damage: 22
+  _damage: 17
   _primaryAttackType: 0
   _secondaryAttackType: 2
+  _rotationOnlyByZ: 0
   _attackPoint: {fileID: 6933536587401122812}
   _animator: {fileID: 5679765553876219667}
   _maxTargets: 3
@@ -95,10 +96,10 @@ MonoBehaviour:
   _trail: {fileID: 2378775563480872992}
   _wavePrefab: {fileID: 2018494615889206388, guid: 9218d384e0c8f0e4a86b9350fe8b2c8e, type: 3}
   _stun: {fileID: 11400000, guid: 6ed531e5fdd340947afce7de8226555c, type: 2}
-  _waveDamage: 25
-  _sanityCost: 35
+  _waveDamage: 22
+  _sanityCost: 25
   _waveSpeed: 16
-  _waveRange: 6
+  _waveRange: 7
   _attackRadius: 0.45
 --- !u!1 &1148879501973815059
 GameObject:

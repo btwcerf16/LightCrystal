@@ -37,8 +37,6 @@ public sealed class ItemBuff : Effect
             owner.ProjectileRangeMultiplier.AddModifier(new StatModifier(data.ProjectileRangeMultiplier, StatModifierType.Multiplier, this));
         if (data.ProjectilePiercing != 0f)
             owner.ProjectilePiercing.AddModifier(new StatModifier(data.ProjectilePiercing, StatModifierType.Flat, this));
-        if (data.FreeSpellCooldowns)
-            owner.GetComponent<SpellHolder>()?.ResetCooldowns();
     }
 
     public override void EffectEnd(ActorStats owner)

@@ -110,11 +110,13 @@ public abstract class Trap : MonoBehaviour
         if (!caughtActor.GetComponent<ActorHealth>().IsDead && _effectOnCaught != null)
         {
             Effect effect = caughtActor.GetComponent<EffectHandler>()?.AddEffect(_effectOnCaught);
-            if (effect is BurnEffect burn)
-                burn.Configure(_owner);
+            if (effect != null)
+                OnEffectApplied(effect);
         }
         Caught?.Invoke(this, caughtActor);
     }
+
+    protected virtual void OnEffectApplied(Effect effect) { }
 
     public ActorStats GetOwner() => _owner;
 

@@ -5,7 +5,7 @@ public sealed class MagicOrbProjectile : Projectile
 {
     [SerializeField, Min(0f)] private float _explosionRadius = 1.5f;
     private readonly HashSet<IDamageable> _targets = new();
-    public event System.Action<Vector3, float> Exploded;
+    [SerializeField] private NetworkProjectileFinishEffect _finishEffect;
 
     protected override bool CanHit(Collider2D collider)
     {
@@ -38,7 +38,7 @@ public sealed class MagicOrbProjectile : Projectile
             }
             _targets.Clear();
         }
-        Exploded?.Invoke(transform.position, _explosionRadius);
+        _finishEffect?.Play(_explosionRadius);
         Finish();
     }
 }

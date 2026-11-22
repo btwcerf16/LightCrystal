@@ -20,6 +20,8 @@ public sealed class SpellUI : NetworkBehaviour
         public Text Binding;
         public Text Cost;
         public Text Timer;
+        public Text Charges;
+        public Text RechargeTimer;
         public GameObject Cooldown;
         public Image CastFill;
         public Outline Border;
@@ -148,8 +150,27 @@ public sealed class SpellUI : NetworkBehaviour
             costOutline.effectDistance = new Vector2(1f, -1f);
             cost.text = config != null && !passive ? config.SanityCost.ToString("0.#") : "";
             cost.gameObject.SetActive(config != null && !passive);
+            Text charges = Label(card, "Charges", "", Vector2.zero, new Vector2(width, 26f), 21);
+            charges.rectTransform.anchorMin = charges.rectTransform.anchorMax = new Vector2(0.5f, 1f);
+            charges.rectTransform.pivot = new Vector2(0.5f, 0f);
+            charges.rectTransform.anchoredPosition = new Vector2(0f, 7f);
+            Outline chargeOutline = charges.gameObject.AddComponent<Outline>();
+            chargeOutline.effectColor = Color.black;
+            chargeOutline.effectDistance = new Vector2(1f, -1f);
+            charges.gameObject.SetActive(false);
+            Text rechargeTimer = Label(card, "RechargeTimer", "", Vector2.zero, new Vector2(34f, 16f), 13);
+            rechargeTimer.rectTransform.anchorMin = rechargeTimer.rectTransform.anchorMax = rechargeTimer.rectTransform.pivot = Vector2.zero;
+            rechargeTimer.rectTransform.anchoredPosition = new Vector2(4f, 3f);
+            rechargeTimer.alignment = TextAnchor.LowerLeft;
+            rechargeTimer.gameObject.AddComponent<Outline>().effectColor = Color.black;
+            rechargeTimer.gameObject.SetActive(false);
             UnityEngine.UI.Text actionLock = HudStyle.CreateActionLock(card);
-            _slots.Add(new SlotView { Button = button, Binding = binding, Cost = cost, Timer = timer, Cooldown = cooldown.gameObject, CastFill = castFill, Border = border, ActionLock = actionLock });
+            _slots.Add(new SlotView
+            {
+                Button = button, Binding = binding, Cost = cost, Timer = timer,
+                Charges = charges, RechargeTimer = rechargeTimer,
+                Cooldown = cooldown.gameObject, CastFill = castFill, Border = border, ActionLock = actionLock
+            });
         }
         RefreshBindings();
     }
@@ -182,6 +203,8 @@ public sealed class SpellUI : NetworkBehaviour
                 _slots[i].Button.interactable = false;
                 _slots[i].CastFill.gameObject.SetActive(false);
                 _slots[i].Cooldown.SetActive(false);
+                _slots[i].Charges.gameObject.SetActive(false);
+                _slots[i].RechargeTimer.gameObject.SetActive(false);
                 continue;
             }
             bool passive = spell.SpellData.IsPassive;
@@ -190,7 +213,6 @@ public sealed class SpellUI : NetworkBehaviour
                 !passive && _effects != null && _effects.IsStunned,
                 !passive && _effects != null && _effects.IsSilenced);
             bool toggled = _networkHolder != null ? _networkHolder.IsSpellToggled(i) : spell is ToggleSpell { IsToggled: true };
-            _slots[i].Border.effectColor = toggled ? new Color(0.4f, 0.9f, 0.5f) : HudStyle.Line;
             float remaining = passive ? 0f : spell.CooldownRemaining;
             float progress = _networkHolder != null ? _networkHolder.GetCastProgress(i) : spell.CastProgress;
             bool casting = !passive && progress >= 0f;
@@ -198,10 +220,23 @@ public sealed class SpellUI : NetworkBehaviour
             _slots[i].CastFill.fillAmount = Mathf.Clamp01(progress);
             _slots[i].Cost.text = passive ? "" : spell.SanityCost.ToString("0.#");
             bool affordable = toggled || _vitals.State.z >= spell.SanityCost;
-            _slots[i].Cooldown.SetActive(!casting && remaining > 0f);
-            _slots[i].Timer.text = remaining >= 1f ? Mathf.CeilToInt(remaining).ToString() : remaining.ToString("0.0");
+            int availableCharges = spell.AvailableCharges;
+            int maxCharges = spell.MaxCharges;
+            bool hasCharge = availableCharges > 0;
+            bool showCharges = !passive && maxCharges > 1;
+            _slots[i].Border.effectColor = toggled ? new Color(0.4f, 0.9f, 0.5f) : HudStyle.Line;
+            string timer = remaining >= 1f ? Mathf.CeilToInt(remaining).ToString() : remaining.ToString("0.0");
+            _slots[i].Cooldown.SetActive(!casting && !hasCharge && remaining > 0f);
+            _slots[i].Timer.text = timer;
+            _slots[i].Charges.gameObject.SetActive(showCharges);
+            if (showCharges)
+                _slots[i].Charges.text = availableCharges.ToString();
+            bool showRecharge = showCharges && hasCharge && remaining > 0f;
+            _slots[i].RechargeTimer.gameObject.SetActive(showRecharge);
+            if (showRecharge)
+                _slots[i].RechargeTimer.text = timer + " с";
             _slots[i].Cost.color = affordable ? new Color32(255, 227, 148, 255) : new Color32(255, 126, 114, 255);
-            _slots[i].Button.interactable = !blocked && !passive && !casting && remaining <= 0f && affordable && _vitals.State.x > 0f && !_input.IsMenuOpen && !_input.IsStatsOpen;
+            _slots[i].Button.interactable = !blocked && !passive && !casting && hasCharge && affordable && _vitals.State.x > 0f && !_input.IsMenuOpen && !_input.IsStatsOpen;
         }
     }
 
@@ -262,7 +297,13 @@ public sealed class SpellUI : NetworkBehaviour
             float cooldown = spell != null ? spell.CooldownTime : config.CooldownTime;
             if (spell != null && spell.CastTime > 0f)
                 description += $"\nВремя чтения: {spell.CastTime:0.##} с";
-            description += $"\n\nРассудок: {(spell != null ? spell.SanityCost : config.SanityCost):0.#}\nКулдаун: {cooldown:0.#} с";
+            description += $"\n\nРассудок: {(spell != null ? spell.SanityCost : config.SanityCost):0.#}";
+            int maxCharges = spell != null ? spell.MaxCharges : config.MaxCharges;
+            description += maxCharges > 1
+                ? $"\nЗаряды: {spell?.AvailableCharges ?? maxCharges}/{maxCharges}\nВосстановление заряда: {cooldown:0.#} с"
+                : $"\nКулдаун: {cooldown:0.#} с";
+            if (maxCharges > 1 && spell != null && spell.CooldownRemaining > 0f)
+                description += $"\nСледующий заряд через {spell.CooldownRemaining:0.0} с";
         }
 
         if (Pointer.current != null)

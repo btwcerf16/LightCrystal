@@ -10,6 +10,7 @@ public abstract class Weapon : Item
     [SerializeField, Min(1)] private int _maxTargets = 1;
     [SerializeField] private EAttackType _primaryAttackType;
     [SerializeField] private EAttackType _secondaryAttackType;
+    [SerializeField] private bool _rotationOnlyByZ = true;
     protected ActorHand _hand;
     protected bool _isAttacking;
     private SpriteRenderer _equippedHandRenderer;
@@ -17,6 +18,7 @@ public abstract class Weapon : Item
     private float? _physicalDamageOverride;
     public EAttackType PrimaryAttackType => _primaryAttackType;
     public EAttackType SecondaryAttackType => _secondaryAttackType;
+    public bool RotationOnlyByZ => _rotationOnlyByZ;
     public virtual float ChargeProgress => -1f;
 
     public bool IsAvailable { get; private set; } = true;
@@ -115,6 +117,8 @@ public abstract class Weapon : Item
         base.Equip();
         _physicalDamageOverride = null;
         _hand = GetComponentInParent<ActorHand>();
+        if (_hand != null)
+            _hand.SetWeapon(this);
         _equippedHandRenderer = _hand != null ? _hand.VisualRenderer : null;
         RefreshHandVisibility();
         Equipped?.Invoke();
@@ -141,6 +145,8 @@ public abstract class Weapon : Item
     public override void Drop()
     {
         Unequipped?.Invoke();
+        if (_hand != null)
+            _hand.ClearWeapon(this);
         ClearAnimationSpeed();
         base.Drop();
         RefreshHandVisibility();

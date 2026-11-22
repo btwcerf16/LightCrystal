@@ -17,35 +17,18 @@ public abstract class Spell : MonoBehaviour
     public string Description => TooltipText.Format(this, SpellData.SpellDescription, SpellData);
     public string StatsDescription => TooltipText.Format(this, SpellData.StatsDescription, SpellData);
     public double CooldownEndsAt { get; private set; }
+    public virtual int MaxCharges => SpellData.IsPassive ? 0 : Mathf.Max(1, SpellData.MaxCharges);
+    public int AvailableCharges { get; private set; }
     private bool _isCasting;
     private float _castRemaining;
     public float CastProgress => _isCasting ? Mathf.Clamp01(1f - _castRemaining / SpellData.CastTime) : -1f;
     public float CastTime => SpellData.CastTime / _ownerStats.CastSpeed.Value;
     public virtual float SanityCost => GetReducedSanityCost(SpellData.SanityCost);
     protected float GetReducedSanityCost(float baseCost) => baseCost * (1f - _ownerStats.SanityCostReduction.Value);
-    private bool HasFreeCooldowns
-    {
-        get
-        {
-            if (_ownerEffects != null)
-                foreach (Effect effect in _ownerEffects.ActiveEffects)
-                    if (effect.EffectData is ItemBuffData buff && buff.FreeSpellCooldowns)
-                        return true;
-            NetworkEffectHandler network = _owner.GetComponent<NetworkEffectHandler>();
-            if (network != null && network.IsSpawned && !network.IsServer)
-                for (int i = 0; i < network.Count; i++)
-                    if (network.GetData(network.GetEffect(i).EffectIndex) is ItemBuffData buff && buff.FreeSpellCooldowns)
-                        return true;
-            return false;
-        }
-    }
-
     public float CooldownTime
     {
         get
         {
-            if (HasFreeCooldowns)
-                return 0f;
             float reduction = _ownerStats.CooldownReduction.Value + _ownerStats.SpellCooldownReduction.Value;
             return SpellData.CooldownTime * (1f - Mathf.Clamp(reduction, 0f, 0.9f));
         }
@@ -59,6 +42,7 @@ public abstract class Spell : MonoBehaviour
     public void Initialize(SpellConfig config)
     {
         SpellData = config;
+        ResetCharges();
     }
 
     public void SetOwner(GameObject owner)
@@ -87,7 +71,10 @@ public abstract class Spell : MonoBehaviour
         data.Caster = _owner;
         if (_ownerEffects != null && _ownerEffects.IsDowned)
             return false;
-        if (!IsActive || !isActiveAndEnabled || SpellData.IsPassive || _isCasting || CooldownRemaining > 0f)
+        if (!IsActive || !isActiveAndEnabled || SpellData.IsPassive || _isCasting)
+            return false;
+        RefreshCharges();
+        if (AvailableCharges == 0)
             return false;
 
         if (_ownerEffects != null && (_ownerEffects.IsStunned || _ownerEffects.IsSilenced))
@@ -105,7 +92,7 @@ public abstract class Spell : MonoBehaviour
             return false;
         }
 
-        CooldownEndsAt = CurrentTime + CooldownTime;
+        SpendCharge();
         if (CastTime > 0f)
             StartCoroutine(CompleteCast(data));
         else
@@ -148,9 +135,52 @@ public abstract class Spell : MonoBehaviour
         _isCasting = false;
     }
 
-    public void SetCooldown(double endsAt)
+    private void SpendCharge()
     {
-        CooldownEndsAt = endsAt;
+        float rechargeTime = CooldownTime;
+        if (rechargeTime <= 0f)
+            return;
+
+        AvailableCharges--;
+        if (CooldownEndsAt == 0d)
+            CooldownEndsAt = CurrentTime + rechargeTime;
+    }
+
+    internal void RefreshCharges()
+    {
+        if (CooldownEndsAt == 0d)
+            return;
+
+        double now = CurrentTime;
+        while (CooldownEndsAt <= now)
+        {
+            AvailableCharges++;
+            if (AvailableCharges >= MaxCharges)
+            {
+                ResetCharges();
+                return;
+            }
+
+            float rechargeTime = CooldownTime;
+            if (rechargeTime <= 0f)
+            {
+                ResetCharges();
+                return;
+            }
+            CooldownEndsAt += rechargeTime;
+        }
+    }
+
+    internal void ResetCharges()
+    {
+        AvailableCharges = MaxCharges;
+        CooldownEndsAt = 0d;
+    }
+
+    internal void ApplyChargeState(NetworkSpellChargeState state)
+    {
+        AvailableCharges = state.AvailableCharges;
+        CooldownEndsAt = state.RechargesAt;
     }
 
     public virtual bool CanCast(SpellCastData data) => true;

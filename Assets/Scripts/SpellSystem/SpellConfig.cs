@@ -7,6 +7,7 @@ public abstract class SpellConfig : ScriptableObject
     [TextArea] public string StatsDescription;
     public bool IsPassive;
     [Min(0f)] public float CooldownTime;
+    [Min(1)] public int MaxCharges = 1;
     [Min(0f)] public float SanityCost;
     [Min(0f)] public float CastTime;
     public Sprite SpriteIcon;

@@ -1,0 +1,261 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+public sealed class LightningRodWeapon : MagicWeapon, IWeaponVisualReceiver
+{
+    [SerializeField] private Material _effectMaterial;
+    [SerializeField] private float _lifeSteal = 0.1f;
+    [SerializeField] private float _castTime = 0.10f;
+    [SerializeField] private float _bounceRadius = 2.5f;
+    [SerializeField] private int _baseBounces = 3;
+    [SerializeField] private float _stormCastTime = 0.85f;
+    [SerializeField] private float _stormRadius = 2.75f;
+    [SerializeField] private float _stormDamage = 25f;
+    [SerializeField] private float _healPerEnemy = 5f;
+
+    private readonly List<RaycastHit2D> _hits = new();
+    private readonly List<Collider2D> _overlaps = new();
+    private readonly HashSet<ActorHealth> _struck = new();
+    private readonly List<Vector2> _path = new();
+    private float _castEndsAt;
+    private float _castDuration;
+    private bool _storm;
+
+    public override float GetRange(ActorStats owner) => _range;
+    public override float ChargeProgress => _isAttacking && _storm
+        ? 1f - Mathf.Clamp01((_castEndsAt - Time.time) / _castDuration)
+        : -1f;
+
+    public override string GetWeaponTooltip(bool detailed) => base.GetWeaponTooltip(detailed)
+        + $"\n\nЛКМ: {FormatDamage(_damage, EDamageType.Magic, detailed)} маг. урона, {_baseBounces} отскока + пронзания."
+        + $" Самоотскок наносит половину урона. Рассудок: {_primarySanityCost:0.#}."
+        + $"\nПКМ: удерживайте {_stormCastTime / CastSpeed:0.##} с. Удар на {_stormDamage:0.#} маг. урона по себе и врагам в радиусе {_stormRadius:0.##}."
+        + $" Лечение: {_healPerEnemy:0.#} за задетого врага. КД: {GetReducedCooldown(BaseCooldown):0.#} с. Самоурон оставляет минимум 0,1 HP.";
+
+    public override void Equip()
+    {
+        if (IsEquipped)
+            return;
+        base.Equip();
+        if (IsServer)
+            OwnerStats.MagicLifeSteal.AddModifier(new StatModifier(_lifeSteal, StatModifierType.Flat, this));
+    }
+
+    public override void Drop()
+    {
+        if (IsServer)
+            OwnerStats.MagicLifeSteal.RemoveModifiersFrom(this);
+        base.Drop();
+    }
+
+    public override bool BeginPrimaryUse()
+    {
+        if (!IsEquipped)
+            return false;
+        if (IsServer)
+        {
+            if (!CanStartAttack || !CheckSanity(_primarySanityCost, spend: false))
+                return false;
+            BeginCast(_castTime, storm: false);
+        }
+        _animator.Play("Fire", 0, 0f);
+        return true;
+    }
+
+    public override bool BeginSecondaryUse()
+    {
+        if (!CanStartAttack || CooldownRemaining > 0f)
+            return false;
+        BeginCast(_stormCastTime, storm: true);
+        return true;
+    }
+
+    private void BeginCast(float duration, bool storm)
+    {
+        _castDuration = duration / CastSpeed;
+        _castEndsAt = Time.time + _castDuration;
+        _storm = storm;
+        _isAttacking = true;
+    }
+
+    public override void EndSecondaryUse()
+    {
+        if (_storm)
+            CancelUse();
+    }
+
+    public override void CancelUse() => _isAttacking = false;
+
+    private void Update()
+    {
+        if (!_isAttacking)
+            return;
+        if (!CanAttack)
+        {
+            CancelUse();
+            return;
+        }
+        if (Time.time < _castEndsAt)
+            return;
+
+        CancelUse();
+        if (_storm)
+            StrikeStorm();
+        else if (CheckSanity(_primarySanityCost, spend: true))
+            FireChain();
+    }
+
+    private ContactFilter2D TargetFilter()
+    {
+        ContactFilter2D filter = new() { useTriggers = true };
+        filter.SetLayerMask(DamageCalculator.GetTargetMask(OwnerStats, _targetMask));
+        return filter;
+    }
+
+    private ActorHealth GetEnemy(Collider2D collider)
+    {
+        ActorHealth target = collider.GetComponentInParent<ActorHealth>();
+        return target != null && !target.IsDead && target.TryGetComponent<Enemy>(out _)
+            && target.AcceptsDamageFrom(OwnerStats) ? target : null;
+    }
+
+    private void FireChain()
+    {
+        ActorHealth owner = OwnerStats.GetComponent<ActorHealth>();
+        Vector2 origin = _attackPoint.position;
+        Vector2 direction = _hand.AimDirection;
+        Vector2 end = origin + direction * _range;
+        ContactFilter2D filter = TargetFilter();
+        Physics2D.Raycast(origin, direction, filter, _hits, _range);
+        _hits.Sort(static (a, b) => a.distance.CompareTo(b.distance));
+
+        ActorHealth target = null;
+        foreach (RaycastHit2D hit in _hits)
+        {
+            Collider2D collider = hit.collider;
+            if (collider == null || collider.GetComponentInParent<ActorStats>() == OwnerStats)
+                continue;
+            target = GetEnemy(collider);
+            if (target == null && collider.isTrigger)
+                continue;
+            end = hit.point;
+            break;
+        }
+
+        _path.Clear();
+        _path.Add(origin);
+        _path.Add(end);
+        _struck.Clear();
+        int bounces = _baseBounces + Mathf.FloorToInt(OwnerStats.ProjectilePiercing.Value);
+        for (int remaining = bounces; target != null; remaining--)
+        {
+            if (target == owner)
+            {
+                ApplySelfDamage(owner, _damage * 0.5f);
+                break;
+            }
+            _struck.Add(target);
+            Vector2 center = target.transform.position;
+            HitEnemy(target, _damage);
+            if (remaining == 0)
+                break;
+            target = FindBounce(center, owner, filter);
+            if (target != null)
+                _path.Add(target.transform.position);
+        }
+
+        OwnerStats.GetComponent<NetworkWeaponVisuals>()?.PlayRpc(ItemId, _path.ToArray());
+    }
+
+    private ActorHealth FindBounce(Vector2 center, ActorHealth owner, ContactFilter2D filter)
+    {
+        float closest = _bounceRadius * _bounceRadius;
+        ActorHealth next = null;
+        if (!owner.IsDead)
+        {
+            float ownerDistance = ((Vector2)owner.transform.position - center).sqrMagnitude;
+            if (ownerDistance <= closest)
+            {
+                closest = ownerDistance;
+                next = owner;
+            }
+        }
+
+        Physics2D.OverlapCircle(center, _bounceRadius, filter, _overlaps);
+        foreach (Collider2D collider in _overlaps)
+        {
+            ActorHealth candidate = GetEnemy(collider);
+            if (candidate == null || _struck.Contains(candidate))
+                continue;
+            float distance = ((Vector2)candidate.transform.position - center).sqrMagnitude;
+            if (distance > closest || (distance == closest && next != null))
+                continue;
+            closest = distance;
+            next = candidate;
+        }
+        return next;
+    }
+
+    private void StrikeStorm()
+    {
+        float cooldown = GetReducedCooldown(BaseCooldown);
+        SetCooldown(cooldown, OwnerNetworkObject.NetworkManager.ServerTime.Time + cooldown);
+        NotifyStateChanged();
+
+        ActorHealth owner = OwnerStats.GetComponent<ActorHealth>();
+        Vector2 center = owner.transform.position;
+        Physics2D.OverlapCircle(center, _stormRadius, TargetFilter(), _overlaps);
+        ApplySelfDamage(owner, _stormDamage);
+
+        _struck.Clear();
+        int hitCount = 0;
+        foreach (Collider2D collider in _overlaps)
+        {
+            if (collider == null)
+                continue;
+            ActorHealth target = GetEnemy(collider);
+            if (target != null && _struck.Add(target) && HitEnemy(target, _stormDamage))
+                hitCount++;
+        }
+        owner.Heal(hitCount * _healPerEnemy);
+        OwnerStats.GetComponent<NetworkWeaponVisuals>()?.PlayRpc(ItemId, new[] { center + Vector2.up * 7f, center }, radius: _stormRadius);
+    }
+
+    private void ApplySelfDamage(ActorHealth owner, float damage)
+    {
+        const float minimumHealth = 0.1f;
+        float allowedDamage = owner.CurrentHealth - minimumHealth;
+        if (allowedDamage <= 0f)
+            return;
+
+        float potentialDamage = DamageCalculator.CalculateDamage(damage, EDamageType.Magic, OwnerStats, OwnerStats);
+        if (potentialDamage > allowedDamage)
+            damage *= allowedDamage / potentialDamage;
+
+        owner.TakeDamage(damage, EDamageType.Magic, OwnerStats);
+    }
+
+    private bool HitEnemy(ActorHealth target, float damage)
+    {
+        Vector2 point = target.transform.position;
+        if (ActorArsenal.DealWeaponDamage(target, damage, EDamageType.Magic, OwnerStats) <= 0f)
+            return false;
+        NotifyHit(target, EAttackType.Magic, point);
+        return true;
+    }
+
+    void IWeaponVisualReceiver.PlayVisual(GameObject owner, Vector2[] points, bool charged, float radius)
+    {
+        if (!owner.TryGetComponent(out LightningRodEffect effect))
+            effect = owner.AddComponent<LightningRodEffect>();
+        effect.Play(_effectMaterial, points, radius);
+    }
+
+    private void LateUpdate()
+    {
+        if (!CanAnimate)
+            return;
+
+        _animator.SetBool("Charging", NetworkArsenal.WeaponCharge >= 0f);
+    }
+}

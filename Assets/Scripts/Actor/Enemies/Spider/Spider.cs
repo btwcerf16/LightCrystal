@@ -108,7 +108,7 @@ public sealed class Spider : Enemy
             return false;
 
         Spell webSpell = _spellHolder.Spells[0];
-        if (!webSpell.IsActive || !webSpell.isActiveAndEnabled || webSpell.CooldownRemaining > 0f)
+        if (!webSpell.IsActive || !webSpell.isActiveAndEnabled || webSpell.AvailableCharges == 0)
             return false;
 
         return webSpell.CanCast(new SpellCastData { Target = target.gameObject });

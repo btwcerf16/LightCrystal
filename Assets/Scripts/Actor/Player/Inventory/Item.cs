@@ -20,6 +20,7 @@ public abstract class Item : MonoBehaviour, ITooltipSource
     protected bool IsServer => _ownerNetworkObject != null && _ownerNetworkObject.IsSpawned && _ownerNetworkObject.NetworkManager.IsServer;
     public bool DestroyOnDrop { get; protected set; }
     protected bool IsOwnerStunned => _ownerEffects != null && _ownerEffects.IsStunned;
+    protected bool IsOwnerSilenced => _ownerEffects != null && _ownerEffects.IsSilenced;
     public GameObject WorldItem {  get; private set; }
     public bool IsEquipped { get; private set; }
     public virtual string DisplayName => name;

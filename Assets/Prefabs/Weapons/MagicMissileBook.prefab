@@ -75,27 +75,28 @@ MonoBehaviour:
   _itemId: 31
   _rarity: 3
   _price: 125
-  _cooldown: 8
+  _cooldown: 7
   _description: "\u0412\u0441\u044F \u044D\u0442\u0430 \u0442\u043E\u043B\u0441\u0442\u0430\u044F
     \u043A\u043D\u0438\u0433\u0430 \u043F\u043E\u0441\u0432\u044F\u0449\u0435\u043D\u0430
     \u043E\u0434\u043D\u043E\u043C\u0443-\u0435\u0434\u0438\u043D\u0441\u0442\u0432\u0435\u043D\u043D\u043E\u043C\u0443
     \u0437\u0430\u043A\u043B\u0438\u043D\u0430\u043D\u0438\u044E. \u0417\u0430\u0442\u043E
     \u043E\u043D\u043E \u0440\u0430\u0431\u043E\u0442\u0430\u0435\u0442."
   _statsDescription:
-  _damage: 10
+  _damage: 5.5
   _primaryAttackType: 2
   _secondaryAttackType: 2
+  _rotationOnlyByZ: 0
   _attackPoint: {fileID: 5047312454344996514}
   _animator: {fileID: 1702321623059664369}
   _maxTargets: 1
   _renderer: {fileID: 8121004747208208476}
   _missilePrefab: {fileID: 5529964042686445618, guid: 233e197012af2f84685f9f95ccdf7d38, type: 3}
   _burstPrefab: {fileID: 6994032946750993110, guid: 11d16cd71c7e6ca45afd2a30e88637a0, type: 3}
-  _sanityCost: 15
+  _sanityCost: 12
   _magicMisslesCount: 3
   _spreadAngle: 40
-  _missileSpeed: 12
-  _missileRange: 12
+  _missileSpeed: 15
+  _missileRange: 10
   _burstSpeed: 4
   _burstRange: 8
   _targetMask:

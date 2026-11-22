@@ -4,7 +4,7 @@ using UnityEngine;
 
 public sealed class RustySwordWeapon : Weapon
 {
-    private const float SecondaryDamageMultiplier = 0.5f;
+    private const float SecondaryDamageMultiplier = 0.65f;
     [SerializeField] private SpriteRenderer _swordRenderer;
     [SerializeField] private float _attackRadius = 0.4f;
     [SerializeField] private TrailRenderer _trail;

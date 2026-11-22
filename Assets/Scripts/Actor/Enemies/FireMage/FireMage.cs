@@ -73,7 +73,7 @@ public sealed class FireMage : Enemy
         Transform target = CurrentTarget;
         FaceTarget(target);
         Spell pillar = _spells.Spells[0];
-        if (pillar.CooldownRemaining > 0f || (Effects != null && Effects.IsSilenced))
+        if (pillar.AvailableCharges == 0 || (Effects != null && Effects.IsSilenced))
             return;
 
         NotifyAttackStarted();

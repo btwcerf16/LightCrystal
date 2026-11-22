@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::ItemBuffData
   EffectName: "Азарт"
   EffectDuration: 3
-  EffectDescription: "Скорость передвижения +20% за стак."
+  EffectDescription: "Скорость передвижения +15% за стак."
   EffectStats: "\u0421\u043A\u043E\u0440\u043E\u0441\u0442\u044C \u043F\u0435\u0440\u0435\u0434\u0432\u0438\u0436\u0435\u043D\u0438\u044F:
     {MoveSpeed:0%}"
   SpriteIcon: {fileID: 21300000, guid: f421c8e9db1b4801b124cb1245029659, type: 3}
@@ -28,9 +28,8 @@ MonoBehaviour:
   TintActor: 0
   ActorTintStrength: 0.7
   AttackSpeed: 0
-  MoveSpeed: 0.2
+  MoveSpeed: 0.15
   CriticalDamage: 0
   CriticalChance: 0
   CameraDistance: 0
   MadnessResistance: 0
-  FreeSpellCooldowns: 0

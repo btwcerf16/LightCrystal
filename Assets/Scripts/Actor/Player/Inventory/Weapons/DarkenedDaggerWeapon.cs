@@ -5,7 +5,7 @@ using UnityEngine;
 
 public sealed class DarkenedDaggerWeapon : Weapon
 {
-    [SerializeField] private EffectData _criticalSpeedEffect;
+    [SerializeField] private ItemBuffData _criticalSpeedEffect;
     private const float CriticalChanceBonus = 0.1f;
 
     public override int TargetLimit => Mathf.Min(2, base.TargetLimit);
@@ -26,7 +26,8 @@ public sealed class DarkenedDaggerWeapon : Weapon
         + $"\n\nЛКМ: {FormatDamage(_damage, EDamageType.Physical, detailed)} физ. урона"
         + $"\nСкорость атаки: {FormatAttackSpeed(PrimaryAttackType, detailed)}\nЦелей за удар: {TargetLimit}"
         + $"\nПКМ: бросок на {FormatDamage(_projectileDamage, EDamageType.Physical, detailed)} физ. урона. Возврат через {FormatTooltipValue(BaseCooldown, GetReducedCooldown(BaseCooldown), detailed)} с."
-        + "\n+10% к шансу крита. Критическая тычка даёт +20% к скорости движения на 3 с (до 2 стаков). Добивание тычкой даёт +5 золота.";
+        + $"\n+{CriticalChanceBonus:0%} к шансу крита. Критическая тычка даёт +{_criticalSpeedEffect.MoveSpeed:0%} к скорости движения"
+        + $" на {_criticalSpeedEffect.EffectDuration:0.#} с (до 2 стаков). Добивание тычкой даёт +5 золота.";
 
     public override void Equip()
     {
@@ -142,15 +143,6 @@ public sealed class DarkenedDaggerWeapon : Weapon
         });
         thrownProjectile.GetComponent<NetworkObject>().Spawn();
         StartReturnTimer();
-    }
-
-    private void LateUpdate()
-    {
-        if (_hand == null)
-            return;
-        Vector3 weaponScale = transform.localScale;
-        weaponScale.y = Mathf.Abs(weaponScale.y) * (_hand.AimDirection.x < 0f ? -1f : 1f);
-        transform.localScale = weaponScale;
     }
 
     public void FinishAttack() => _isAttacking = false;

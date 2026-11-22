@@ -15,7 +15,7 @@ MonoBehaviour:
   EffectName: "Безумное озарение"
   EffectDuration: 8
   EffectDescription: "Безумное озарение"
-  EffectStats: "Перезарядка способностей: 0 с\nСопротивление потере рассудка: +{MadnessResistancePercent:0.#}%\nДлительность: {EffectDuration:0.#} с"
+  EffectStats: "Скорость каста: +{CastSpeedBonus:0%}\nСопротивление потере рассудка: +{MadnessResistancePercent:0.#}%\nДлительность: {EffectDuration:0.#} с"
   SpriteIcon: {fileID: 21300000, guid: 97a10c0affd44279b547d925eca54d90, type: 3}
   EffectColor: {r: 0.6, g: 0.75, b: 1, a: 1}
   IsBuff: 1
@@ -26,4 +26,4 @@ MonoBehaviour:
   TintActor: 0
   ActorTintStrength: 0.3
   MadnessResistance: 0.5
-  FreeSpellCooldowns: 1
+  CastSpeedBonus: 1
