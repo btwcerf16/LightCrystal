@@ -9,6 +9,7 @@ public class PlayerNetworkInteractions : NetworkBehaviour
     private PlayerInputReader _inputReader;
 
     private ActorArsenal _actorArsenal;
+    private SpellHolder _spells;
     private Inventory _actorInventory;
     private ActorHand _hand;
     private readonly List<Collider2D> _handHits = new();
@@ -33,6 +34,7 @@ public class PlayerNetworkInteractions : NetworkBehaviour
         _networkWallet = GetComponent<NetworkPlayerWallet>();
         _inputReader = GetComponent<PlayerInputReader>();
         _actorArsenal = GetComponent<ActorArsenal>();
+        _spells = GetComponent<SpellHolder>();
         _actorInventory = GetComponent<Inventory>();
         _hand = GetComponentInChildren<ActorHand>();
     }
@@ -159,12 +161,9 @@ public class PlayerNetworkInteractions : NetworkBehaviour
                 Destroy(item.gameObject);
                 return;
             }
-            WorldItem worldItem = item.WorldItem != null ? item.WorldItem.GetComponent<WorldItem>() : null;
-            worldItem = _hand.DropItem(worldItem, item.gameObject);
-            if (worldItem == null)
+            if (!_hand.DropItem(item, _hand.HandTransform.position))
                 return;
 
-            item.SetWorldItem(worldItem.gameObject);
             if (item == _lastUsedWeapon)
             {
                 CancelWeaponActivities();
@@ -283,7 +282,7 @@ public class PlayerNetworkInteractions : NetworkBehaviour
     {
         if (_effects != null && _effects.IsStunned)
             return;
-        if (_lastInputType != EInputType.None)
+        if (_lastInputType != EInputType.None || _spells.IsCasting)
             return;
         _lastUsedWeapon = _actorArsenal.ActiveWeapon;
 
@@ -315,7 +314,7 @@ public class PlayerNetworkInteractions : NetworkBehaviour
             return;
         if (_effects != null && _effects.IsStunned)
             return;
-        if(_lastInputType != EInputType.None)
+        if (_lastInputType != EInputType.None || _spells.IsCasting)
             return;
 
         _lastUsedWeapon = _actorArsenal.ActiveWeapon;
@@ -335,7 +334,8 @@ public class PlayerNetworkInteractions : NetworkBehaviour
         if(_lastInputType == EInputType.Secondary) 
         { 
             _lastInputType = EInputType.None; 
-            _lastUsedWeapon.EndSecondaryUse(); 
+            _lastUsedWeapon.EndSecondaryUse();
+            PlayWeaponActionRpc(_lastUsedWeaponIndex, EInputType.SecondaryReleased);
         }
     }
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Owner)]
@@ -369,6 +369,9 @@ public class PlayerNetworkInteractions : NetworkBehaviour
             case EInputType.Secondary:
                 weapon.BeginSecondaryUse();
                 break;
+            case EInputType.SecondaryReleased:
+                weapon.EndSecondaryUse();
+                break;
             case EInputType.None:
                 weapon.CancelUse();
                 break;
@@ -379,6 +382,7 @@ public class PlayerNetworkInteractions : NetworkBehaviour
     {
         None,
         Primary,
-        Secondary
+        Secondary,
+        SecondaryReleased
     }
 }

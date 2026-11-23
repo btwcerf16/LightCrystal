@@ -21,13 +21,7 @@ public sealed class NetworkSpellHolder : NetworkBehaviour
             throw new System.InvalidOperationException("Команда выполняется на сервере.");
         int index = NetworkManager.GetComponent<LobbyConnection>().Characters.IndexOf(character);
         if (index < 0) throw new System.ArgumentException("Класс не найден в каталоге.");
-        if (GetComponent<CourierBagSpell>() != null && index != _characterIndex.Value)
-        {
-            Inventory inventory = GetComponent<Inventory>();
-            for (int i = 6; i < inventory.Size; i++)
-                if (inventory.GetItem(i) != null)
-                    throw new System.InvalidOperationException("Сначала освободите дополнительные ячейки сумки.");
-        }
+
         if (_characterIndex.Value != index) _characterIndex.Value = index;
         return "Способности: " + character.DisplayName;
     }

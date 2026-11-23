@@ -10,6 +10,6 @@ public sealed class CourierBagSpell : PassiveSpell
     {
         Inventory inventory = GetComponent<Inventory>();
         int size = inventory.Size - ((CourierBagConfig)SpellData).ExtraSlots;
-        inventory.SetSize(size);
+        GetComponent<NetworkPlayerInventory>().SetSize(size);
     }
 }

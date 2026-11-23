@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 845feeb397940954b826766cf1381411
+guid: ee119b4ca71c91248b316c6003bbc2e4
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 8646856312443602999
-    second: IdleCharged Lightning Rod_003_0
+      213: 1638392315007260615
+    second: IdleChargedLightningRod_004_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -88,7 +88,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -101,7 +101,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: IdleCharged Lightning Rod_003_0
+      name: IdleChargedLightningRod_004_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 32
-        height: 32
+        y: 1
+        width: 30
+        height: 31
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 7388b0fc00ecff770800000000000000
-      internalID: 8646856312443602999
+      spriteID: 7c7dcb2412dbcb610800000000000000
+      internalID: 1638392315007260615
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      IdleCharged Lightning Rod_003_0: 8646856312443602999
+      IdleChargedLightningRod_004_0: 1638392315007260615
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

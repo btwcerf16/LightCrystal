@@ -7,6 +7,7 @@ public static class HudStyle
     private static Font _pixelFont;
     private static Sprite _silenceMask;
     private static Sprite _stunAnvil;
+    private static Sprite _castSprite;
     public static Font PixelFont => _pixelFont ??= Resources.Load<Font>("Tiny5-Regular");
 
     public static readonly Color Surface = new Color32(22, 24, 25, 255);
@@ -14,6 +15,21 @@ public static class HudStyle
     public static readonly Color Line = new Color32(66, 71, 72, 255);
     public static readonly Color Text = new Color32(239, 233, 222, 255);
     public static readonly Color Muted = new Color32(165, 166, 158, 255);
+
+    public static Image CreateCastFill(RectTransform rect)
+    {
+        Image fill = rect.gameObject.AddComponent<Image>();
+        fill.sprite = _castSprite ??= Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f));
+        fill.color = new Color(1f, 0.77f, 0.3f, 0.55f);
+        fill.raycastTarget = false;
+        fill.type = Image.Type.Filled;
+        fill.fillMethod = Image.FillMethod.Radial360;
+        fill.fillOrigin = (int)Image.Origin360.Top;
+        fill.fillClockwise = true;
+        fill.fillAmount = 0f;
+        rect.gameObject.SetActive(false);
+        return fill;
+    }
 
     public static Text Binding(Transform parent, string value)
     {

@@ -45,6 +45,12 @@ public static class DamageCalculator
             : target.TakeDamage(damage, type, attacker);
     }
 
+    public static float CalculateDamage(float damage, EDamageType damageType, ActorStats attacker, ActorStats target, float additionalCriticalChance)
+    {
+        float criticalDamage = RollCriticalDamage(damage, attacker, additionalCriticalChance);
+        return CalculateDamage(criticalDamage, damageType, attacker, target);
+    }
+
     public static float CalculateDamage(float damage, EDamageType damageType, ActorStats attacker, ActorStats target)
     {
         damage = Mathf.Max(0f, damage);

@@ -1,6 +1,4 @@
-using UnityEngine;
 using Unity.Netcode;
-using UnityEngine.InputSystem;
 
 public class NetworkActorStats : NetworkBehaviour
 {
@@ -8,32 +6,11 @@ public class NetworkActorStats : NetworkBehaviour
         new(default, NetworkVariableReadPermission.Everyone, NetworkVariableWritePermission.Server);
 
     private ActorStats _stats;
-    private PlayerInputReader _input;
     private Stat[] _allStats;
 
     private void Awake()
     {
         _stats = GetComponent<ActorStats>();
-        _input = GetComponent<PlayerInputReader>();
-    }
-
-    private void Update()
-    {
-        if (!IsOwner || Keyboard.current == null || (_input != null && _input.IsMenuOpen))
-        {
-            return;
-        }
-        if (Keyboard.current.tKey.wasPressedThisFrame) 
-        {
-            IncreaseViewDistanceRpc();
-        }
-    }
-
-    [Rpc(SendTo.Server)]
-    private void IncreaseViewDistanceRpc()
-    {
-        float newBaseValue = _stats.ViewDistance.BaseValue + 1f;
-        _stats.ViewDistance.SetBaseValue(newBaseValue);
     }
 
     public override void OnNetworkSpawn()

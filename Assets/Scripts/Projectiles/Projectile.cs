@@ -2,11 +2,14 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
+using Unity.Netcode;
 
 public abstract class Projectile : MonoBehaviour
 {
     [FormerlySerializedAs("_radius")]
     [SerializeField, Min(0.01f)] private float _collisionRadius = 0.06f;
+    [SerializeField] private string _finishEffectId;
+    [SerializeField, Min(0f)] private float _finishEffectRadius;
     private readonly List<RaycastHit2D> _collisionHits = new();
     private static readonly Comparison<RaycastHit2D> CompareHitsByDistance = (firstHit, secondHit) => firstHit.distance.CompareTo(secondHit.distance);
     private Vector2 _flightDirection;
@@ -19,7 +22,6 @@ public abstract class Projectile : MonoBehaviour
     protected ProjectileData Data { get; private set; }
     protected int ExtraPiercing { get; private set; }
     private readonly HashSet<IDamageable> _hitTargets = new();
-    public event Action Finishing;
     public event Action Finished;
     public static event Action<Projectile> Launched;
     public static event Action<Projectile, ActorHealth, float> TargetHit;
@@ -44,8 +46,7 @@ public abstract class Projectile : MonoBehaviour
             projectileData.Speed = attackerStats.GetProjectileSpeed(projectileData.Speed);
             projectileData.LifeTime = flightRange / projectileData.Speed;
             if (projectileData.DamageType == EDamageType.Physical ||
-                (projectileData.DamageType == EDamageType.Magic && UnityEngine.Random.value < 0.2f) ||
-                (attackerStats.TryGetComponent(out FreakInsightSpell insight) && insight.IsEmpowered))
+                (projectileData.DamageType == EDamageType.Magic && UnityEngine.Random.value < 0.2f))
                 ExtraPiercing = Mathf.Max(0, Mathf.FloorToInt(attackerStats.ProjectilePiercing.Value));
         }
         if (projectileData.SourceWeapon != null)
@@ -137,7 +138,7 @@ public abstract class Projectile : MonoBehaviour
                 Finish();
                 return;
             }
-            float dealtDamage = ActorArsenal.DealWeaponDamage(damageableTarget, Data.Damage, Data.DamageType, Data.Attacker);
+            float dealtDamage = DamageCalculator.DealCriticalDamage(damageableTarget, Data.Damage, Data.DamageType, Data.Attacker);
             if (dealtDamage > 0f)
             {
                 if (!damageableTarget.IsDead && Data.EffectOnHit != null)
@@ -169,8 +170,15 @@ public abstract class Projectile : MonoBehaviour
             return;
         _hasFinishedFlight = true;
         _isFlying = false;
-        Finishing?.Invoke();
+        if (_finishEffectRadius > 0f)
+            PlayFinishEffect(_finishEffectRadius);
         Finished?.Invoke();
+    }
+
+    protected void PlayFinishEffect(float radius)
+    {
+        if (!string.IsNullOrEmpty(_finishEffectId) && TryGetComponent(out NetworkObject networkObject) && networkObject.IsSpawned)
+            NetworkEffects.Play(networkObject.NetworkManager, _finishEffectId, transform.position, radius);
     }
 
     protected virtual void OnDisable()
@@ -182,7 +190,7 @@ public abstract class Projectile : MonoBehaviour
         _hitTargets.Clear();
         ExtraPiercing = 0;
         Data = default;
-        Finishing = null;
         Finished = null;
     }
+
 }

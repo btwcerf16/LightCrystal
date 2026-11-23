@@ -70,8 +70,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e498154d9a0430e8b0ff1f3ac5e70bc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LightningRodWeapon
-  _icon: {fileID: 6223803134613837650, guid: 5e27b63b4c8a1b2479a368d690d03fb4, type: 3}
-  _worldIcon: {fileID: 6223803134613837650, guid: 5e27b63b4c8a1b2479a368d690d03fb4, type: 3}
+  _icon: {fileID: -17781380354759153, guid: 2209867f35159894eb2150d433048fc6, type: 3}
+  _worldIcon: {fileID: -17781380354759153, guid: 2209867f35159894eb2150d433048fc6, type: 3}
   _itemId: 49
   _rarity: 2
   _price: 80
@@ -94,15 +94,15 @@ MonoBehaviour:
   _primaryAttackType: 2
   _secondaryAttackType: 2
   _rotationOnlyByZ: 0
-  _grip: {fileID: 7038864183342389301}
   _displayName: "\u0417\u0430\u0440\u044F\u0436\u0435\u043D\u043D\u044B\u0439 \u0433\u0440\u043E\u043C\u043E\u043E\u0442\u0432\u043E\u0434"
   _sanityBonus: 0.3
   _castSpeedBonus: 0
   _range: 5.5
   _primarySanityCost: 4
-  _effectMaterial: {fileID: 2100000, guid: 78e976f7bb885da4c850f7a8eadf3f80, type: 2}
+  _chainEffectId: lightning-chain
+  _stormEffectId: lightning-storm
   _lifeSteal: 0.1
-  _castTime: 0.1
+  _castTime: 0.6
   _bounceRadius: 4
   _baseBounces: 3
   _stormCastTime: 0.85
@@ -203,12 +203,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 5
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 6223803134613837650, guid: 5e27b63b4c8a1b2479a368d690d03fb4, type: 3}
+  m_Sprite: {fileID: -4702690743866796626, guid: 7fd34259208cd034ca6b375726e774c3, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.28, y: 0.32}
+  m_Size: {x: 0.9375, y: 0.96875}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1

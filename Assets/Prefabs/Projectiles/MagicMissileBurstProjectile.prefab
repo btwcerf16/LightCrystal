@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 1084510940925720918}
   - component: {fileID: 5348924484311852401}
   - component: {fileID: 6994032946750993110}
-  - component: {fileID: 117023810000000001}
   m_Layer: 0
   m_Name: MagicMissileBurstProjectile
   m_TagString: Projectile
@@ -313,20 +312,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MagicMissileBurstProjectile
   _radius: 0.2
+  _finishEffectId: magic-explosion
+  _finishEffectRadius: 0.8
   _missilePrefab: {fileID: 5529964042686445618, guid: 233e197012af2f84685f9f95ccdf7d38, type: 3}
   _missileSpeed: 12
   _missileRange: 12
---- !u!114 &117023810000000001
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4048721760953548664}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d49b8bee4944036bd1f4411936d7395, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkProjectileFinishEffect
-  _effectPrefab: {fileID: 2026658084249230375, guid: 0e138df5e3cb47249b5a27695e2772b7, type: 3}
-  _finishRadius: 0.8

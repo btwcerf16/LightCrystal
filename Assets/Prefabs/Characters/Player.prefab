@@ -5949,6 +5949,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 2183fb0c85d542dfacb4de6537afc53d, type: 2}
   - {fileID: 11400000, guid: bbf2419b762141ba8930b586ea65a535, type: 2}
   - {fileID: 11400000, guid: cdd5ee3897ca43929c88aab52985b833, type: 2}
+  - {fileID: 11400000, guid: c62cebb17c2c4aa2b79f1fe466afbf56, type: 2}
 --- !u!114 &8123400010000000022
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6416,6 +6417,49 @@ MonoBehaviour:
   m_GameObject: {fileID: 8496232388664145000}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fab70ff44672419da47f8f4f6de8e8a7, type: 3}
+  m_Script: {fileID: 11500000, guid: b01bc62c9461484a8cb08e5f6f3c11af, type: 3}
   m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkWeaponVisuals
+  m_EditorClassIdentifier: Assembly-CSharp::NetworkEffects
+  _presets:
+  - Id: wand-beam
+    Prefab: {fileID: 100001, guid: a6200a91240f49bcabb303ba5a0251b1, type: 3}
+    Duration: 0.14
+    PathLineCount: 2
+    WidthAtEnd: 0.25
+    DetailOpacityRange: {x: 0.5, y: 0.8333333}
+  - Id: wand-beam-charged
+    Prefab: {fileID: 100001, guid: 5ae1f572625847d6902a041fcec777b2, type: 3}
+    Duration: 0.24
+    PathLineCount: 2
+    WidthAtEnd: 0.25
+    DetailOpacityRange: {x: 0.5, y: 0.8333333}
+  - Id: lightning-chain
+    Prefab: {fileID: 100001, guid: e47d54594f7346a3b32fbc603ec07aca, type: 3}
+    Duration: 0.15
+    PathLineCount: 2
+    WidthAtEnd: 1
+    DetailOpacityRange: {x: 0, y: 1}
+  - Id: lightning-storm
+    Prefab: {fileID: 100001, guid: 2d745d227ab7482a9a2d94d1ac13d453, type: 3}
+    Duration: 0.28
+    PathLineCount: 2
+    WidthAtEnd: 1
+    DetailOpacityRange: {x: 0, y: 1}
+  - Id: magic-explosion
+    Prefab: {fileID: 4416194336819130296, guid: 0e138df5e3cb47249b5a27695e2772b7, type: 3}
+    Duration: 0
+    PathLineCount: 0
+    WidthAtEnd: 1
+    DetailOpacityRange: {x: 0, y: 1}
+  - Id: fire-explosion
+    Prefab: {fileID: 4416194336819130296, guid: c62e992c87e2fae4db7c09685f8a915c, type: 3}
+    Duration: 0
+    PathLineCount: 0
+    WidthAtEnd: 1
+    DetailOpacityRange: {x: 0, y: 1}
+  - Id: stone-explosion
+    Prefab: {fileID: 4416194336819130296, guid: b2842fad43e91a842988cdb48e7c22ff, type: 3}
+    Duration: 0
+    PathLineCount: 0
+    WidthAtEnd: 1
+    DetailOpacityRange: {x: 0, y: 1}

@@ -15,7 +15,6 @@ GameObject:
   - component: {fileID: 8991527859389000940}
   - component: {fileID: 8844614496038439019}
   - component: {fileID: 5027646864068170231}
-  - component: {fileID: 117023810000000001}
   m_Layer: 0
   m_Name: SlingStoneProjectile
   m_TagString: Projectile
@@ -313,17 +312,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::StoneProjectile
   _collisionRadius: 0.08
---- !u!114 &117023810000000001
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7408976538709746696}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7d49b8bee4944036bd1f4411936d7395, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::NetworkProjectileFinishEffect
-  _effectPrefab: {fileID: 2026658084249230375, guid: b2842fad43e91a842988cdb48e7c22ff, type: 3}
-  _finishRadius: 0.35
+  _finishEffectId: stone-explosion
+  _finishEffectRadius: 0.35

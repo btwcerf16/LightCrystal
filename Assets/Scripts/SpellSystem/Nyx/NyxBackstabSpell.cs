@@ -2,31 +2,30 @@ using UnityEngine;
 
 public sealed class NyxBackstabSpell : PassiveSpell
 {
-    private ActorArsenal _arsenal;
-    private ActorWallet _wallet;
+    private ActorHealth _health;
+    private Effect _activeBuff;
 
     protected override void Apply()
     {
-        _arsenal = _owner.GetComponent<ActorArsenal>();
-        _wallet = _owner.GetComponent<ActorWallet>();
-        _arsenal.ResolveWeaponHit = ResolveHit;
+        _health = _owner.GetComponent<ActorHealth>();
+        _health.EnemyKilled += OnEnemyKilled;
     }
 
     protected override void Remove()
     {
-        if (_arsenal != null && _arsenal.ResolveWeaponHit == ResolveHit)
-            _arsenal.ResolveWeaponHit = null;
+        _health.EnemyKilled -= OnEnemyKilled;
+        if (_activeBuff != null)
+            _ownerEffects.RemoveEffect(_activeBuff);
+        _activeBuff = null;
     }
 
-    private float ResolveHit(IDamageable target, float damage, EDamageType damageType, out bool critical, bool isMelee)
+    private void OnEnemyKilled(ActorHealth health)
     {
-        Enemy enemy = !target.IsDead && target is ActorHealth health ? health.GetComponent<Enemy>() : null;
-        Transform enemyTarget = enemy != null ? enemy.CurrentTarget : null;
-        bool backstab = enemyTarget != null && !enemyTarget.IsChildOf(_owner.transform);
-        float additionalCriticalChance = backstab ? 1f - _ownerStats.CriticalChance.Value : 0f;
-        float dealt = DamageCalculator.DealCriticalDamage(target, damage, damageType, _ownerStats, out critical, isMelee, additionalCriticalChance);
-        if (backstab && dealt > 0f && target.IsDead)
-            _wallet.AddCurrency(((NyxBackstabConfig)SpellData).BonusKillGold, enemy.transform.position);
-        return dealt;
+        if (!health.TryGetComponent(out Enemy enemy))
+            return;
+
+        Transform target = enemy.CurrentTarget;
+        if (target != null && !target.IsChildOf(_owner.transform))
+            _activeBuff = _ownerEffects.AddEffect(((NyxBackstabConfig)SpellData).StackEffect);
     }
 }

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 5e27b63b4c8a1b2479a368d690d03fb4
+guid: 2209867f35159894eb2150d433048fc6
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: 6223803134613837650
-    second: IdleCharged Lightning Rod_001_0
+      213: -17781380354759153
+    second: IdleChargedLightningRod_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -37,7 +37,7 @@ TextureImporter:
   maxTextureSize: 2048
   textureSettings:
     serializedVersion: 2
-    filterMode: 0
+    filterMode: 2
     aniso: 1
     mipBias: 0
     wrapU: 1
@@ -75,7 +75,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -88,7 +88,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -101,7 +101,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 0
+    textureCompression: 1
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -113,13 +113,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: IdleCharged Lightning Rod_001_0
+      name: IdleChargedLightningRod_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 32
-        height: 32
+        y: 1
+        width: 30
+        height: 31
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -128,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 257de9ec9f36f5650800000000000000
-      internalID: 6223803134613837650
+      spriteID: f06a654cde3d0cff0800000000000000
+      internalID: -17781380354759153
       vertices: []
       indices: 
       edges: []
@@ -148,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      IdleCharged Lightning Rod_001_0: 6223803134613837650
+      IdleChargedLightningRod_0: -17781380354759153
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -4905,7 +4905,6 @@ GameObject:
   - component: {fileID: 4341631073835377848}
   - component: {fileID: 1996321591043811529}
   - component: {fileID: 4895446833195800215}
-  - component: {fileID: 2026658084249230375}
   m_Layer: 0
   m_Name: StoneFinishExplosion
   m_TagString: Untagged
@@ -4940,7 +4939,7 @@ ParticleSystem:
   serializedVersion: 8
   lengthInSec: 0.5
   simulationSpeed: 1
-  stopAction: 3
+  stopAction: 0
   cullingMode: 0
   ringBufferMode: 0
   ringBufferLoopRange: {x: 0, y: 1}
@@ -9791,18 +9790,6 @@ ParticleSystemRenderer:
   m_MeshWeighting1: 1
   m_MeshWeighting2: 1
   m_MeshWeighting3: 1
---- !u!114 &2026658084249230375
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4416194336819130296}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: db807ba1715c45d9bce88769171697a4, type: 3}
-  m_Name:
-  m_EditorClassIdentifier: Assembly-CSharp::MagicOrbExplosion
 --- !u!1 &8871504673453694309
 GameObject:
   m_ObjectHideFlags: 0

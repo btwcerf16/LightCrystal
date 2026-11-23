@@ -22,7 +22,7 @@ public sealed class GlassShardProjectile : Projectile
         IDamageable caughtTarget = targetCollider.GetComponentInParent<IDamageable>();
         if (caughtTarget != null)
         {
-            float dealtDamage = ActorArsenal.DealWeaponDamage(caughtTarget, Data.Damage, Data.DamageType, Data.Attacker);
+            float dealtDamage = DamageCalculator.DealCriticalDamage(caughtTarget, Data.Damage, Data.DamageType, Data.Attacker);
             if (dealtDamage > 0f && Data.SourceWeapon != null)
                 Data.SourceWeapon.NotifyHit(caughtTarget, EAttackType.Range);
         }

@@ -5129,7 +5129,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.4375}
+  m_Offset: {x: -0.029020146, y: -0.021018386}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -5139,7 +5139,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.625, y: 0.875}
+  m_Size: {x: 0.8, y: 0.7}
   m_EdgeRadius: 0
 --- !u!114 &5702981897679865433
 MonoBehaviour:
@@ -5204,7 +5204,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 961894282
+  GlobalObjectIdHash: 788727365
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -5315,12 +5315,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3c7e562d9d34f679d31b85ef80f0c59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActorVisuals
-  _stunPivot: {fileID: 639448104277970876}
-  _stunStar: {fileID: 21300000, guid: f7a5d98462ba4f86a47f942024ed2b4e, type: 3}
-  _stunStarMaterial: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   _renderers:
   - {fileID: 6621549006806991681}
   _hitParticles: {fileID: 2722292812699893657}
+  _stunPivot: {fileID: 639448104277970876}
+  _stunTilt: 30
+  _stunStar: {fileID: 21300000, guid: f7a5d98462ba4f86a47f942024ed2b4e, type: 3}
+  _stunStarMaterial: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   _hitColor: {r: 1, g: 0.92, b: 0.72, a: 1}
   _hitDuration: 0.15
 --- !u!114 &7644122733380861433
@@ -5417,13 +5418,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Spider
   _attackDistance: 0.9
   _mainTarget: {fileID: 0}
-  _separationRadius: 0.85
-  _separationStrength: 0.9
-  _facing: {fileID: 639448104277970876}
-  _bodyCollider: {fileID: 7907548783786223162}
   _targetMask:
     serializedVersion: 2
     m_Bits: 4294967295
+  _facing: {fileID: 639448104277970876}
+  _goldDropChance: 0.4
+  _goldDropAmount: 0
+  _separationRadius: 0.85
+  _separationStrength: 0.9
+  _bodyCollider: {fileID: 7907548783786223162}
   _preferredDistance: 7
   _biteRadius: 0.45
 --- !u!114 &7520670796110298072

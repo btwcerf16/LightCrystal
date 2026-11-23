@@ -5,6 +5,7 @@ public abstract class Effect : MonoBehaviour
     public float TimeRemaining { get; internal set; }
     internal float DisplayDuration { get; set; }
     public EffectData EffectData { get; private set; }
+    public int StackCount { get; internal set; } = 1;
 
     public void Initialize(EffectData effectData)
     {

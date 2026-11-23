@@ -3,19 +3,16 @@ using UnityEngine;
 
 public sealed class WoodenStaffWeapon : MagicWeapon
 {
-    private const float Hold = 0.08f;
-    private const float Recovery = 0.13f;
-    private const float IdleAngle = 78f;
-
     [SerializeField, Min(0.01f)] private float _castTime = 0.22f;
     [SerializeField] private StraightProjectile _projectilePrefab;
     [SerializeField, Min(0.1f)] private float _projectileSpeed = 10f;
 
     private float _windupAt;
-    private float _holdDuration;
-    private float _recoveryDuration;
     private float _fireAt = float.NegativeInfinity;
-    private float _recoverAt = float.NegativeInfinity;
+
+    public override float ChargeProgress => _isAttacking
+        ? Mathf.Clamp01((Time.time - _windupAt) / (_fireAt - _windupAt))
+        : -1f;
 
     public override float GetRange(ActorStats owner) => owner != null ? owner.GetProjectileRange(_range) : _range;
 
@@ -35,14 +32,11 @@ public sealed class WoodenStaffWeapon : MagicWeapon
                 return false;
 
             _isAttacking = true;
+            _windupAt = Time.time;
+            _fireAt = _windupAt + _castTime / CastSpeed;
         }
 
-        float speed = CastSpeed;
-        _windupAt = Time.time;
-        _fireAt = _windupAt + _castTime / speed;
-        _holdDuration = Hold / speed;
-        _recoveryDuration = Recovery / speed;
-        _recoverAt = _fireAt + _holdDuration;
+        _animator.Play("Fire", 0, 0f);
         return true;
     }
 
@@ -64,7 +58,6 @@ public sealed class WoodenStaffWeapon : MagicWeapon
         }
 
         _isAttacking = false;
-        _recoverAt = Time.time + _holdDuration;
         var pool = OwnerNetworkObject.NetworkManager.GetComponent<NetworkObjectPool>();
         var projectile = pool.GetObject(_projectilePrefab, _attackPoint.position, Quaternion.identity);
         projectile.Launch(new ProjectileData
@@ -76,23 +69,4 @@ public sealed class WoodenStaffWeapon : MagicWeapon
         projectile.GetComponent<NetworkObject>().Spawn();
     }
 
-    private void LateUpdate()
-    {
-        if (!CanAnimate)
-            return;
-
-        float now = Time.time;
-        float angle = IdleAngle;
-        if (now < _fireAt)
-            angle = Mathf.SmoothStep(IdleAngle, 0f, (now - _windupAt) / (_fireAt - _windupAt));
-        else if (now < _recoverAt + _recoveryDuration)
-            angle = Mathf.SmoothStep(0f, IdleAngle, (now - _recoverAt) / _recoveryDuration);
-        _grip.localRotation = Quaternion.Euler(0f, 0f, angle);
-    }
-
-    public override void CancelUse()
-    {
-        _isAttacking = false;
-        _fireAt = _recoverAt = float.NegativeInfinity;
-    }
 }

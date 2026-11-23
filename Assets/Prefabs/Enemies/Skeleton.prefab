@@ -300,16 +300,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Skeleton
   _attackDistance: 7
   _mainTarget: {fileID: 0}
+  _targetMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _facing: {fileID: 8872379248383783580}
+  _goldDropChance: 0.4
+  _goldDropAmount: 0
   _separationRadius: 0.85
   _separationStrength: 0.9
-  _facing: {fileID: 8872379248383783580}
   _weaponAim: {fileID: 4060134182481157674}
   _muzzle: {fileID: 5717602624018937866}
   _bodyCollider: {fileID: 4711220380284995505}
   _arrowPrefab: {fileID: 7188332974573166865, guid: c44261467d9f90a4eb0957106da64a5c, type: 3}
-  _targetMask:
-    serializedVersion: 2
-    m_Bits: 4294967295
 --- !u!114 &8344695436882791797
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -442,13 +444,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3c7e562d9d34f679d31b85ef80f0c59, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ActorVisuals
-  _stunPivot: {fileID: 8872379248383783580}
-  _stunStar: {fileID: 21300000, guid: f7a5d98462ba4f86a47f942024ed2b4e, type: 3}
-  _stunStarMaterial: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   _renderers:
   - {fileID: 3746272976236740035}
   - {fileID: 1475498099374005456}
   _hitParticles: {fileID: 8365753093218672896}
+  _stunPivot: {fileID: 8872379248383783580}
+  _stunTilt: 30
+  _stunStar: {fileID: 21300000, guid: f7a5d98462ba4f86a47f942024ed2b4e, type: 3}
+  _stunStarMaterial: {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   _hitColor: {r: 1, g: 0.92, b: 0.72, a: 1}
   _hitDuration: 0.15
 --- !u!114 &2710420979819551490

@@ -31,7 +31,6 @@ public sealed class SpellUI : NetworkBehaviour
     private readonly List<SlotView> _slots = new();
     private SpellHolder _holder;
     private NetworkSpellHolder _networkHolder;
-    private Sprite _castSprite;
     private PlayerSlotBindings _bindings;
     private PlayerInputReader _input;
     private NetworkActorVitals _vitals;
@@ -72,7 +71,6 @@ public sealed class SpellUI : NetworkBehaviour
     private void CreatePanel()
     {
         _font = HudStyle.PixelFont;
-        _castSprite = Sprite.Create(Texture2D.whiteTexture, new Rect(0f, 0f, 1f, 1f), new Vector2(0.5f, 0.5f));
         if (EventSystem.current == null)
             new GameObject("EventSystem", typeof(EventSystem), typeof(InputSystemUIInputModule));
         _panel = GetComponent<PlayerHUD>().SpellPanel;
@@ -130,14 +128,7 @@ public sealed class SpellUI : NetworkBehaviour
             Text timer = Label(cooldown, "Timer", "", Vector2.zero, cooldown.sizeDelta, 22);
             cooldown.gameObject.SetActive(false);
             RectTransform casting = Rect("Casting", card, new Vector2(2f, -2f), new Vector2(width - 4f, width - 4f));
-            Image castFill = Image(casting, new Color(1f, 0.77f, 0.3f, 0.55f), false);
-            castFill.sprite = _castSprite;
-            castFill.type = UnityEngine.UI.Image.Type.Filled;
-            castFill.fillMethod = UnityEngine.UI.Image.FillMethod.Radial360;
-            castFill.fillOrigin = (int)UnityEngine.UI.Image.Origin360.Top;
-            castFill.fillClockwise = true;
-            castFill.fillAmount = 0f;
-            casting.gameObject.SetActive(false);
+            Image castFill = HudStyle.CreateCastFill(casting);
             bool passive = config != null && config.IsPassive;
             Text binding = HudStyle.Binding(card, "");
             binding.transform.parent.gameObject.SetActive(!passive);
@@ -252,11 +243,6 @@ public sealed class SpellUI : NetworkBehaviour
             _canvas = null;
         }
         _slots.Clear();
-        if (_castSprite != null)
-        {
-            Destroy(_castSprite);
-            _castSprite = null;
-        }
         HideTooltip();
         if (_rangePreview != null)
         {

@@ -28,10 +28,6 @@ public sealed class PlayerHUD : NetworkBehaviour
     private int _shownSeconds = -1;
     private int _shownWaveNumber;
     private WaveDirector _waveDirector;
-    private NetworkPlayerArsenal _networkArsenal;
-    private RectTransform _weaponChargePanel;
-    private readonly RectTransform[] _weaponChargeFills = new RectTransform[4];
-    private float _shownWeaponCharge = -1f;
     private readonly NetworkVariable<double> _waveStartsAt = new(0,
         NetworkVariableReadPermission.Owner, NetworkVariableWritePermission.Server);
     private readonly NetworkVariable<int> _activeWaveNumber = new(0,
@@ -66,7 +62,6 @@ public sealed class PlayerHUD : NetworkBehaviour
 
     public override void OnNetworkSpawn()
     {
-        _networkArsenal = GetComponent<NetworkPlayerArsenal>();
         if (!IsServer)
             return;
         _waveDirector = NetworkManager.GetComponent<WaveDirector>();
@@ -141,70 +136,6 @@ public sealed class PlayerHUD : NetworkBehaviour
         _performanceFrames = 0;
     }
 
-    private void LateUpdate()
-    {
-        if (!IsSpawned || !IsOwner || _weaponChargePanel == null)
-            return;
-
-        float chargeProgress = _networkArsenal.WeaponCharge;
-        Camera worldCamera = chargeProgress >= 0f ? Camera.main : null;
-        _weaponChargePanel.gameObject.SetActive(worldCamera != null);
-        if (worldCamera == null)
-            return;
-
-        Vector3 screenPosition = worldCamera.WorldToScreenPoint(transform.position + Vector3.up * 0.55f);
-        RectTransform canvasRect = (RectTransform)_weaponChargePanel.parent;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(canvasRect, screenPosition, null, out Vector2 canvasPosition);
-        _weaponChargePanel.anchoredPosition = canvasPosition;
-
-        if (_shownWeaponCharge == chargeProgress)
-            return;
-
-        _shownWeaponCharge = chargeProgress;
-        for (int i = 0; i < _weaponChargeFills.Length; i++)
-        {
-            float squareFill = Mathf.Clamp01(chargeProgress * _weaponChargeFills.Length - i);
-            _weaponChargeFills[i].anchorMax = new Vector2(squareFill, 1f);
-        }
-    }
-
-    private void CreateWeaponChargeUI()
-    {
-        const float squareSize = 10f;
-        const float spacing = 3f;
-        float panelWidth = _weaponChargeFills.Length * (squareSize + spacing) - spacing;
-        _weaponChargePanel = new GameObject("WeaponCharge", typeof(RectTransform)).GetComponent<RectTransform>();
-        _weaponChargePanel.SetParent(_canvas.transform, false);
-        _weaponChargePanel.anchorMin = _weaponChargePanel.anchorMax = new Vector2(0.5f, 0.5f);
-        _weaponChargePanel.pivot = new Vector2(0.5f, 0f);
-        _weaponChargePanel.sizeDelta = new Vector2(panelWidth, squareSize);
-
-        for (int i = 0; i < _weaponChargeFills.Length; i++)
-        {
-            Image square = new GameObject("Square", typeof(Image), typeof(Outline)).GetComponent<Image>();
-            square.transform.SetParent(_weaponChargePanel, false);
-            square.color = HudStyle.Surface;
-            square.raycastTarget = false;
-            square.GetComponent<Outline>().effectColor = HudStyle.Muted;
-            RectTransform squareRect = square.rectTransform;
-            squareRect.anchorMin = squareRect.anchorMax = squareRect.pivot = Vector2.zero;
-            squareRect.anchoredPosition = new Vector2(i * (squareSize + spacing), 0f);
-            squareRect.sizeDelta = Vector2.one * squareSize;
-
-            Image fill = new GameObject("Fill", typeof(Image)).GetComponent<Image>();
-            fill.transform.SetParent(squareRect, false);
-            fill.color = HudStyle.Text;
-            fill.raycastTarget = false;
-            RectTransform fillRect = fill.rectTransform;
-            fillRect.anchorMin = Vector2.zero;
-            fillRect.anchorMax = Vector2.up;
-            fillRect.offsetMin = fillRect.offsetMax = Vector2.zero;
-            _weaponChargeFills[i] = fillRect;
-        }
-        _shownWeaponCharge = -1f;
-        _weaponChargePanel.gameObject.SetActive(false);
-    }
-
     private RectTransform Section(string name, Vector2 position, Vector2 size)
     {
         CreateRoot();
@@ -267,7 +198,6 @@ public sealed class PlayerHUD : NetworkBehaviour
             _performanceText = CreateLabel(performance, "Stats", HudStyle.Text);
             _performanceText.fontSize = 13;
             performance.gameObject.SetActive(false);
-            CreateWeaponChargeUI();
             var bossBars = new GameObject("BossBars", typeof(RectTransform), typeof(BossBarsUI));
             bossBars.transform.SetParent(_canvas.transform, false);
             bossBars.GetComponent<BossBarsUI>().Initialize(NetworkManager);
@@ -506,6 +436,5 @@ public sealed class PlayerHUD : NetworkBehaviour
         _performanceText = null;
         _performanceElapsed = 0f;
         _performanceFrames = 0;
-        _weaponChargePanel = null;
     }
 }

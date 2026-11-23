@@ -15,6 +15,7 @@ public abstract class EffectData : ScriptableObject
     public bool AffectedByEffectResistance;
     public bool CanPurged = true;
     public bool Stackable;
+    [Tooltip("Maximum stacks sharing one timer when Stackable is disabled."), Min(1)] public int MaxSharedStacks = 1;
     public bool RestartOnReapply = true;
     [Header("Actor visuals")]
     public bool TintActor;

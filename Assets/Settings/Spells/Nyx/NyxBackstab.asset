@@ -13,11 +13,11 @@ MonoBehaviour:
   m_Name: NyxBackstab
   m_EditorClassIdentifier: Assembly-CSharp::NyxBackstabConfig
   SpellName: "Нож в спину"
-  SpellDescription: "Атаки Никса гарантированно критуют по врагам, которые целятся в кого-то другого."
-  StatsDescription: "+{BonusKillGold} золота за добивание таким ударом."
+  SpellDescription: "Когда Никс добивает врага, который целится в другого, он получает стак и обновляет общий таймер."
+  StatsDescription: "За стак — +10 п. п. к шансу крита и +5 п. п. к критическому урону. До 10 стаков на 8 с."
   IsPassive: 1
   CooldownTime: 0
   SanityCost: 0
   CastTime: 0
   SpriteIcon: {fileID: 21300000, guid: 343a60cb777d4a30865988f76950f61f, type: 3}
-  BonusKillGold: 3
+  StackEffect: {fileID: 11400000, guid: c62cebb17c2c4aa2b79f1fe466afbf56, type: 2}

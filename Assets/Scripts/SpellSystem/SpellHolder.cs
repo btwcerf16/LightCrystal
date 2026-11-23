@@ -9,11 +9,14 @@ public sealed class SpellHolder : MonoBehaviour
     [SerializeField] private SpellConfig[] _spellConfigs = new SpellConfig[0];
     private readonly List<Spell> _spells = new();
     private ActorHealth _health;
+    private ActorArsenal _arsenal;
     private NetworkObject _networkObject;
     private bool _canProcess;
 
     public IReadOnlyList<Spell> Spells => _spells;
     public int Count => _spellConfigs.Length;
+    internal bool IsCasting => _arsenal?.ActiveWeapon is MagicWeapon { IsAttacking: true }
+        || _spells.Exists(spell => spell != null && spell.CastProgress >= 0f);
 
     public SpellConfig GetConfig(int index)
     {
@@ -46,6 +49,7 @@ public sealed class SpellHolder : MonoBehaviour
     private void Awake()
     {
         _health = GetComponent<ActorHealth>();
+        _arsenal = GetComponent<ActorArsenal>();
         _networkObject = GetComponent<NetworkObject>();
     }
 
@@ -83,7 +87,7 @@ public sealed class SpellHolder : MonoBehaviour
             return;
         }
         Spell spell = _spells[index];
-        if (spell == null)
+        if (spell == null || IsCasting)
             return;
         if (spell.TryCast(data, out string error))
             SpellCast?.Invoke(index);

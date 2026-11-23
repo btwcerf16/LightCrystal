@@ -91,26 +91,30 @@ public sealed class ActorHand : MonoBehaviour
         RotateOnlyByZ(weapon, localRotation);
     }
 
-    public WorldItem DropItem(WorldItem worldItem, GameObject itemPrefab)
+    public bool DropItem(Item item, Vector3 position)
     {
         NetworkObject player = GetComponentInParent<NetworkObject>();
-        if (player == null || !player.IsSpawned || !player.NetworkManager.IsServer || itemPrefab == null)
-            return null;
+        if (player == null || !player.IsSpawned || !player.NetworkManager.IsServer || item == null)
+            return false;
 
+        WorldItem worldItem = item.WorldItem != null ? item.WorldItem.GetComponent<WorldItem>() : null;
         if (worldItem == null)
         {
             if (_worldItemPrefab == null)
-                return null;
+                return false;
 
-            worldItem = Instantiate(_worldItemPrefab, _handTransform.position, Quaternion.identity);
-            worldItem.SetItem(itemPrefab);
+            worldItem = Instantiate(_worldItemPrefab, position, Quaternion.identity);
+            worldItem.SetItem(item.gameObject);
             worldItem.NetworkObject.Spawn();
-            return worldItem;
-        } 
+        }
+        else
+        {
+            worldItem.SetItem(item.gameObject);
+            worldItem.ShowAt(position);
+        }
 
-        worldItem.SetItem(itemPrefab);
-        worldItem.ShowAt(_handTransform.position);
-        return worldItem;
+        item.SetWorldItem(worldItem.gameObject);
+        return true;
     }
 
     public void SetOffset(Vector2 offset)

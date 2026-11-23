@@ -59,10 +59,41 @@ public class NetworkPlayerInventory: NetworkBehaviour
         _inventory.ContentsChanged -= PublishContents;
     }
 
+    public void SetSize(int size)
+    {
+        if (!IsSpawned || !IsServer || NetworkManager.ShutdownInProgress || size < 1 || size == _inventory.Size)
+            return;
+
+        if (size < _inventory.Size)
+        {
+            ActorHand hand = GetComponentInChildren<ActorHand>();
+            for (int i = _inventory.Size - 1; i >= size; i--)
+            {
+                Item item = _inventory.GetItem(i);
+                if (item == null)
+                    continue;
+
+                if (hand == null || !hand.DropItem(item, transform.position))
+                {
+                    Debug.LogError($"Could not drop item from inventory slot {i} before resizing.", this);
+                    return;
+                }
+
+                _inventory.DropItem(i);
+                item.gameObject.SetActive(false);
+            }
+        }
+
+        _inventory.SetSize(size);
+    }
+
     private void OnSlotsChanged(NetworkListEvent<NetworkInventorySlot> change)
     {
-        if (IsServer || _inventory == null)
+        if (IsServer || _inventory == null || _slots.Count == 0)
             return;
+
+        for (int i = _slots.Count; i < _inventory.Size; i++)
+            _inventory.SetItem(i, 0);
 
         _inventory.SetSize(_slots.Count);
         for (int i = 0; i < _slots.Count; i++)

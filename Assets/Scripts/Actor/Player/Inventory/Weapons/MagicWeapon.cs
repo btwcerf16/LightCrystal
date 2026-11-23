@@ -2,7 +2,6 @@ using UnityEngine;
 
 public abstract class MagicWeapon : Weapon
 {
-    [SerializeField] protected Transform _grip;
     [SerializeField] private string _displayName;
     [SerializeField] private float _sanityBonus;
     [SerializeField] private float _castSpeedBonus;
@@ -12,12 +11,9 @@ public abstract class MagicWeapon : Weapon
     private EffectHandler _effects;
     private ActorSanity _sanity;
 
-    protected NetworkPlayerArsenal NetworkArsenal { get; private set; }
     protected bool CanAttack => IsServer && IsEquipped && IsAvailable && _hand != null
         && !IsOwnerStunned && (_effects == null || (!_effects.IsDowned && !_effects.IsSilenced));
     protected bool CanStartAttack => CanAttack && !_isAttacking;
-    protected bool CanAnimate => IsEquipped && _hand != null && _grip != null
-        && NetworkArsenal != null && NetworkArsenal.IsClient;
     protected float CastSpeed => Mathf.Max(0.01f, OwnerStats?.CastSpeed.Value ?? 1f);
     public override string DisplayName => _displayName;
 
@@ -29,7 +25,8 @@ public abstract class MagicWeapon : Weapon
         base.Equip();
         _effects = OwnerStats.GetComponent<EffectHandler>();
         _sanity = OwnerStats.GetComponent<ActorSanity>();
-        NetworkArsenal = OwnerStats.GetComponent<NetworkPlayerArsenal>();
+        if (_effects != null)
+            _effects.StatusChanged += OnStatusChanged;
         if (!IsServer)
             return;
 
@@ -40,6 +37,8 @@ public abstract class MagicWeapon : Weapon
 
     public override void Drop()
     {
+        if (_effects != null)
+            _effects.StatusChanged -= OnStatusChanged;
         CancelUse();
         if (OwnerStats != null)
         {
@@ -56,6 +55,26 @@ public abstract class MagicWeapon : Weapon
 
         OwnerNetworkObject.GetComponent<NetworkPlayerWallet>()?.ShowHint("Недостаточно рассудка");
         return false;
+    }
+
+    private void OnStatusChanged()
+    {
+        if (_effects.IsStunned || _effects.IsDowned || _effects.IsSilenced)
+            CancelUse();
+    }
+
+    protected override void OnDestroy()
+    {
+        if (_effects != null)
+            _effects.StatusChanged -= OnStatusChanged;
+        base.OnDestroy();
+    }
+
+    public override void CancelUse()
+    {
+        _isAttacking = false;
+        if (_animator != null && _animator.isActiveAndEnabled)
+            _animator.Play("Idle", 0, 0f);
     }
 
     public override void EndPrimaryUse() { }

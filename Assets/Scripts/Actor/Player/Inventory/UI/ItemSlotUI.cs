@@ -16,6 +16,8 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
     private Action<int> _drop;
     private Action<int> _select;
     private Image _dragIcon;
+    private Func<float> _getCastProgress;
+    private Image _castFill;
     private GameObject _cooldownPanel;
     private RectTransform _cooldownFill;
     private Text _cooldownText;
@@ -24,7 +26,8 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
     private bool IsBlocked => _effects != null && _effects.IsStunned;
     public Item CurrentItem => _getItem?.Invoke();
 
-    public void Bind(Func<Item> getItem, Component container, int index, Action<int, int> swap, Action<int> drop, Action<int> select = null)
+    public void Bind(Func<Item> getItem, Component container, int index, Action<int, int> swap, Action<int> drop, Action<int> select = null,
+        Func<float> getCastProgress = null)
     {
         _getItem = getItem;
         _container = container;
@@ -33,6 +36,7 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
         _swap = swap;
         _drop = drop;
         _select = select;
+        _getCastProgress = getCastProgress;
         Outline outline = GetComponent<Outline>();
         if (outline != null)
             outline.enabled = false;
@@ -62,6 +66,8 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
         _cooldownText.alignment = TextAnchor.MiddleCenter;
         _cooldownText.color = HudStyle.Text;
         _cooldownText.raycastTarget = false;
+        if (_getCastProgress != null)
+            _castFill = HudStyle.CreateCastFill(Child("Casting", icon.anchorMin, icon.anchorMax));
         _ornament = ItemRarityBorder.Create(transform);
         _ornament.DrawFrame = true;
         _ornament.transform.SetAsFirstSibling();
@@ -144,16 +150,23 @@ public sealed class ItemSlotUI : MonoBehaviour, IBeginDragHandler, IDragHandler,
         if (item != _shownItem || (item == null && _icon.enabled) || (item != null && item.Rarity != _shownRarity))
             Refresh(item);
         _icon.color = item is Weapon weapon && !weapon.IsAvailable ? new Color(0.35f, 0.35f, 0.35f) : Color.white;
-        RefreshCooldown(item);
+        float castProgress = item != null ? _getCastProgress?.Invoke() ?? -1f : -1f;
+        bool casting = castProgress >= 0f;
+        if (_castFill != null)
+        {
+            _castFill.fillAmount = Mathf.Clamp01(castProgress);
+            _castFill.gameObject.SetActive(casting);
+        }
+        RefreshCooldown(item, casting);
     }
 
-    private void RefreshCooldown(Item item)
+    private void RefreshCooldown(Item item, bool casting = false)
     {
         if (_cooldownPanel == null)
             return;
 
         float remaining = item != null ? item.CooldownRemaining : 0f;
-        bool isOnCooldown = remaining > 0f;
+        bool isOnCooldown = !casting && remaining > 0f;
         if (_cooldownPanel.activeSelf != isOnCooldown)
             _cooldownPanel.SetActive(isOnCooldown);
         if (!isOnCooldown)

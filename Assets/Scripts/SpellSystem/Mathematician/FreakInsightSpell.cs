@@ -3,7 +3,6 @@ public sealed class FreakInsightSpell : Spell
     private EmpiricalLearningSpell _learning;
     private EffectHandler _effects;
     private Effect _insight;
-    public bool IsEmpowered => _effects != null && _effects.HasEffect(((FreakInsightConfig)SpellData).Effect);
 
     public override void Activate()
     {

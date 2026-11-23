@@ -168,7 +168,7 @@ public sealed class PlayerEffectsUI : NetworkBehaviour
                 view.DisplayDuration = slot.DisplayDuration;
             }
             view.IsPresent = true;
-            view.Count++;
+            view.Count += slot.StackCount;
         }
 
         for (int i = _views.Count - 1; i >= 0; i--)

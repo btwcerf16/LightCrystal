@@ -146,7 +146,7 @@ public sealed class RustySwordWeapon : Weapon
             IDamageable damageable = target.GetComponentInParent<IDamageable>();
             if (damageable != null && _hitTargets.Add(damageable))
             {
-                float dealt = ActorArsenal.DealWeaponDamage(damageable, damage, EDamageType.Physical, OwnerStats, isMelee: true);
+                float dealt = DamageCalculator.DealCriticalDamage(damageable, damage, EDamageType.Physical, OwnerStats, isMelee: true);
                 if (dealt > 0f)
                     NotifyMeleeHit(damageable, target.ClosestPoint(position));
                 else

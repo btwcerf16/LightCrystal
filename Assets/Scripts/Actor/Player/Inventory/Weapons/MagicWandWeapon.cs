@@ -1,9 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public sealed class MagicWandWeapon : MagicWeapon, IWeaponVisualReceiver
+public sealed class MagicWandWeapon : MagicWeapon
 {
-    [SerializeField] private Material _effectMaterial;
+    [SerializeField] private string _beamEffectId = "wand-beam";
+    [SerializeField] private string _chargedBeamEffectId = "wand-beam-charged";
     [SerializeField, Min(0.01f)] private float _primaryCastTime = 0.18f;
     [SerializeField, Min(0.1f)] private float _chargeTime = 0.65f;
     [SerializeField, Min(0f)] private float _chargedSanityCost;
@@ -12,7 +13,6 @@ public sealed class MagicWandWeapon : MagicWeapon, IWeaponVisualReceiver
 
     private readonly List<RaycastHit2D> _hits = new();
     private readonly HashSet<IDamageable> _targets = new();
-    private LineRenderer _chargeFlash;
     private float _chargeEndsAt;
     private float _castDuration;
     private bool _chargedCast;
@@ -39,7 +39,14 @@ public sealed class MagicWandWeapon : MagicWeapon, IWeaponVisualReceiver
         return true;
     }
 
-    public override bool BeginSecondaryUse() => BeginCast(charged: true);
+    public override bool BeginSecondaryUse()
+    {
+        if (!IsEquipped || (IsServer && !BeginCast(charged: true)))
+            return false;
+
+        _animator.Play("Charge", 0, 0f);
+        return true;
+    }
 
     private bool BeginCast(bool charged)
     {
@@ -67,7 +74,7 @@ public sealed class MagicWandWeapon : MagicWeapon, IWeaponVisualReceiver
             return;
 
         bool charged = _chargedCast;
-        CancelUse();
+        _isAttacking = false;
         if (CheckSanity(charged ? _chargedSanityCost : _primarySanityCost, spend: true))
             Fire(charged);
     }
@@ -104,70 +111,19 @@ public sealed class MagicWandWeapon : MagicWeapon, IWeaponVisualReceiver
             if (target.IsDead || (target is ActorHealth health && !health.AcceptsDamageFrom(OwnerStats)) || !_targets.Add(target))
                 continue;
 
-            if (ActorArsenal.DealWeaponDamage(target, damage, EDamageType.Magic, OwnerStats) > 0f)
+            if (DamageCalculator.DealCriticalDamage(target, damage, EDamageType.Magic, OwnerStats) > 0f)
                 NotifyHit(target, EAttackType.Magic, hit.point);
         }
 
         _hits.Clear();
         _targets.Clear();
-        OwnerStats.GetComponent<NetworkWeaponVisuals>()?.PlayRpc(ItemId, new[] { origin, end }, charged);
-    }
-
-    void IWeaponVisualReceiver.PlayVisual(GameObject owner, Vector2[] points, bool charged, float radius)
-    {
-        if (!owner.TryGetComponent(out MagicWandBeamEffect effect))
-            effect = owner.AddComponent<MagicWandBeamEffect>();
-        effect.Play(_effectMaterial, points[0], points[1], charged);
-    }
-
-    private void LateUpdate()
-    {
-        if (!CanAnimate)
-            return;
-
-        float charge = NetworkArsenal.WeaponCharge;
-        _animator.SetBool("Charging", charge >= 0f);
-        UpdateChargeFlash(charge);
-    }
-
-    private void UpdateChargeFlash(float charge)
-    {
-        if (charge < 0f)
-        {
-            HideChargeFlash();
-            return;
-        }
-
-        if (_chargeFlash == null)
-        {
-            _chargeFlash = WeaponEffectLine.Create(_grip, "Wand charge", _effectMaterial, 7);
-            _chargeFlash.positionCount = 4;
-            _chargeFlash.loop = true;
-        }
-
-        Vector3 tip = _grip.TransformPoint(_attackPoint.localPosition - _grip.localPosition);
-        float size = Mathf.Lerp(0.045f, 0.14f, charge);
-        _chargeFlash.SetPosition(0, tip + Vector3.up * size);
-        _chargeFlash.SetPosition(1, tip + Vector3.right * size);
-        _chargeFlash.SetPosition(2, tip - Vector3.up * size);
-        _chargeFlash.SetPosition(3, tip - Vector3.right * size);
-        _chargeFlash.widthMultiplier = Mathf.Lerp(0.025f, 0.06f, charge);
-        _chargeFlash.startColor = _chargeFlash.endColor = Color.Lerp(
-            new Color(0.25f, 0.73f, 0.92f, 0.5f), new Color(0.85f, 1f, 1f), charge);
-        _chargeFlash.enabled = true;
-    }
-
-    private void HideChargeFlash()
-    {
-        if (_chargeFlash != null)
-            _chargeFlash.enabled = false;
+        float flashSize = charged ? 0.18f : 0.105f;
+        Vector2 side = Vector2.Perpendicular(aim) * (flashSize * 0.9f);
+        Vector2 back = origin - aim * (flashSize * 0.7f);
+        NetworkEffects.Play(OwnerNetworkObject.NetworkManager, charged ? _chargedBeamEffectId : _beamEffectId,
+            origin, path: new[] { origin, end }, detail: new[] { back + side, origin, back - side });
     }
 
     public override void EndSecondaryUse() => CancelUse();
 
-    public override void CancelUse()
-    {
-        _isAttacking = false;
-        HideChargeFlash();
-    }
 }

@@ -97,9 +97,12 @@ public class EffectHandler : MonoBehaviour
             {
                 existing.TimeRemaining = duration;
                 existing.DisplayDuration = displayDuration;
-                if (effectData.RestartOnReapply)
+                bool addStack = existing.StackCount < effectData.MaxSharedStacks;
+                if (addStack || effectData.RestartOnReapply)
                 {
                     existing.EffectEnd(_ownerStats);
+                    if (addStack)
+                        existing.StackCount++;
                     existing.EffectStart(_ownerStats);
                 }
                 RefreshStatus();

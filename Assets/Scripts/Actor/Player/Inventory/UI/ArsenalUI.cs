@@ -28,7 +28,9 @@ public sealed class ArsenalUI : NetworkBehaviour
     {
         if (!isActiveAndEnabled || !IsSpawned || !IsClient || !IsOwner || _canvasObject != null)
             return;
-        int count = GetComponent<ActorArsenal>().WeaponSize;
+        ActorArsenal arsenal = GetComponent<ActorArsenal>();
+        NetworkPlayerArsenal networkArsenal = GetComponent<NetworkPlayerArsenal>();
+        int count = arsenal.WeaponSize;
         if (count <= 0)
             return;
 
@@ -56,9 +58,9 @@ public sealed class ArsenalUI : NetworkBehaviour
             RectTransform slot = Rect("WeaponSlot_" + i, grid, Vector2.zero, Vector2.zero, Vector2.zero, layout.cellSize);
             Paint(slot, HudStyle.Slot);
             int index = i;
-            ActorArsenal arsenal = GetComponent<ActorArsenal>();
             slot.gameObject.AddComponent<ItemSlotUI>().Bind(() => arsenal.GetWeapon(index), arsenal, index,
-                arsenal.RequestChangeWeaponSlot, arsenal.RequestDropWeapon, arsenal.RequestSelectWeapon);
+                arsenal.RequestChangeWeaponSlot, arsenal.RequestDropWeapon, arsenal.RequestSelectWeapon,
+                () => arsenal.ActiveWeaponIndex == index ? networkArsenal.WeaponCharge : -1f);
             _bindingLabels.Add(HudStyle.Binding(slot, _slotBindings.GetBindingLabel(true, i)));
         }
         _slotBindings.BindingsChanged += RefreshBindings;

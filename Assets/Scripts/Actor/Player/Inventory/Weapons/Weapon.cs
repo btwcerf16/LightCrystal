@@ -1,5 +1,6 @@
-using UnityEngine;
 using System;
+using Unity.Netcode;
+using UnityEngine;
 
 public abstract class Weapon : Item
 {
@@ -200,5 +201,7 @@ public abstract class Weapon : Item
     public abstract void EndSecondaryUse();
     public abstract void CancelUse();
     public virtual void SetAim(Vector2 aim) { }
+
+
 }
 
